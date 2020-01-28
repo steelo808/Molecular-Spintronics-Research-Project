@@ -1,0 +1,264 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE msd SYSTEM "msd.dtd">
+<msd>
+	<version major="1" minor="4"/>
+	<msd_version>2.2</msd_version>
+	<gen>
+		<prgm>bin\metropolis</prgm>
+		<date timestamp="1580009077"/>
+	</gen>
+	<global>
+		<var type="param" name="width" value="11"/>
+		<var type="param" name="height" value="10"/>
+		<var type="param" name="depth" value="10"/>
+		<var type="param" name="molPosL" value="5"/>
+		<var type="param" name="molPosR" value="5"/>
+		<var type="param" name="topL" value="3"/>
+		<var type="param" name="bottomL" value="6"/>
+		<var type="param" name="frontR" value="3"/>
+		<var type="param" name="backR" value="6"/>
+		<var type="param" name="t_eq" value="10000"/>
+		<var type="param" name="simCount" value="0"/>
+		<var type="param" name="freq" value="1"/>
+		<ind name="kT">
+			<val>0.34</val>
+		</ind>
+		<ind name="B_x">
+			<val>0</val>
+		</ind>
+		<ind name="B_y">
+			<val>-1.5</val>
+			<val>-1.45</val>
+			<val>-1.4</val>
+			<val>-1.35</val>
+			<val>-1.3</val>
+			<val>-1.25</val>
+			<val>-1.2</val>
+			<val>-1.15</val>
+			<val>-1.1</val>
+			<val>-1.05</val>
+			<val>-1</val>
+			<val>-0.95</val>
+			<val>-0.9</val>
+			<val>-0.85</val>
+			<val>-0.8</val>
+			<val>-0.75</val>
+			<val>-0.7</val>
+			<val>-0.65</val>
+			<val>-0.6</val>
+			<val>-0.55</val>
+			<val>-0.5</val>
+			<val>-0.45</val>
+			<val>-0.4</val>
+			<val>-0.35</val>
+			<val>-0.3</val>
+			<val>-0.25</val>
+			<val>-0.2</val>
+			<val>-0.15</val>
+			<val>-0.1</val>
+			<val>-0.05</val>
+			<val>7.63278e-16</val>
+			<val>0.05</val>
+			<val>0.1</val>
+			<val>0.15</val>
+			<val>0.2</val>
+			<val>0.25</val>
+			<val>0.3</val>
+			<val>0.35</val>
+			<val>0.4</val>
+			<val>0.45</val>
+			<val>0.5</val>
+			<val>0.55</val>
+			<val>0.6</val>
+			<val>0.65</val>
+			<val>0.7</val>
+			<val>0.75</val>
+			<val>0.8</val>
+			<val>0.85</val>
+			<val>0.9</val>
+			<val>0.95</val>
+			<val>1</val>
+			<val>1.05</val>
+			<val>1.1</val>
+			<val>1.15</val>
+			<val>1.2</val>
+			<val>1.25</val>
+			<val>1.3</val>
+			<val>1.35</val>
+			<val>1.4</val>
+			<val>1.45</val>
+			<val>1.5</val>
+		</ind>
+		<ind name="B_z">
+			<val>0</val>
+		</ind>
+		<ind name="JL">
+			<val>1</val>
+		</ind>
+		<ind name="JmL">
+			<val>0.2</val>
+		</ind>
+		<ind name="Jm">
+			<val>0</val>
+		</ind>
+		<ind name="JmR">
+			<val>-0.2</val>
+		</ind>
+		<ind name="JR">
+			<val>1</val>
+		</ind>
+		<ind name="JLR">
+			<val>0</val>
+		</ind>
+		<ind name="bL">
+			<val>0</val>
+		</ind>
+		<ind name="bmL">
+			<val>0</val>
+		</ind>
+		<ind name="bm">
+			<val>0</val>
+		</ind>
+		<ind name="bmR">
+			<val>0</val>
+		</ind>
+		<ind name="bR">
+			<val>0</val>
+		</ind>
+		<ind name="bLR">
+			<val>0</val>
+		</ind>
+		<ind name="AL">
+			<val>0.5</val>
+		</ind>
+		<ind name="AR">
+			<val>0.5</val>
+		</ind>
+		<ind name="Am">
+			<val>0</val>
+		</ind>
+	</global>
+	<data>
+		<date timestamp="1580009077"/>
+		<var type="param" name="kT" value="0.34"/>
+		<var type="param" name="B_x" value="0"/>
+		<var type="param" name="B_y" value="-1.5"/>
+		<var type="param" name="B_z" value="0"/>
+		<var type="param" name="JL" value="1"/>
+		<var type="param" name="JR" value="1"/>
+		<var type="param" name="Jm" value="0"/>
+		<var type="param" name="JmL" value="0.2"/>
+		<var type="param" name="JmR" value="-0.2"/>
+		<var type="param" name="JLR" value="0"/>
+		<var type="param" name="bL" value="0"/>
+		<var type="param" name="bR" value="0"/>
+		<var type="param" name="bm" value="0"/>
+		<var type="param" name="bmL" value="0"/>
+		<var type="param" name="bmR" value="0"/>
+		<var type="param" name="bLR" value="0"/>
+		<var type="param" name="AL" value="0.5"/>
+		<var type="param" name="AR" value="0.5"/>
+		<var type="param" name="Am" value="0"/>
+		<var type="result" name="M_x" value="11.7951"/>
+		<var type="result" name="M_y" value="823.323"/>
+		<var type="result" name="M_z" value="19.4337"/>
+		<var type="result" name="ML_x" value="11.598"/>
+		<var type="result" name="ML_y" value="418.375"/>
+		<var type="result" name="ML_z" value="33.3654"/>
+		<var type="result" name="MR_x" value="3.86223"/>
+		<var type="result" name="MR_y" value="428.415"/>
+		<var type="result" name="MR_z" value="-14.0761"/>
+		<var type="result" name="Mm_x" value="-3.66513"/>
+		<var type="result" name="Mm_y" value="-23.467"/>
+		<var type="result" name="Mm_z" value="0.144452"/>
+		<var type="result" name="U" value="-844.654"/>
+		<var type="result" name="UL" value="-396.849"/>
+		<var type="result" name="UR" value="-411.753"/>
+		<var type="result" name="Um" value="-35.2004"/>
+		<var type="result" name="UmL" value="3.48181"/>
+		<var type="result" name="UmR" value="-4.33307"/>
+		<var type="result" name="ULR" value="0"/>
+		<var type="result" name="c" value="0"/>
+		<var type="result" name="cL" value="0"/>
+		<var type="result" name="cR" value="0"/>
+		<var type="result" name="cm" value="0"/>
+		<var type="result" name="cmL" value="0"/>
+		<var type="result" name="cmR" value="0"/>
+		<var type="result" name="cLR" value="0"/>
+		<var type="result" name="x" value="0"/>
+		<var type="result" name="xL" value="0"/>
+		<var type="result" name="xR" value="0"/>
+		<var type="result" name="xm" value="0"/>
+	</data>
+	<data>
+		<date timestamp="1580009077"/>
+		<var type="param" name="kT" value="0.34"/>
+		<var type="param" name="B_x" value="0"/>
+		<var type="param" name="B_y" value="-1.45"/>
+		<var type="param" name="B_z" value="0"/>
+		<var type="param" name="JL" value="1"/>
+		<var type="param" name="JR" value="1"/>
+		<var type="param" name="Jm" value="0"/>
+		<var type="param" name="JmL" value="0.2"/>
+		<var type="param" name="JmR" value="-0.2"/>
+		<var type="param" name="JLR" value="0"/>
+		<var type="param" name="bL" value="0"/>
+		<var type="param" name="bR" value="0"/>
+		<var type="param" name="bm" value="0"/>
+		<var type="param" name="bmL" value="0"/>
+		<var type="param" name="bmR" value="0"/>
+		<var type="param" name="bLR" value="0"/>
+		<var type="param" name="AL" value="0.5"/>
+		<var type="param" name="AR" value="0.5"/>
+		<var type="param" name="Am" value="0"/>
+		<var type="result" name="M_x" value="-22.2375"/>
+		<var type="result" name="M_y" value="829.595"/>
+		<var type="result" name="M_z" value="-16.9075"/>
+		<var type="result" name="ML_x" value="-8.03294"/>
+		<var type="result" name="ML_y" value="424.362"/>
+		<var type="result" name="ML_z" value="11.4392"/>
+		<var type="result" name="MR_x" value="-15.771"/>
+		<var type="result" name="MR_y" value="427.294"/>
+		<var type="result" name="MR_z" value="-29.1855"/>
+		<var type="result" name="Mm_x" value="1.56636"/>
+		<var type="result" name="Mm_y" value="-22.0614"/>
+		<var type="result" name="Mm_z" value="0.8389"/>
+		<var type="result" name="U" value="-886.812"/>
+		<var type="result" name="UL" value="-428.857"/>
+		<var type="result" name="UR" value="-424.467"/>
+		<var type="result" name="Um" value="-31.9891"/>
+		<var type="result" name="UmL" value="4.14109"/>
+		<var type="result" name="UmR" value="-5.64002"/>
+		<var type="result" name="ULR" value="0"/>
+		<var type="result" name="c" value="0"/>
+		<var type="result" name="cL" value="0"/>
+		<var type="result" name="cR" value="0"/>
+		<var type="result" name="cm" value="0"/>
+		<var type="result" name="cmL" value="0"/>
+		<var type="result" name="cmR" value="0"/>
+		<var type="result" name="cLR" value="0"/>
+		<var type="result" name="x" value="0"/>
+		<var type="result" name="xL" value="0"/>
+		<var type="result" name="xR" value="0"/>
+		<var type="result" name="xm" value="0"/>
+	</data>
+	<data>
+		<date timestamp="1580009077"/>
+		<var type="param" name="kT" value="0.34"/>
+		<var type="param" name="B_x" value="0"/>
+		<var type="param" name="B_y" value="-1.4"/>
+		<var type="param" name="B_z" value="0"/>
+		<var type="param" name="JL" value="1"/>
+		<var type="param" name="JR" value="1"/>
+		<var type="param" name="Jm" value="0"/>
+		<var type="param" name="JmL" value="0.2"/>
+		<var type="param" name="JmR" value="-0.2"/>
+		<var type="param" name="JLR" value="0"/>
+		<var type="param" name="bL" value="0"/>
+		<var type="param" name="bR" value="0"/>
+		<var type="param" name="bm" value="0"/>
+		<var type="param" name="bmL" value="0"/>
+		<var type="param" name="bmR" value="0"/>
+		<var type="param" name="bLR" value="0"/>
+		<var type="param" name="AL" value="0.5"/>
+		<var type="param" name="AR" v

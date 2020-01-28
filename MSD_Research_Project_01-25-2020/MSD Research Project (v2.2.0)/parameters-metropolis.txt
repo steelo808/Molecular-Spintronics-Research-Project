@@ -1,0 +1,39 @@
+width  = 11
+height = 10
+depth  = 10
+
+molPosL = 5
+molPosR = 5
+
+topL    = 3
+bottomL = 6
+frontR  = 3
+backR   = 6
+
+t_eq     = 10000
+simCount = 0
+freq     = 1
+
+kT = 0.34
+
+B_x = 0
+B_y : -1.5  1.5  0.05
+B_z = 0
+
+JL  = 1
+JR  = 1
+Jm  = 0
+JmL = 0.2
+JmR = -0.2
+JLR = 0
+
+AL = 0.5
+AR = 0.5
+Am = 0
+
+bL  = 0
+bR  = 0
+bm  = 0
+bmL = 0
+bmR = 0
+bLR = 0

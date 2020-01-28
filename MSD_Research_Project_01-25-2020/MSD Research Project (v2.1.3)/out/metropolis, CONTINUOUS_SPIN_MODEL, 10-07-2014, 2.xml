@@ -1,0 +1,1720 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE msd SYSTEM "msd.dtd">
+<msd>
+	<version major="1" minor="3"/>
+	<msd_version>2.1</msd_version>
+	<gen>
+		<prgm>bin\metropolis</prgm>
+		<date timestamp="1412707317"/>
+	</gen>
+	<global>
+		<var type="param" name="width" value="11"/>
+		<var type="param" name="height" value="10"/>
+		<var type="param" name="depth" value="10"/>
+		<var type="param" name="molPosL" value="11"/>
+		<var type="param" name="molPosR" value="10"/>
+		<var type="param" name="t_eq" value="1.1e+007"/>
+		<var type="param" name="simCount" value="0"/>
+		<var type="param" name="freq" value="1"/>
+		<ind name="kT">
+			<val>0.01</val>
+		</ind>
+		<ind name="B_x">
+			<val>0</val>
+		</ind>
+		<ind name="B_y">
+			<val>-1.5</val>
+			<val>-1.4</val>
+			<val>-1.3</val>
+			<val>-1.2</val>
+			<val>-1.1</val>
+			<val>-1</val>
+			<val>-0.9</val>
+			<val>-0.8</val>
+			<val>-0.7</val>
+			<val>-0.6</val>
+			<val>-0.5</val>
+			<val>-0.4</val>
+			<val>-0.3</val>
+			<val>-0.2</val>
+			<val>-0.1</val>
+			<val>1.94289e-016</val>
+			<val>0.1</val>
+			<val>0.2</val>
+			<val>0.3</val>
+			<val>0.4</val>
+			<val>0.5</val>
+			<val>0.6</val>
+			<val>0.7</val>
+			<val>0.8</val>
+			<val>0.9</val>
+			<val>1</val>
+			<val>1.1</val>
+			<val>1.2</val>
+			<val>1.3</val>
+			<val>1.4</val>
+			<val>1.5</val>
+		</ind>
+		<ind name="B_z">
+			<val>0</val>
+		</ind>
+		<ind name="JL">
+			<val>1</val>
+		</ind>
+		<ind name="JmL">
+			<val>0</val>
+		</ind>
+		<ind name="Jm">
+			<val>0</val>
+		</ind>
+		<ind name="JmR">
+			<val>0</val>
+		</ind>
+		<ind name="JR">
+			<val>0</val>
+		</ind>
+		<ind name="JLR">
+			<val>0</val>
+		</ind>
+		<ind name="bL">
+			<val>0</val>
+		</ind>
+		<ind name="bmL">
+			<val>0</val>
+		</ind>
+		<ind name="bm">
+			<val>0</val>
+		</ind>
+		<ind name="bmR">
+			<val>0</val>
+		</ind>
+		<ind name="bR">
+			<val>0</val>
+		</ind>
+		<ind name="bLR">
+			<val>0</val>
+		</ind>
+		<ind name="AL">
+			<val>0.5</val>
+		</ind>
+		<ind name="AR">
+			<val>0</val>
+		</ind>
+		<ind name="Am">
+			<val>0</val>
+		</ind>
+	</global>
+	<data>
+		<date timestamp="1412707610"/>
+		<var type="param" name="kT" value="0.01"/>
+		<var type="param" name="B_x" value="0"/>
+		<var type="param" name="B_y" value="0.1"/>
+		<var type="param" name="B_z" value="0"/>
+		<var type="param" name="JL" value="1"/>
+		<var type="param" name="JR" value="0"/>
+		<var type="param" name="Jm" value="0"/>
+		<var type="param" name="JmL" value="0"/>
+		<var type="param" name="JmR" value="0"/>
+		<var type="param" name="JLR" value="0"/>
+		<var type="param" name="bL" value="0"/>
+		<var type="param" name="bR" value="0"/>
+		<var type="param" name="bm" value="0"/>
+		<var type="param" name="bmL" value="0"/>
+		<var type="param" name="bmR" value="0"/>
+		<var type="param" name="bLR" value="0"/>
+		<var type="param" name="AL" value="0.5"/>
+		<var type="param" name="AR" value="0"/>
+		<var type="param" name="Am" value="0"/>
+		<var type="result" name="M_x" value="720.972"/>
+		<var type="result" name="M_y" value="400.958"/>
+		<var type="result" name="M_z" value="1.64714"/>
+		<var type="result" name="ML_x" value="720.972"/>
+		<var type="result" name="ML_y" value="400.958"/>
+		<var type="result" name="ML_z" value="1.64714"/>
+		<var type="result" name="MR_x" value="0"/>
+		<var type="result" name="MR_y" value="0"/>
+		<var type="result" name="MR_z" value="0"/>
+		<var type="result" name="Mm_x" value="0"/>
+		<var type="result" name="Mm_y" value="0"/>
+		<var type="result" name="Mm_z" value="0"/>
+		<var type="result" name="U" value="-3382.78"/>
+		<var type="result" name="UL" value="-3382.78"/>
+		<var type="result" name="UR" value="-0"/>
+		<var type="result" name="Um" value="-0"/>
+		<var type="result" name="UmL" value="-0"/>
+		<var type="result" name="UmR" value="-0"/>
+		<var type="result" name="ULR" value="-0"/>
+		<var type="result" name="c" value="0"/>
+		<var type="result" name="cL" value="0"/>
+		<var type="result" name="cR" value="0"/>
+		<var type="result" name="cm" value="0"/>
+		<var type="result" name="cmL" value="0"/>
+		<var type="result" name="cmR" value="0"/>
+		<var type="result" name="cLR" value="0"/>
+		<var type="result" name="x" value="0"/>
+		<var type="result" name="xL" value="0"/>
+		<var type="result" name="xR" value="0"/>
+		<var type="result" name="xm" value="0"/>
+	</data>
+	<data>
+		<date timestamp="1412707612"/>
+		<var type="param" name="kT" value="0.01"/>
+		<var type="param" name="B_x" value="0"/>
+		<var type="param" name="B_y" value="1.94289e-016"/>
+		<var type="param" name="B_z" value="0"/>
+		<var type="param" name="JL" value="1"/>
+		<var type="param" name="JR" value="0"/>
+		<var type="param" name="Jm" value="0"/>
+		<var type="param" name="JmL" value="0"/>
+		<var type="param" name="JmR" value="0"/>
+		<var type="param" name="JLR" value="0"/>
+		<var type="param" name="bL" value="0"/>
+		<var type="param" name="bR" value="0"/>
+		<var type="param" name="bm" value="0"/>
+		<var type="param" name="bmL" value="0"/>
+		<var type="param" name="bmR" value="0"/>
+		<var type="param" name="bLR" value="0"/>
+		<var type="param" name="AL" value="0.5"/>
+		<var type="param" name="AR" value="0"/>
+		<var type="param" name="Am" value="0"/>
+		<var type="result" name="M_x" value="1096.86"/>
+		<var type="result" name="M_y" value="28.4509"/>
+		<var type="result" name="M_z" value="3.67835"/>
+		<var type="result" name="ML_x" value="1096.86"/>
+		<var type="result" name="ML_y" value="28.4509"/>
+		<var type="result" name="ML_z" value="3.67835"/>
+		<var type="result" name="MR_x" value="0"/>
+		<var type="result" name="MR_y" value="0"/>
+		<var type="result" name="MR_z" value="0"/>
+		<var type="result" name="Mm_x" value="0"/>
+		<var type="result" name="Mm_y" value="0"/>
+		<var type="result" name="Mm_z" value="0"/>
+		<var type="result" name="U" value="-3515.23"/>
+		<var type="result" name="UL" value="-3515.23"/>
+		<var type="result" name="UR" value="-0"/>
+		<var type="result" name="Um" value="-0"/>
+		<var type="result" name="UmL" value="-0"/>
+		<var type="result" name="UmR" value="-0"/>
+		<var type="result" name="ULR" value="-0"/>
+		<var type="result" name="c" value="0"/>
+		<var type="result" name="cL" value="0"/>
+		<var type="result" name="cR" value="0"/>
+		<var type="result" name="cm" value="0"/>
+		<var type="result" name="cmL" value="0"/>
+		<var type="result" name="cmR" value="0"/>
+		<var type="result" name="cLR" value="0"/>
+		<var type="result" name="x" value="0"/>
+		<var type="result" name="xL" value="0"/>
+		<var type="result" name="xR" value="0"/>
+		<var type="result" name="xm" value="0"/>
+	</data>
+	<data>
+		<date timestamp="1412707616"/>
+		<var type="param" name="kT" value="0.01"/>
+		<var type="param" name="B_x" value="0"/>
+		<var type="param" name="B_y" value="-0.6"/>
+		<var type="param" name="B_z" value="0"/>
+		<var type="param" name="JL" value="1"/>
+		<var type="param" name="JR" value="0"/>
+		<var type="param" name="Jm" value="0"/>
+		<var type="param" name="JmL" value="0"/>
+		<var type="param" name="JmR" value="0"/>
+		<var type="param" name="JLR" value="0"/>
+		<var type="param" name="bL" value="0"/>
+		<var type="param" name="bR" value="0"/>
+		<var type="param" name="bm" value="0"/>
+		<var type="param" name="bmL" value="0"/>
+		<var type="param" name="bmR" value="0"/>
+		<var type="param" name="bLR" value="0"/>
+		<var type="param" name="AL" value="0.5"/>
+		<var type="param" name="AR" value="0"/>
+		<var type="param" name="Am" value="0"/>
+		<var type="result" name="M_x" value="69.8529"/>
+		<var type="result" name="M_y" value="-854.345"/>
+		<var type="result" name="M_z" value="1.86473"/>
+		<var type="result" name="ML_x" value="69.8529"/>
+		<var type="result" name="ML_y" value="-854.345"/>
+		<var type="result" name="ML_z" value="1.86473"/>
+		<var type="result" name="MR_x" value="0"/>
+		<var type="result" name="MR_y" value="0"/>
+		<var type="result" name="MR_z" value="0"/>
+		<var type="result" name="Mm_x" value="0"/>
+		<var type="result" name="Mm_y" value="0"/>
+		<var type="result" name="Mm_z" value="0"/>
+		<var type="result" name="U" value="-3656.55"/>
+		<var type="result" name="UL" value="-3656.55"/>
+		<var type="result" name="UR" value="-0"/>
+		<var type="result" name="Um" value="-0"/>
+		<var type="result" name="UmL" value="-0"/>
+		<var type="result" name="UmR" value="-0"/>
+		<var type="result" name="ULR" value="-0"/>
+		<var type="result" name="c" value="0"/>
+		<var type="result" name="cL" value="0"/>
+		<var type="result" name="cR" value="0"/>
+		<var type="result" name="cm" value="0"/>
+		<var type="result" name="cmL" value="0"/>
+		<var type="result" name="cmR" value="0"/>
+		<var type="result" name="cLR" value="0"/>
+		<var type="result" name="x" value="0"/>
+		<var type="result" name="xL" value="0"/>
+		<var type="result" name="xR" value="0"/>
+		<var type="result" name="xm" value="0"/>
+	</data>
+	<data>
+		<date timestamp="1412707617"/>
+		<var type="param" name="kT" value="0.01"/>
+		<var type="param" name="B_x" value="0"/>
+		<var type="param" name="B_y" value="-0.8"/>
+		<var type="param" name="B_z" value="0"/>
+		<var type="param" name="JL" value="1"/>
+		<var type="param" name="JR" value="0"/>
+		<var type="param" name="Jm" value="0"/>
+		<var type="param" name="JmL" value="0"/>
+		<var type="param" name="JmR" value="0"/>
+		<var type="param" name="JLR" value="0"/>
+		<var type="param" name="bL" value="0"/>
+		<var type="param" name="bR" value="0"/>
+		<var type="param" name="bm" value="0"/>
+		<var type="param" name="bmL" value="0"/>
+		<var type="param" name="bmR" value="0"/>
+		<var type="param" name="bLR" value="0"/>
+		<var type="param" name="AL" value="0.5"/>
+		<var type="param" name="AR" value="0"/>
+		<var type="param" name="Am" value="0"/>
+		<var type="result" name="M_x" value="568.303"/>
+		<var type="result" name="M_y" value="-914.533"/>
+		<var type="result" name="M_z" value="1.22532"/>
+		<var type="result" name="ML_x" value="568.303"/>
+		<var type="result" name="ML_y" value="-914.533"/>
+		<var type="result" name="ML_z" value="1.22532"/>
+		<var type="result" name="MR_x" value="0"/>
+		<var type="result" name="MR_y" value="0"/>
+		<var type="result" name="MR_z" value="0"/>
+		<var type="result" name="Mm_x" value="0"/>
+		<var type="result" name="Mm_y" value="0"/>
+		<var type="result" name="Mm_z" value="0"/>
+		<var type="result" name="U" value="-3861.26"/>
+		<var type="result" name="UL" value="-3861.26"/>
+		<var type="result" name="UR" value="-0"/>
+		<var type="result" name="Um" value="-0"/>
+		<var type="result" name="UmL" value="-0"/>
+		<var type="result" name="UmR" value="-0"/>
+		<var type="result" name="ULR" value="-0"/>
+		<var type="result" name="c" value="0"/>
+		<var type="result" name="cL" value="0"/>
+		<var type="result" name="cR" value="0"/>
+		<var type="result" name="cm" value="0"/>
+		<var type="result" name="cmL" value="0"/>
+		<var type="result" name="cmR" value="0"/>
+		<var type="result" name="cLR" value="0"/>
+		<var type="result" name="x" value="0"/>
+		<var type="result" name="xL" value="0"/>
+		<var type="result" name="xR" value="0"/>
+		<var type="result" name="xm" value="0"/>
+	</data>
+	<data>
+		<date timestamp="1412707617"/>
+		<var type="param" name="kT" value="0.01"/>
+		<var type="param" name="B_x" value="0"/>
+		<var type="param" name="B_y" value="-0.7"/>
+		<var type="param" name="B_z" value="0"/>
+		<var type="param" name="JL" value="1"/>
+		<var type="param" name="JR" value="0"/>
+		<var type="param" name="Jm" value="0"/>
+		<var type="param" name="JmL" value="0"/>
+		<var type="param" name="JmR" value="0"/>
+		<var type="param" name="JLR" value="0"/>
+		<var type="param" name="bL" value="0"/>
+		<var type="param" name="bR" value="0"/>
+		<var type="param" name="bm" value="0"/>
+		<var type="param" name="bmL" value="0"/>
+		<var type="param" name="bmR" value="0"/>
+		<var type="param" name="bLR" value="0"/>
+		<var type="param" name="AL" value="0.5"/>
+		<var type="param" name="AR" value="0"/>
+		<var type="param" name="Am" value="0"/>
+		<var type="result" name="M_x" value="794.16"/>
+		<var type="result" name="M_y" value="-756.826"/>
+		<var type="result" name="M_z" value="-0.181841"/>
+		<var type="result" name="ML_x" value="794.16"/>
+		<var type="result" name="ML_y" value="-756.826"/>
+		<var type="result" name="ML_z" value="-0.181841"/>
+		<var type="result" name="MR_x" value="0"/>
+		<var type="result" name="MR_y" value="0"/>
+		<var type="result" name="MR_z" value="0"/>
+		<var type="result" name="Mm_x" value="0"/>
+		<var type="result" name="Mm_y" value="0"/>
+		<var type="result" name="Mm_z" value="0"/>
+		<var type="result" name="U" value="-3784.79"/>
+		<var type="result" name="UL" value="-3784.79"/>
+		<var type="result" name="UR" value="-0"/>
+		<var type="result" name="Um" value="-0"/>
+		<var type="result" name="UmL" value="-0"/>
+		<var type="result" name="UmR" value="-0"/>
+		<var type="result" name="ULR" value="-0"/>
+		<var type="result" name="c" value="0"/>
+		<var type="result" name="cL" value="0"/>
+		<var type="result" name="cR" value="0"/>
+		<var type="result" name="cm" value="0"/>
+		<var type="result" name="cmL" value="0"/>
+		<var type="result" name="cmR" value="0"/>
+		<var type="result" name="cLR" value="0"/>
+		<var type="result" name="x" value="0"/>
+		<var type="result" name="xL" value="0"/>
+		<var type="result" name="xR" value="0"/>
+		<var type="result" name="xm" value="0"/>
+	</data>
+	<data>
+		<date timestamp="1412707617"/>
+		<var type="param" name="kT" value="0.01"/>
+		<var type="param" name="B_x" value="0"/>
+		<var type="param" name="B_y" value="0.3"/>
+		<var type="param" name="B_z" value="0"/>
+		<var type="param" name="JL" value="1"/>
+		<var type="param" name="JR" value="0"/>
+		<var type="param" name="Jm" value="0"/>
+		<var type="param" name="JmL" value="0"/>
+		<var type="param" name="JmR" value="0"/>
+		<var type="param" name="JLR" value="0"/>
+		<var type="param" name="bL" value="0"/>
+		<var type="param" name="bR" value="0"/>
+		<var type="param" name="bm" value="0"/>
+		<var type="param" name="bmL" value="0"/>
+		<var type="param" name="bmR" value="0"/>
+		<var type="param" name="bLR" value="0"/>
+		<var type="param" name="AL" value="0.5"/>
+		<var type="param" name="AR" value="0"/>
+		<var type="param" name="Am" value="0"/>
+		<var type="result" name="M_x" value="-490.85"/>
+		<var type="result" name="M_y" value="781.061"/>
+		<var type="result" name="M_z" value="4.9154"/>
+		<var type="result" name="ML_x" value="-490.85"/>
+		<var type="result" name="ML_y" value="781.061"/>
+		<var type="result" name="ML_z" value="4.9154"/>
+		<var type="result" name="MR_x" value="0"/>
+		<var type="result" name="MR_y" value="0"/>
+		<var type="result" name="MR_z" value="0"/>
+		<var type="result" name="Mm_x" value="0"/>
+		<var type="result" name="Mm_y" value="0"/>
+		<var type="result" name="Mm_z" value="0"/>
+		<var type="result" name="U" value="-3415.07"/>
+		<var type="result" name="UL" value="-3415.07"/>
+		<var type="result" name="UR" value="-0"/>
+		<var type="result" name="Um" value="-0"/>
+		<var type="result" name="UmL" value="-0"/>
+		<var type="result" name="UmR" value="-0"/>
+		<var type="result" name="ULR" value="-0"/>
+		<var type="result" name="c" value="0"/>
+		<var type="result" name="cL" value="0"/>
+		<var type="result" name="cR" value="0"/>
+		<var type="result" name="cm" value="0"/>
+		<var type="result" name="cmL" value="0"/>
+		<var type="result" name="cmR" value="0"/>
+		<var type="result" name="cLR" value="0"/>
+		<var type="result" name="x" value="0"/>
+		<var type="result" name="xL" value="0"/>
+		<var type="result" name="xR" value="0"/>
+		<var type="result" name="xm" value="0"/>
+	</data>
+	<data>
+		<date timestamp="1412707620"/>
+		<var type="param" name="kT" value="0.01"/>
+		<var type="param" name="B_x" value="0"/>
+		<var type="param" name="B_y" value="0.8"/>
+		<var type="param" name="B_z" value="0"/>
+		<var type="param" name="JL" value="1"/>
+		<var type="param" name="JR" value="0"/>
+		<var type="param" name="Jm" value="0"/>
+		<var type="param" name="JmL" value="0"/>
+		<var type="param" name="JmR" value="0"/>
+		<var type="param" name="JLR" value="0"/>
+		<var type="param" name="bL" value="0"/>
+		<var type="param" name="bR" value="0"/>
+		<var type="param" name="bm" value="0"/>
+		<var type="param" name="bmL" value="0"/>
+		<var type="param" name="bmR" value="0"/>
+		<var type="param" name="bLR" value="0"/>
+		<var type="param" name="AL" value="0.5"/>
+		<var type="param" name="AR" value="0"/>
+		<var type="param" name="Am" value="0"/>
+		<var type="result" name="M_x" value="24.525"/>
+		<var type="result" name="M_y" value="1095.47"/>
+		<var type="result" name="M_z" value="3.82179"/>
+		<var type="result" name="ML_x" value="24.525"/>
+		<var type="result" name="ML_y" value="1095.47"/>
+		<var type="result" name="ML_z" value="3.82179"/>
+		<var type="result" name="MR_x" value="0"/>
+		<var type="result" name="MR_y" value="0"/>
+		<var type="result" name="MR_z" value="0"/>
+		<var type="result" name="Mm_x" value="0"/>
+		<var type="result" name="Mm_y" value="0"/>
+		<var type="result" name="Mm_z" value="0"/>
+		<var type="result" name="U" value="-3845.77"/>
+		<var type="result" name="UL" value="-3845.77"/>
+		<var type="result" name="UR" value="-0"/>
+		<var type="result" name="Um" value="-0"/>
+		<var type="result" name="UmL" value="-0"/>
+		<var type="result" name="UmR" value="-0"/>
+		<var type="result" name="ULR" value="-0"/>
+		<var type="result" name="c" value="0"/>
+		<var type="result" name="cL" value="0"/>
+		<var type="result" name="cR" value="0"/>
+		<var type="result" name="cm" value="0"/>
+		<var type="result" name="cmL" value="0"/>
+		<var type="result" name="cmR" value="0"/>
+		<var type="result" name="cLR" value="0"/>
+		<var type="result" name="x" value="0"/>
+		<var type="result" name="xL" value="0"/>
+		<var type="result" name="xR" value="0"/>
+		<var type="result" name="xm" value="0"/>
+	</data>
+	<data>
+		<date timestamp="1412707622"/>
+		<var type="param" name="kT" value="0.01"/>
+		<var type="param" name="B_x" value="0"/>
+		<var type="param" name="B_y" value="-1.3"/>
+		<var type="param" name="B_z" value="0"/>
+		<var type="param" name="JL" value="1"/>
+		<var type="param" name="JR" value="0"/>
+		<var type="param" name="Jm" value="0"/>
+		<var type="param" name="JmL" value="0"/>
+		<var type="param" name="JmR" value="0"/>
+		<var type="param" name="JLR" value="0"/>
+		<var type="param" name="bL" value="0"/>
+		<var type="param" name="bR" value="0"/>
+		<var type="param" name="bm" value="0"/>
+		<var type="param" name="bmL" value="0"/>
+		<var type="param" name="bmR" value="0"/>
+		<var type="param" name="bLR" value="0"/>
+		<var type="param" name="AL" value="0.5"/>
+		<var type="param" name="AR" value="0"/>
+		<var type="param" name="Am" value="0"/>
+		<var type="result" name="M_x" value="1.42874"/>
+		<var type="result" name="M_y" value="-1096.33"/>
+		<var type="result" name="M_z" value="-1.17398"/>
+		<var type="result" name="ML_x" value="1.42874"/>
+		<var type="result" name="ML_y" value="-1096.33"/>
+		<var type="result" name="ML_z" value="-1.17398"/>
+		<var type="result" name="MR_x" value="0"/>
+		<var type="result" name="MR_y" value="0"/>
+		<var type="result" name="MR_z" value="0"/>
+		<var type="result" name="Mm_x" value="0"/>
+		<var type="result" name="Mm_y" value="0"/>
+		<var type="result" name="Mm_z" value="0"/>
+		<var type="result" name="U" value="-4395.17"/>
+		<var type="result" name="UL" value="-4395.17"/>
+		<var type="result" name="UR" value="-0"/>
+		<var type="result" name="Um" value="-0"/>
+		<var type="result" name="UmL" value="-0"/>
+		<var type="result" name="UmR" value="-0"/>
+		<var type="result" name="ULR" value="-0"/>
+		<var type="result" name="c" value="0"/>
+		<var type="result" name="cL" value="0"/>
+		<var type="result" name="cR" value="0"/>
+		<var type="result" name="cm" value="0"/>
+		<var type="result" name="cmL" value="0"/>
+		<var type="result" name="cmR" value="0"/>
+		<var type="result" name="cLR" value="0"/>
+		<var type="result" name="x" value="0"/>
+		<var type="result" name="xL" value="0"/>
+		<var type="result" name="xR" value="0"/>
+		<var type="result" name="xm" value="0"/>
+	</data>
+	<data>
+		<date timestamp="1412707625"/>
+		<var type="param" name="kT" value="0.01"/>
+		<var type="param" name="B_x" value="0"/>
+		<var type="param" name="B_y" value="1.1"/>
+		<var type="param" name="B_z" value="0"/>
+		<var type="param" name="JL" value="1"/>
+		<var type="param" name="JR" value="0"/>
+		<var type="param" name="Jm" value="0"/>
+		<var type="param" name="JmL" value="0"/>
+		<var type="param" name="JmR" value="0"/>
+		<var type="param" name="JLR" value="0"/>
+		<var type="param" name="bL" value="0"/>
+		<var type="param" name="bR" value="0"/>
+		<var type="param" name="bm" value="0"/>
+		<var type="param" name="bmL" value="0"/>
+		<var type="param" name="bmR" value="0"/>
+		<var type="param" name="bLR" value="0"/>
+		<var type="param" name="AL" value="0.5"/>
+		<var type="param" name="AR" value="0"/>
+		<var type="param" name="Am" value="0"/>
+		<var type="result" name="M_x" value="4.22866"/>
+		<var type="result" name="M_y" value="1096.48"/>
+		<var type="result" name="M_z" value="1.83631"/>
+		<var type="result" name="ML_x" value="4.22866"/>
+		<var type="result" name="ML_y" value="1096.48"/>
+		<var type="result" name="ML_z" value="1.83631"/>
+		<var type="result" name="MR_x" value="0"/>
+		<var type="result" name="MR_y" value="0"/>
+		<var type="result" name="MR_z" value="0"/>
+		<var type="result" name="Mm_x" value="0"/>
+		<var type="result" name="Mm_y" value="0"/>
+		<var type="result" name="Mm_z" value="0"/>
+		<var type="result" name="U" value="-4175.59"/>
+		<var type="result" name="UL" value="-4175.59"/>
+		<var type="result" name="UR" value="-0"/>
+		<var type="result" name="Um" value="-0"/>
+		<var type="result" name="UmL" value="-0"/>
+		<var type="result" name="UmR" value="-0"/>
+		<var type="result" name="ULR" value="-0"/>
+		<var type="result" name="c" value="0"/>
+		<var type="result" name="cL" value="0"/>
+		<var type="result" name="cR" value="0"/>
+		<var type="result" name="cm" value="0"/>
+		<var type="result" name="cmL" value="0"/>
+		<var type="result" name="cmR" value="0"/>
+		<var type="result" name="cLR" value="0"/>
+		<var type="result" name="x" value="0"/>
+		<var type="result" name="xL" value="0"/>
+		<var type="result" name="xR" value="0"/>
+		<var type="result" name="xm" value="0"/>
+	</data>
+	<data>
+		<date timestamp="1412707643"/>
+		<var type="param" name="kT" value="0.01"/>
+		<var type="param" name="B_x" value="0"/>
+		<var type="param" name="B_y" value="-0.4"/>
+		<var type="param" name="B_z" value="0"/>
+		<var type="param" name="JL" value="1"/>
+		<var type="param" name="JR" value="0"/>
+		<var type="param" name="Jm" value="0"/>
+		<var type="param" name="JmL" value="0"/>
+		<var type="param" name="JmR" value="0"/>
+		<var type="param" name="JLR" value="0"/>
+		<var type="param" name="bL" value="0"/>
+		<var type="param" name="bR" value="0"/>
+		<var type="param" name="bm" value="0"/>
+		<var type="param" name="bmL" value="0"/>
+		<var type="param" name="bmR" value="0"/>
+		<var type="param" name="bLR" value="0"/>
+		<var type="param" name="AL" value="0.5"/>
+		<var type="param" name="AR" value="0"/>
+		<var type="param" name="Am" value="0"/>
+		<var type="result" name="M_x" value="-146.104"/>
+		<var type="result" name="M_y" value="-661.076"/>
+		<var type="result" name="M_z" value="-14.6841"/>
+		<var type="result" name="ML_x" value="-146.104"/>
+		<var type="result" name="ML_y" value="-661.076"/>
+		<var type="result" name="ML_z" value="-14.6841"/>
+		<var type="result" name="MR_x" value="0"/>
+		<var type="result" name="MR_y" value="0"/>
+		<var type="result" name="MR_z" value="0"/>
+		<var type="result" name="Mm_x" value="0"/>
+		<var type="result" name="Mm_y" value="0"/>
+		<var type="result" name="Mm_z" value="0"/>
+		<var type="result" name="U" value="-3504.56"/>
+		<var type="result" name="UL" value="-3504.56"/>
+		<var type="result" name="UR" value="-0"/>
+		<var type="result" name="Um" value="-0"/>
+		<var type="result" name="UmL" value="-0"/>
+		<var type="result" name="UmR" value="-0"/>
+		<var type="result" name="ULR" value="-0"/>
+		<var type="result" name="c" value="0"/>
+		<var type="result" name="cL" value="0"/>
+		<var type="result" name="cR" value="0"/>
+		<var type="result" name="cm" value="0"/>
+		<var type="result" name="cmL" value="0"/>
+		<var type="result" name="cmR" value="0"/>
+		<var type="result" name="cLR" value="0"/>
+		<var type="result" name="x" value="0"/>
+		<var type="result" name="xL" value="0"/>
+		<var type="result" name="xR" value="0"/>
+		<var type="result" name="xm" value="0"/>
+	</data>
+	<data>
+		<date timestamp="1412707648"/>
+		<var type="param" name="kT" value="0.01"/>
+		<var type="param" name="B_x" value="0"/>
+		<var type="param" name="B_y" value="0.5"/>
+		<var type="param" name="B_z" value="0"/>
+		<var type="param" name="JL" value="1"/>
+		<var type="param" name="JR" value="0"/>
+		<var type="param" name="Jm" value="0"/>
+		<var type="param" name="JmL" value="0"/>
+		<var type="param" name="JmR" value="0"/>
+		<var type="param" name="JLR" value="0"/>
+		<var type="param" name="bL" value="0"/>
+		<var type="param" name="bR" value="0"/>
+		<var type="param" name="bm" value="0"/>
+		<var type="param" name="bmL" value="0"/>
+		<var type="param" name="bmR" value="0"/>
+		<var type="param" name="bLR" value="0"/>
+		<var type="param" name="AL" value="0.5"/>
+		<var type="param" name="AR" value="0"/>
+		<var type="param" name="Am" value="0"/>
+		<var type="result" name="M_x" value="125.855"/>
+		<var type="result" name="M_y" value="1079.63"/>
+		<var type="result" name="M_z" value="-13.4476"/>
+		<var type="result" name="ML_x" value="125.855"/>
+		<var type="result" name="ML_y" value="1079.63"/>
+		<var type="result" name="ML_z" value="-13.4476"/>
+		<var type="result" name="MR_x" value="0"/>
+		<var type="result" name="MR_y" value="0"/>
+		<var type="result" name="MR_z" value="0"/>
+		<var type="result" name="Mm_x" value="0"/>
+		<var type="result" name="Mm_y" value="0"/>
+		<var type="result" name="Mm_z" value="0"/>
+		<var type="result" name="U" value="-3520.57"/>
+		<var type="result" name="UL" value="-3520.57"/>
+		<var type="result" name="UR" value="-0"/>
+		<var type="result" name="Um" value="-0"/>
+		<var type="result" name="UmL" value="-0"/>
+		<var type="result" name="UmR" value="-0"/>
+		<var type="result" name="ULR" value="-0"/>
+		<var type="result" name="c" value="0"/>
+		<var type="result" name="cL" value="0"/>
+		<var type="result" name="cR" value="0"/>
+		<var type="result" name="cm" value="0"/>
+		<var type="result" name="cmL" value="0"/>
+		<var type="result" name="cmR" value="0"/>
+		<var type="result" name="cLR" value="0"/>
+		<var type="result" name="x" value="0"/>
+		<var type="result" name="xL" value="0"/>
+		<var type="result" name="xR" value="0"/>
+		<var type="result" name="xm" value="0"/>
+	</data>
+	<data>
+		<date timestamp="1412707650"/>
+		<var type="param" name="kT" value="0.01"/>
+		<var type="param" name="B_x" value="0"/>
+		<var type="param" name="B_y" value="-1.1"/>
+		<var type="param" name="B_z" value="0"/>
+		<var type="param" name="JL" value="1"/>
+		<var type="param" name="JR" value="0"/>
+		<var type="param" name="Jm" value="0"/>
+		<var type="param" name="JmL" value="0"/>
+		<var type="param" name="JmR" value="0"/>
+		<var type="param" name="JLR" value="0"/>
+		<var type="param" name="bL" value="0"/>
+		<var type="param" name="bR" value="0"/>
+		<var type="param" name="bm" value="0"/>
+		<var type="param" name="bmL" value="0"/>
+		<var type="param" name="bmR" value="0"/>
+		<var type="param" name="bLR" value="0"/>
+		<var type="param" name="AL" value="0.5"/>
+		<var type="param" name="AR" value="0"/>
+		<var type="param" name="Am" value="0"/>
+		<var type="result" name="M_x" value="280.116"/>
+		<var type="result" name="M_y" value="-1060.11"/>
+		<var type="result" name="M_z" value="2.13814"/>
+		<var type="result" name="ML_x" value="280.116"/>
+		<var type="result" name="ML_y" value="-1060.11"/>
+		<var type="result" name="ML_z" value="2.13814"/>
+		<var type="result" name="MR_x" value="0"/>
+		<var type="result" name="MR_y" value="0"/>
+		<var type="result" name="MR_z" value="0"/>
+		<var type="result" name="Mm_x" value="0"/>
+		<var type="result" name="Mm_y" value="0"/>
+		<var type="result" name="Mm_z" value="0"/>
+		<var type="result" name="U" value="-4170.36"/>
+		<var type="result" name="UL" value="-4170.36"/>
+		<var type="result" name="UR" value="-0"/>
+		<var type="result" name="Um" value="-0"/>
+		<var type="result" name="UmL" value="-0"/>
+		<var type="result" name="UmR" value="-0"/>
+		<var type="result" name="ULR" value="-0"/>
+		<var type="result" name="c" value="0"/>
+		<var type="result" name="cL" value="0"/>
+		<var type="result" name="cR" value="0"/>
+		<var type="result" name="cm" value="0"/>
+		<var type="result" name="cmL" value="0"/>
+		<var type="result" name="cmR" value="0"/>
+		<var type="result" name="cLR" value="0"/>
+		<var type="result" name="x" value="0"/>
+		<var type="result" name="xL" value="0"/>
+		<var type="result" name="xR" value="0"/>
+		<var type="result" name="xm" value="0"/>
+	</data>
+	<data>
+		<date timestamp="1412707653"/>
+		<var type="param" name="kT" value="0.01"/>
+		<var type="param" name="B_x" value="0"/>
+		<var type="param" name="B_y" value="1.3"/>
+		<var type="param" name="B_z" value="0"/>
+		<var type="param" name="JL" value="1"/>
+		<var type="param" name="JR" value="0"/>
+		<var type="param" name="Jm" value="0"/>
+		<var type="param" name="JmL" value="0"/>
+		<var type="param" name="JmR" value="0"/>
+		<var type="param" name="JLR" value="0"/>
+		<var type="param" name="bL" value="0"/>
+		<var type="param" name="bR" value="0"/>
+		<var type="param" name="bm" value="0"/>
+		<var type="param" name="bmL" value="0"/>
+		<var type="param" name="bmR" value="0"/>
+		<var type="param" name="bLR" value="0"/>
+		<var type="param" name="AL" value="0.5"/>
+		<var type="param" name="AR" value="0"/>
+		<var type="param" name="Am" value="0"/>
+		<var type="result" name="M_x" value="-0.589064"/>
+		<var type="result" name="M_y" value="1096.89"/>
+		<var type="result" name="M_z" value="9.16017"/>
+		<var type="result" name="ML_x" value="-0.589064"/>
+		<var type="result" name="ML_y" value="1096.89"/>
+		<var type="result" name="ML_z" value="9.16017"/>
+		<var type="result" name="MR_x" value="0"/>
+		<var type="result" name="MR_y" value="0"/>
+		<var type="result" name="MR_z" value="0"/>
+		<var type="result" name="Mm_x" value="0"/>
+		<var type="result" name="Mm_y" value="0"/>
+		<var type="result" name="Mm_z" value="0"/>
+		<var type="result" name="U" value="-4395.4"/>
+		<var type="result" name="UL" value="-4395.4"/>
+		<var type="result" name="UR" value="-0"/>
+		<var type="result" name="Um" value="-0"/>
+		<var type="result" name="UmL" value="-0"/>
+		<var type="result" name="UmR" value="-0"/>
+		<var type="result" name="ULR" value="-0"/>
+		<var type="result" name="c" value="0"/>
+		<var type="result" name="cL" value="0"/>
+		<var type="result" name="cR" value="0"/>
+		<var type="result" name="cm" value="0"/>
+		<var type="result" name="cmL" value="0"/>
+		<var type="result" name="cmR" value="0"/>
+		<var type="result" name="cLR" value="0"/>
+		<var type="result" name="x" value="0"/>
+		<var type="result" name="xL" value="0"/>
+		<var type="result" name="xR" value="0"/>
+		<var type="result" name="xm" value="0"/>
+	</data>
+	<data>
+		<date timestamp="1412707664"/>
+		<var type="param" name="kT" value="0.01"/>
+		<var type="param" name="B_x" value="0"/>
+		<var type="param" name="B_y" value="-0.5"/>
+		<var type="param" name="B_z" value="0"/>
+		<var type="param" name="JL" value="1"/>
+		<var type="param" name="JR" value="0"/>
+		<var type="param" name="Jm" value="0"/>
+		<var type="param" name="JmL" value="0"/>
+		<var type="param" name="JmR" value="0"/>
+		<var type="param" name="JLR" value="0"/>
+		<var type="param" name="bL" value="0"/>
+		<var type="param" name="bR" value="0"/>
+		<var type="param" name="bm" value="0"/>
+		<var type="param" name="bmL" value="0"/>
+		<var type="param" name="bmR" value="0"/>
+		<var type="param" name="bLR" value="0"/>
+		<var type="param" name="AL" value="0.5"/>
+		<var type="param" name="AR" value="0"/>
+		<var type="param" name="Am" value="0"/>
+		<var type="result" name="M_x" value="193.817"/>
+		<var type="result" name="M_y" value="-777.659"/>
+		<var type="result" name="M_z" value="-6.01016"/>
+		<var type="result" name="ML_x" value="193.817"/>
+		<var type="result" name="ML_y" value="-777.659"/>
+		<var type="result" name="ML_z" value="-6.01016"/>
+		<var type="result" name="MR_x" value="0"/>
+		<var type="result" name="MR_y" value="0"/>
+		<var type="result" name="MR_z" value="0"/>
+		<var type="result" name="Mm_x" value="0"/>
+		<var type="result" name="Mm_y" value="0"/>
+		<var type="result" name="Mm_z" value="0"/>
+		<var type="result" name="U" value="-3575.5"/>
+		<var type="result" name="UL" value="-3575.5"/>
+		<var type="result" name="UR" value="-0"/>
+		<var type="result" name="Um" value="-0"/>
+		<var type="result" name="UmL" value="-0"/>
+		<var type="result" name="UmR" value="-0"/>
+		<var type="result" name="ULR" value="-0"/>
+		<var type="result" name="c" value="0"/>
+		<var type="result" name="cL" value="0"/>
+		<var type="result" name="cR" value="0"/>
+		<var type="result" name="cm" value="0"/>
+		<var type="result" name="cmL" value="0"/>
+		<var type="result" name="cmR" value="0"/>
+		<var type="result" name="cLR" value="0"/>
+		<var type="result" name="x" value="0"/>
+		<var type="result" name="xL" value="0"/>
+		<var type="result" name="xR" value="0"/>
+		<var type="result" name="xm" value="0"/>
+	</data>
+	<data>
+		<date timestamp="1412707666"/>
+		<var type="param" name="kT" value="0.01"/>
+		<var type="param" name="B_x" value="0"/>
+		<var type="param" name="B_y" value="0.4"/>
+		<var type="param" name="B_z" value="0"/>
+		<var type="param" name="JL" value="1"/>
+		<var type="param" name="JR" value="0"/>
+		<var type="param" name="Jm" value="0"/>
+		<var type="param" name="JmL" value="0"/>
+		<var type="param" name="JmR" value="0"/>
+		<var type="param" name="JLR" value="0"/>
+		<var type="param" name="bL" value="0"/>
+		<var type="param" name="bR" value="0"/>
+		<var type="param" name="bm" value="0"/>
+		<var type="param" name="bmL" value="0"/>
+		<var type="param" name="bmR" value="0"/>
+		<var type="param" name="bLR" value="0"/>
+		<var type="param" name="AL" value="0.5"/>
+		<var type="param" name="AR" value="0"/>
+		<var type="param" name="Am" value="0"/>
+		<var type="result" name="M_x" value="-330.122"/>
+		<var type="result" name="M_y" value="926.013"/>
+		<var type="result" name="M_z" value="-2.6088"/>
+		<var type="result" name="ML_x" value="-330.122"/>
+		<var type="result" name="ML_y" value="926.013"/>
+		<var type="result" name="ML_z" value="-2.6088"/>
+		<var type="result" name="MR_x" value="0"/>
+		<var type="result" name="MR_y" value="0"/>
+		<var type="result" name="MR_z" value="0"/>
+		<var type="result" name="Mm_x" value="0"/>
+		<var type="result" name="Mm_y" value="0"/>
+		<var type="result" name="Mm_z" value="0"/>
+		<var type="result" name="U" value="-3468.14"/>
+		<var type="result" name="UL" value="-3468.14"/>
+		<var type="result" name="UR" value="-0"/>
+		<var type="result" name="Um" value="-0"/>
+		<var type="result" name="UmL" value="-0"/>
+		<var type="result" name="UmR" value="-0"/>
+		<var type="result" name="ULR" value="-0"/>
+		<var type="result" name="c" value="0"/>
+		<var type="result" name="cL" value="0"/>
+		<var type="result" name="cR" value="0"/>
+		<var type="result" name="cm" value="0"/>
+		<var type="result" name="cmL" value="0"/>
+		<var type="result" name="cmR" value="0"/>
+		<var type="result" name="cLR" value="0"/>
+		<var type="result" name="x" value="0"/>
+		<var type="result" name="xL" value="0"/>
+		<var type="result" name="xR" value="0"/>
+		<var type="result" name="xm" value="0"/>
+	</data>
+	<data>
+		<date timestamp="1412707666"/>
+		<var type="param" name="kT" value="0.01"/>
+		<var type="param" name="B_x" value="0"/>
+		<var type="param" name="B_y" value="-1.2"/>
+		<var type="param" name="B_z" value="0"/>
+		<var type="param" name="JL" value="1"/>
+		<var type="param" name="JR" value="0"/>
+		<var type="param" name="Jm" value="0"/>
+		<var type="param" name="JmL" value="0"/>
+		<var type="param" name="JmR" value="0"/>
+		<var type="param" name="JLR" value="0"/>
+		<var type="param" name="bL" value="0"/>
+		<var type="param" name="bR" value="0"/>
+		<var type="param" name="bm" value="0"/>
+		<var type="param" name="bmL" value="0"/>
+		<var type="param" name="bmR" value="0"/>
+		<var type="param" name="bLR" value="0"/>
+		<var type="param" name="AL" value="0.5"/>
+		<var type="param" name="AR" value="0"/>
+		<var type="param" name="Am" value="0"/>
+		<var type="result" name="M_x" value="8.48607"/>
+		<var type="result" name="M_y" value="-1094.1"/>
+		<var type="result" name="M_z" value="-0.764201"/>
+		<var type="result" name="ML_x" value="8.48607"/>
+		<var type="result" name="ML_y" value="-1094.1"/>
+		<var type="result" name="ML_z" value="-0.764201"/>
+		<var type="result" name="MR_x" value="0"/>
+		<var type="result" name="MR_y" value="0"/>
+		<var type="result" name="MR_z" value="0"/>
+		<var type="result" name="Mm_x" value="0"/>
+		<var type="result" name="Mm_y" value="0"/>
+		<var type="result" name="Mm_z" value="0"/>
+		<var type="result" name="U" value="-4284.37"/>
+		<var type="result" name="UL" value="-4284.37"/>
+		<var type="result" name="UR" value="-0"/>
+		<var type="result" name="Um" value="-0"/>
+		<var type="result" name="UmL" value="-0"/>
+		<var type="result" name="UmR" value="-0"/>
+		<var type="result" name="ULR" value="-0"/>
+		<var type="result" name="c" value="0"/>
+		<var type="result" name="cL" value="0"/>
+		<var type="result" name="cR" value="0"/>
+		<var type="result" name="cm" value="0"/>
+		<var type="result" name="cmL" value="0"/>
+		<var type="result" name="cmR" value="0"/>
+		<var type="result" name="cLR" value="0"/>
+		<var type="result" name="x" value="0"/>
+		<var type="result" name="xL" value="0"/>
+		<var type="result" name="xR" value="0"/>
+		<var type="result" name="xm" value="0"/>
+	</data>
+	<data>
+		<date timestamp="1412707674"/>
+		<var type="param" name="kT" value="0.01"/>
+		<var type="param" name="B_x" value="0"/>
+		<var type="param" name="B_y" value="1.2"/>
+		<var type="param" name="B_z" value="0"/>
+		<var type="param" name="JL" value="1"/>
+		<var type="param" name="JR" value="0"/>
+		<var type="param" name="Jm" value="0"/>
+		<var type="param" name="JmL" value="0"/>
+		<var type="param" name="JmR" value="0"/>
+		<var type="param" name="JLR" value="0"/>
+		<var type="param" name="bL" value="0"/>
+		<var type="param" name="bR" value="0"/>
+		<var type="param" name="bm" value="0"/>
+		<var type="param" name="bmL" value="0"/>
+		<var type="param" name="bmR" value="0"/>
+		<var type="param" name="bLR" value="0"/>
+		<var type="param" name="AL" value="0.5"/>
+		<var type="param" name="AR" value="0"/>
+		<var type="param" name="Am" value="0"/>
+		<var type="result" name="M_x" value="-8.44894"/>
+		<var type="result" name="M_y" value="1096.5"/>
+		<var type="result" name="M_z" value="-5.30708"/>
+		<var type="result" name="ML_x" value="-8.44894"/>
+		<var type="result" name="ML_y" value="1096.5"/>
+		<var type="result" name="ML_z" value="-5.30708"/>
+		<var type="result" name="MR_x" value="0"/>
+		<var type="result" name="MR_y" value="0"/>
+		<var type="result" name="MR_z" value="0"/>
+		<var type="result" name="Mm_x" value="0"/>
+		<var type="result" name="Mm_y" value="0"/>
+		<var type="result" name="Mm_z" value="0"/>
+		<var type="result" name="U" value="-4283.96"/>
+		<var type="result" name="UL" value="-4283.96"/>
+		<var type="result" name="UR" value="-0"/>
+		<var type="result" name="Um" value="-0"/>
+		<var type="result" name="UmL" value="-0"/>
+		<var type="result" name="UmR" value="-0"/>
+		<var type="result" name="ULR" value="-0"/>
+		<var type="result" name="c" value="0"/>
+		<var type="result" name="cL" value="0"/>
+		<var type="result" name="cR" value="0"/>
+		<var type="result" name="cm" value="0"/>
+		<var type="result" name="cmL" value="0"/>
+		<var type="result" name="cmR" value="0"/>
+		<var type="result" name="cLR" value="0"/>
+		<var type="result" name="x" value="0"/>
+		<var type="result" name="xL" value="0"/>
+		<var type="result" name="xR" value="0"/>
+		<var type="result" name="xm" value="0"/>
+	</data>
+	<data>
+		<date timestamp="1412707690"/>
+		<var type="param" name="kT" value="0.01"/>
+		<var type="param" name="B_x" value="0"/>
+		<var type="param" name="B_y" value="-0.1"/>
+		<var type="param" name="B_z" value="0"/>
+		<var type="param" name="JL" value="1"/>
+		<var type="param" name="JR" value="0"/>
+		<var type="param" name="Jm" value="0"/>
+		<var type="param" name="JmL" value="0"/>
+		<var type="param" name="JmR" value="0"/>
+		<var type="param" name="JLR" value="0"/>
+		<var type="param" name="bL" value="0"/>
+		<var type="param" name="bR" value="0"/>
+		<var type="param" name="bm" value="0"/>
+		<var type="param" name="bmL" value="0"/>
+		<var type="param" name="bmR" value="0"/>
+		<var type="param" name="bLR" value="0"/>
+		<var type="param" name="AL" value="0.5"/>
+		<var type="param" name="AR" value="0"/>
+		<var type="param" name="Am" value="0"/>
+		<var type="result" name="M_x" value="608.227"/>
+		<var type="result" name="M_y" value="212.765"/>
+		<var type="result" name="M_z" value="-6.61014"/>
+		<var type="result" name="ML_x" value="608.227"/>
+		<var type="result" name="ML_y" value="212.765"/>
+		<var type="result" name="ML_z" value="-6.61014"/>
+		<var type="result" name="MR_x" value="0"/>
+		<var type="result" name="MR_y" value="0"/>
+		<var type="result" name="MR_z" value="0"/>
+		<var type="result" name="Mm_x" value="0"/>
+		<var type="result" name="Mm_y" value="0"/>
+		<var type="result" name="Mm_z" value="0"/>
+		<var type="result" name="U" value="-3307.98"/>
+		<var type="result" name="UL" value="-3307.98"/>
+		<var type="result" name="UR" value="-0"/>
+		<var type="result" name="Um" value="-0"/>
+		<var type="result" name="UmL" value="-0"/>
+		<var type="result" name="UmR" value="-0"/>
+		<var type="result" name="ULR" value="-0"/>
+		<var type="result" name="c" value="0"/>
+		<var type="result" name="cL" value="0"/>
+		<var type="result" name="cR" value="0"/>
+		<var type="result" name="cm" value="0"/>
+		<var type="result" name="cmL" value="0"/>
+		<var type="result" name="cmR" value="0"/>
+		<var type="result" name="cLR" value="0"/>
+		<var type="result" name="x" value="0"/>
+		<var type="result" name="xL" value="0"/>
+		<var type="result" name="xR" value="0"/>
+		<var type="result" name="xm" value="0"/>
+	</data>
+	<data>
+		<date timestamp="1412707694"/>
+		<var type="param" name="kT" value="0.01"/>
+		<var type="param" name="B_x" value="0"/>
+		<var type="param" name="B_y" value="-0.9"/>
+		<var type="param" name="B_z" value="0"/>
+		<var type="param" name="JL" value="1"/>
+		<var type="param" name="JR" value="0"/>
+		<var type="param" name="Jm" value="0"/>
+		<var type="param" name="JmL" value="0"/>
+		<var type="param" name="JmR" value="0"/>
+		<var type="param" name="JLR" value="0"/>
+		<var type="param" name="bL" value="0"/>
+		<var type="param" name="bR" value="0"/>
+		<var type="param" name="bm" value="0"/>
+		<var type="param" name="bmL" value="0"/>
+		<var type="param" name="bmR" value="0"/>
+		<var type="param" name="bLR" value="0"/>
+		<var type="param" name="AL" value="0.5"/>
+		<var type="param" name="AR" value="0"/>
+		<var type="param" name="Am" value="0"/>
+		<var type="result" name="M_x" value="-507.627"/>
+		<var type="result" name="M_y" value="-969.72"/>
+		<var type="result" name="M_z" value="3.13719"/>
+		<var type="result" name="ML_x" value="-507.627"/>
+		<var type="result" name="ML_y" value="-969.72"/>
+		<var type="result" name="ML_z" value="3.13719"/>
+		<var type="result" name="MR_x" value="0"/>
+		<var type="result" name="MR_y" value="0"/>
+		<var type="result" name="MR_z" value="0"/>
+		<var type="result" name="Mm_x" value="0"/>
+		<var type="result" name="Mm_y" value="0"/>
+		<var type="result" name="Mm_z" value="0"/>
+		<var type="result" name="U" value="-3959.87"/>
+		<var type="result" name="UL" value="-3959.87"/>
+		<var type="result" name="UR" value="-0"/>
+		<var type="result" name="Um" value="-0"/>
+		<var type="result" name="UmL" value="-0"/>
+		<var type="result" name="UmR" value="-0"/>
+		<var type="result" name="ULR" value="-0"/>
+		<var type="result" name="c" value="0"/>
+		<var type="result" name="cL" value="0"/>
+		<var type="result" name="cR" value="0"/>
+		<var type="result" name="cm" value="0"/>
+		<var type="result" name="cmL" value="0"/>
+		<var type="result" name="cmR" value="0"/>
+		<var type="result" name="cLR" value="0"/>
+		<var type="result" name="x" value="0"/>
+		<var type="result" name="xL" value="0"/>
+		<var type="result" name="xR" value="0"/>
+		<var type="result" name="xm" value="0"/>
+	</data>
+	<data>
+		<date timestamp="1412707697"/>
+		<var type="param" name="kT" value="0.01"/>
+		<var type="param" name="B_x" value="0"/>
+		<var type="param" name="B_y" value="1.5"/>
+		<var type="param" name="B_z" value="0"/>
+		<var type="param" name="JL" value="1"/>
+		<var type="param" name="JR" value="0"/>
+		<var type="param" name="Jm" value="0"/>
+		<var type="param" name="JmL" value="0"/>
+		<var type="param" name="JmR" value="0"/>
+		<var type="param" name="JLR" value="0"/>
+		<var type="param" name="bL" value="0"/>
+		<var type="param" name="bR" value="0"/>
+		<var type="param" name="bm" value="0"/>
+		<var type="param" name="bmL" value="0"/>
+		<var type="param" name="bmR" value="0"/>
+		<var type="param" name="bLR" value="0"/>
+		<var type="param" name="AL" value="0.5"/>
+		<var type="param" name="AR" value="0"/>
+		<var type="param" name="Am" value="0"/>
+		<var type="result" name="M_x" value="0.0040306"/>
+		<var type="result" name="M_y" value="1097.07"/>
+		<var type="result" name="M_z" value="-1.61704"/>
+		<var type="result" name="ML_x" value="0.0040306"/>
+		<var type="result" name="ML_y" value="1097.07"/>
+		<var type="result" name="ML_z" value="-1.61704"/>
+		<var type="result" name="MR_x" value="0"/>
+		<var type="result" name="MR_y" value="0"/>
+		<var type="result" name="MR_z" value="0"/>
+		<var type="result" name="Mm_x" value="0"/>
+		<var type="result" name="Mm_y" value="0"/>
+		<var type="result" name="Mm_z" value="0"/>
+		<var type="result" name="U" value="-4615.13"/>
+		<var type="result" name="UL" value="-4615.13"/>
+		<var type="result" name="UR" value="-0"/>
+		<var type="result" name="Um" value="-0"/>
+		<var type="result" name="UmL" value="-0"/>
+		<var type="result" name="UmR" value="-0"/>
+		<var type="result" name="ULR" value="-0"/>
+		<var type="result" name="c" value="0"/>
+		<var type="result" name="cL" value="0"/>
+		<var type="result" name="cR" value="0"/>
+		<var type="result" name="cm" value="0"/>
+		<var type="result" name="cmL" value="0"/>
+		<var type="result" name="cmR" value="0"/>
+		<var type="result" name="cLR" value="0"/>
+		<var type="result" name="x" value="0"/>
+		<var type="result" name="xL" value="0"/>
+		<var type="result" name="xR" value="0"/>
+		<var type="result" name="xm" value="0"/>
+	</data>
+	<data>
+		<date timestamp="1412707697"/>
+		<var type="param" name="kT" value="0.01"/>
+		<var type="param" name="B_x" value="0"/>
+		<var type="param" name="B_y" value="0.7"/>
+		<var type="param" name="B_z" value="0"/>
+		<var type="param" name="JL" value="1"/>
+		<var type="param" name="JR" value="0"/>
+		<var type="param" name="Jm" value="0"/>
+		<var type="param" name="JmL" value="0"/>
+		<var type="param" name="JmR" value="0"/>
+		<var type="param" name="JLR" value="0"/>
+		<var type="param" name="bL" value="0"/>
+		<var type="param" name="bR" value="0"/>
+		<var type="param" name="bm" value="0"/>
+		<var type="param" name="bmL" value="0"/>
+		<var type="param" name="bmR" value="0"/>
+		<var type="param" name="bLR" value="0"/>
+		<var type="param" name="AL" value="0.5"/>
+		<var type="param" name="AR" value="0"/>
+		<var type="param" name="Am" value="0"/>
+		<var type="result" name="M_x" value="-47.1349"/>
+		<var type="result" name="M_y" value="1093.52"/>
+		<var type="result" name="M_z" value="0.221292"/>
+		<var type="result" name="ML_x" value="-47.1349"/>
+		<var type="result" name="ML_y" value="1093.52"/>
+		<var type="result" name="ML_z" value="0.221292"/>
+		<var type="result" name="MR_x" value="0"/>
+		<var type="result" name="MR_y" value="0"/>
+		<var type="result" name="MR_z" value="0"/>
+		<var type="result" name="Mm_x" value="0"/>
+		<var type="result" name="Mm_y" value="0"/>
+		<var type="result" name="Mm_z" value="0"/>
+		<var type="result" name="U" value="-3736"/>
+		<var type="result" name="UL" value="-3736"/>
+		<var type="result" name="UR" value="-0"/>
+		<var type="result" name="Um" value="-0"/>
+		<var type="result" name="UmL" value="-0"/>
+		<var type="result" name="UmR" value="-0"/>
+		<var type="result" name="ULR" value="-0"/>
+		<var type="result" name="c" value="0"/>
+		<var type="result" name="cL" value="0"/>
+		<var type="result" name="cR" value="0"/>
+		<var type="result" name="cm" value="0"/>
+		<var type="result" name="cmL" value="0"/>
+		<var type="result" name="cmR" value="0"/>
+		<var type="result" name="cLR" value="0"/>
+		<var type="result" name="x" value="0"/>
+		<var type="result" name="xL" value="0"/>
+		<var type="result" name="xR" value="0"/>
+		<var type="result" name="xm" value="0"/>
+	</data>
+	<data>
+		<date timestamp="1412707698"/>
+		<var type="param" name="kT" value="0.01"/>
+		<var type="param" name="B_x" value="0"/>
+		<var type="param" name="B_y" value="-0.3"/>
+		<var type="param" name="B_z" value="0"/>
+		<var type="param" name="JL" value="1"/>
+		<var type="param" name="JR" value="0"/>
+		<var type="param" name="Jm" value="0"/>
+		<var type="param" name="JmL" value="0"/>
+		<var type="param" name="JmR" value="0"/>
+		<var type="param" name="JLR" value="0"/>
+		<var type="param" name="bL" value="0"/>
+		<var type="param" name="bR" value="0"/>
+		<var type="param" name="bm" value="0"/>
+		<var type="param" name="bmL" value="0"/>
+		<var type="param" name="bmR" value="0"/>
+		<var type="param" name="bLR" value="0"/>
+		<var type="param" name="AL" value="0.5"/>
+		<var type="param" name="AR" value="0"/>
+		<var type="param" name="Am" value="0"/>
+		<var type="result" name="M_x" value="123.144"/>
+		<var type="result" name="M_y" value="-531.816"/>
+		<var type="result" name="M_z" value="-15.7941"/>
+		<var type="result" name="ML_x" value="123.144"/>
+		<var type="result" name="ML_y" value="-531.816"/>
+		<var type="result" name="ML_z" value="-15.7941"/>
+		<var type="result" name="MR_x" value="0"/>
+		<var type="result" name="MR_y" value="0"/>
+		<var type="result" name="MR_z" value="0"/>
+		<var type="result" name="Mm_x" value="0"/>
+		<var type="result" name="Mm_y" value="0"/>
+		<var type="result" name="Mm_z" value="0"/>
+		<var type="result" name="U" value="-3436.42"/>
+		<var type="result" name="UL" value="-3436.42"/>
+		<var type="result" name="UR" value="-0"/>
+		<var type="result" name="Um" value="-0"/>
+		<var type="result" name="UmL" value="-0"/>
+		<var type="result" name="UmR" value="-0"/>
+		<var type="result" name="ULR" value="-0"/>
+		<var type="result" name="c" value="0"/>
+		<var type="result" name="cL" value="0"/>
+		<var type="result" name="cR" value="0"/>
+		<var type="result" name="cm" value="0"/>
+		<var type="result" name="cmL" value="0"/>
+		<var type="result" name="cmR" value="0"/>
+		<var type="result" name="cLR" value="0"/>
+		<var type="result" name="x" value="0"/>
+		<var type="result" name="xL" value="0"/>
+		<var type="result" name="xR" value="0"/>
+		<var type="result" name="xm" value="0"/>
+	</data>
+	<data>
+		<date timestamp="1412707699"/>
+		<var type="param" name="kT" value="0.01"/>
+		<var type="param" name="B_x" value="0"/>
+		<var type="param" name="B_y" value="-0.2"/>
+		<var type="param" name="B_z" value="0"/>
+		<var type="param" name="JL" value="1"/>
+		<var type="param" name="JR" value="0"/>
+		<var type="param" name="Jm" value="0"/>
+		<var type="param" name="JmL" value="0"/>
+		<var type="param" name="JmR" value="0"/>
+		<var type="param" name="JLR" value="0"/>
+		<var type="param" name="bL" value="0"/>
+		<var type="param" name="bR" value="0"/>
+		<var type="param" name="bm" value="0"/>
+		<var type="param" name="bmL" value="0"/>
+		<var type="param" name="bmR" value="0"/>
+		<var type="param" name="bLR" value="0"/>
+		<var type="param" name="AL" value="0.5"/>
+		<var type="param" name="AR" value="0"/>
+		<var type="param" name="Am" value="0"/>
+		<var type="result" name="M_x" value="-616.702"/>
+		<var type="result" name="M_y" value="161.202"/>
+		<var type="result" name="M_z" value="-13.7124"/>
+		<var type="result" name="ML_x" value="-616.702"/>
+		<var type="result" name="ML_y" value="161.202"/>
+		<var type="result" name="ML_z" value="-13.7124"/>
+		<var type="result" name="MR_x" value="0"/>
+		<var type="result" name="MR_y" value="0"/>
+		<var type="result" name="MR_z" value="0"/>
+		<var type="result" name="Mm_x" value="0"/>
+		<var type="result" name="Mm_y" value="0"/>
+		<var type="result" name="Mm_z" value="0"/>
+		<var type="result" name="U" value="-3240.94"/>
+		<var type="result" name="UL" value="-3240.94"/>
+		<var type="result" name="UR" value="-0"/>
+		<var type="result" name="Um" value="-0"/>
+		<var type="result" name="UmL" value="-0"/>
+		<var type="result" name="UmR" value="-0"/>
+		<var type="result" name="ULR" value="-0"/>
+		<var type="result" name="c" value="0"/>
+		<var type="result" name="cL" value="0"/>
+		<var type="result" name="cR" value="0"/>
+		<var type="result" name="cm" value="0"/>
+		<var type="result" name="cmL" value="0"/>
+		<var type="result" name="cmR" value="0"/>
+		<var type="result" name="cLR" value="0"/>
+		<var type="result" name="x" value="0"/>
+		<var type="result" name="xL" value="0"/>
+		<var type="result" name="xR" value="0"/>
+		<var type="result" name="xm" value="0"/>
+	</data>
+	<data>
+		<date timestamp="1412707702"/>
+		<var type="param" name="kT" value="0.01"/>
+		<var type="param" name="B_x" value="0"/>
+		<var type="param" name="B_y" value="-1.5"/>
+		<var type="param" name="B_z" value="0"/>
+		<var type="param" name="JL" value="1"/>
+		<var type="param" name="JR" value="0"/>
+		<var type="param" name="Jm" value="0"/>
+		<var type="param" name="JmL" value="0"/>
+		<var type="param" name="JmR" value="0"/>
+		<var type="param" name="JLR" value="0"/>
+		<var type="param" name="bL" value="0"/>
+		<var type="param" name="bR" value="0"/>
+		<var type="param" name="bm" value="0"/>
+		<var type="param" name="bmL" value="0"/>
+		<var type="param" name="bmR" value="0"/>
+		<var type="param" name="bLR" value="0"/>
+		<var type="param" name="AL" value="0.5"/>
+		<var type="param" name="AR" value="0"/>
+		<var type="param" name="Am" value="0"/>
+		<var type="result" name="M_x" value="25.5422"/>
+		<var type="result" name="M_y" value="-1096.75"/>
+		<var type="result" name="M_z" value="-1.44646"/>
+		<var type="result" name="ML_x" value="25.5422"/>
+		<var type="result" name="ML_y" value="-1096.75"/>
+		<var type="result" name="ML_z" value="-1.44646"/>
+		<var type="result" name="MR_x" value="0"/>
+		<var type="result" name="MR_y" value="0"/>
+		<var type="result" name="MR_z" value="0"/>
+		<var type="result" name="Mm_x" value="0"/>
+		<var type="result" name="Mm_y" value="0"/>
+		<var type="result" name="Mm_z" value="0"/>
+		<var type="result" name="U" value="-4615.05"/>
+		<var type="result" name="UL" value="-4615.05"/>
+		<var type="result" name="UR" value="-0"/>
+		<var type="result" name="Um" value="-0"/>
+		<var type="result" name="UmL" value="-0"/>
+		<var type="result" name="UmR" value="-0"/>
+		<var type="result" name="ULR" value="-0"/>
+		<var type="result" name="c" value="0"/>
+		<var type="result" name="cL" value="0"/>
+		<var type="result" name="cR" value="0"/>
+		<var type="result" name="cm" value="0"/>
+		<var type="result" name="cmL" value="0"/>
+		<var type="result" name="cmR" value="0"/>
+		<var type="result" name="cLR" value="0"/>
+		<var type="result" name="x" value="0"/>
+		<var type="result" name="xL" value="0"/>
+		<var type="result" name="xR" value="0"/>
+		<var type="result" name="xm" value="0"/>
+	</data>
+	<data>
+		<date timestamp="1412707702"/>
+		<var type="param" name="kT" value="0.01"/>
+		<var type="param" name="B_x" value="0"/>
+		<var type="param" name="B_y" value="0.2"/>
+		<var type="param" name="B_z" value="0"/>
+		<var type="param" name="JL" value="1"/>
+		<var type="param" name="JR" value="0"/>
+		<var type="param" name="Jm" value="0"/>
+		<var type="param" name="JmL" value="0"/>
+		<var type="param" name="JmR" value="0"/>
+		<var type="param" name="JLR" value="0"/>
+		<var type="param" name="bL" value="0"/>
+		<var type="param" name="bR" value="0"/>
+		<var type="param" name="bm" value="0"/>
+		<var type="param" name="bmL" value="0"/>
+		<var type="param" name="bmR" value="0"/>
+		<var type="param" name="bLR" value="0"/>
+		<var type="param" name="AL" value="0.5"/>
+		<var type="param" name="AR" value="0"/>
+		<var type="param" name="Am" value="0"/>
+		<var type="result" name="M_x" value="-234.527"/>
+		<var type="result" name="M_y" value="679.063"/>
+		<var type="result" name="M_z" value="7.26139"/>
+		<var type="result" name="ML_x" value="-234.527"/>
+		<var type="result" name="ML_y" value="679.063"/>
+		<var type="result" name="ML_z" value="7.26139"/>
+		<var type="result" name="MR_x" value="0"/>
+		<var type="result" name="MR_y" value="0"/>
+		<var type="result" name="MR_z" value="0"/>
+		<var type="result" name="Mm_x" value="0"/>
+		<var type="result" name="Mm_y" value="0"/>
+		<var type="result" name="Mm_z" value="0"/>
+		<var type="result" name="U" value="-3353.09"/>
+		<var type="result" name="UL" value="-3353.09"/>
+		<var type="result" name="UR" value="-0"/>
+		<var type="result" name="Um" value="-0"/>
+		<var type="result" name="UmL" value="-0"/>
+		<var type="result" name="UmR" value="-0"/>
+		<var type="result" name="ULR" value="-0"/>
+		<var type="result" name="c" value="0"/>
+		<var type="result" name="cL" value="0"/>
+		<var type="result" name="cR" value="0"/>
+		<var type="result" name="cm" value="0"/>
+		<var type="result" name="cmL" value="0"/>
+		<var type="result" name="cmR" value="0"/>
+		<var type="result" name="cLR" value="0"/>
+		<var type="result" name="x" value="0"/>
+		<var type="result" name="xL" value="0"/>
+		<var type="result" name="xR" value="0"/>
+		<var type="result" name="xm" value="0"/>
+	</data>
+	<data>
+		<date timestamp="1412707709"/>
+		<var type="param" name="kT" value="0.01"/>
+		<var type="param" name="B_x" value="0"/>
+		<var type="param" name="B_y" value="1"/>
+		<var type="param" name="B_z" value="0"/>
+		<var type="param" name="JL" value="1"/>
+		<var type="param" name="JR" value="0"/>
+		<var type="param" name="Jm" value="0"/>
+		<var type="param" name="JmL" value="0"/>
+		<var type="param" name="JmR" value="0"/>
+		<var type="param" name="JLR" value="0"/>
+		<var type="param" name="bL" value="0"/>
+		<var type="param" name="bR" value="0"/>
+		<var type="param" name="bm" value="0"/>
+		<var type="param" name="bmL" value="0"/>
+		<var type="param" name="bmR" value="0"/>
+		<var type="param" name="bLR" value="0"/>
+		<var type="param" name="AL" value="0.5"/>
+		<var type="param" name="AR" value="0"/>
+		<var type="param" name="Am" value="0"/>
+		<var type="result" name="M_x" value="-5.74834"/>
+		<var type="result" name="M_y" value="1096.25"/>
+		<var type="result" name="M_z" value="-5.92751"/>
+		<var type="result" name="ML_x" value="-5.74834"/>
+		<var type="result" name="ML_y" value="1096.25"/>
+		<var type="result" name="ML_z" value="-5.92751"/>
+		<var type="result" name="MR_x" value="0"/>
+		<var type="result" name="MR_y" value="0"/>
+		<var type="result" name="MR_z" value="0"/>
+		<var type="result" name="Mm_x" value="0"/>
+		<var type="result" name="Mm_y" value="0"/>
+		<var type="result" name="Mm_z" value="0"/>
+		<var type="result" name="U" value="-4065.28"/>
+		<var type="result" name="UL" value="-4065.28"/>
+		<var type="result" name="UR" value="-0"/>
+		<var type="result" name="Um" value="-0"/>
+		<var type="result" name="UmL" value="-0"/>
+		<var type="result" name="UmR" value="-0"/>
+		<var type="result" name="ULR" value="-0"/>
+		<var type="result" name="c" value="0"/>
+		<var type="result" name="cL" value="0"/>
+		<var type="result" name="cR" value="0"/>
+		<var type="result" name="cm" value="0"/>
+		<var type="result" name="cmL" value="0"/>
+		<var type="result" name="cmR" value="0"/>
+		<var type="result" name="cLR" value="0"/>
+		<var type="result" name="x" value="0"/>
+		<var type="result" name="xL" value="0"/>
+		<var type="result" name="xR" value="0"/>
+		<var type="result" name="xm" value="0"/>
+	</data>
+	<data>
+		<date timestamp="1412707711"/>
+		<var type="param" name="kT" value="0.01"/>
+		<var type="param" name="B_x" value="0"/>
+		<var type="param" name="B_y" value="-1.4"/>
+		<var type="param" name="B_z" value="0"/>
+		<var type="param" name="JL" value="1"/>
+		<var type="param" name="JR" value="0"/>
+		<var type="param" name="Jm" value="0"/>
+		<var type="param" name="JmL" value="0"/>
+		<var type="param" name="JmR" value="0"/>
+		<var type="param" name="JLR" value="0"/>
+		<var type="param" name="bL" value="0"/>
+		<var type="param" name="bR" value="0"/>
+		<var type="param" name="bm" value="0"/>
+		<var type="param" name="bmL" value="0"/>
+		<var type="param" name="bmR" value="0"/>
+		<var type="param" name="bLR" value="0"/>
+		<var type="param" name="AL" value="0.5"/>
+		<var type="param" name="AR" value="0"/>
+		<var type="param" name="Am" value="0"/>
+		<var type="result" name="M_x" value="4.90741"/>
+		<var type="result" name="M_y" value="-1096.91"/>
+		<var type="result" name="M_z" value="3.2663"/>
+		<var type="result" name="ML_x" value="4.90741"/>
+		<var type="result" name="ML_y" value="-1096.91"/>
+		<var type="result" name="ML_z" value="3.2663"/>
+		<var type="result" name="MR_x" value="0"/>
+		<var type="result" name="MR_y" value="0"/>
+		<var type="result" name="MR_z" value="0"/>
+		<var type="result" name="Mm_x" value="0"/>
+		<var type="result" name="Mm_y" value="0"/>
+		<var type="result" name="Mm_z" value="0"/>
+		<var type="result" name="U" value="-4505.44"/>
+		<var type="result" name="UL" value="-4505.44"/>
+		<var type="result" name="UR" value="-0"/>
+		<var type="result" name="Um" value="-0"/>
+		<var type="result" name="UmL" value="-0"/>
+		<var type="result" name="UmR" value="-0"/>
+		<var type="result" name="ULR" value="-0"/>
+		<var type="result" name="c" value="0"/>
+		<var type="result" name="cL" value="0"/>
+		<var type="result" name="cR" value="0"/>
+		<var type="result" name="cm" value="0"/>
+		<var type="result" name="cmL" value="0"/>
+		<var type="result" name="cmR" value="0"/>
+		<var type="result" name="cLR" value="0"/>
+		<var type="result" name="x" value="0"/>
+		<var type="result" name="xL" value="0"/>
+		<var type="result" name="xR" value="0"/>
+		<var type="result" name="xm" value="0"/>
+	</data>
+	<data>
+		<date timestamp="1412707715"/>
+		<var type="param" name="kT" value="0.01"/>
+		<var type="param" name="B_x" value="0"/>
+		<var type="param" name="B_y" value="0.6"/>
+		<var type="param" name="B_z" value="0"/>
+		<var type="param" name="JL" value="1"/>
+		<var type="param" name="JR" value="0"/>
+		<var type="param" name="Jm" value="0"/>
+		<var type="param" name="JmL" value="0"/>
+		<var type="param" name="JmR" value="0"/>
+		<var type="param" name="JLR" value="0"/>
+		<var type="param" name="bL" value="0"/>
+		<var type="param" name="bR" value="0"/>
+		<var type="param" name="bm" value="0"/>
+		<var type="param" name="bmL" value="0"/>
+		<var type="param" name="bmR" value="0"/>
+		<var type="param" name="bLR" value="0"/>
+		<var type="param" name="AL" value="0.5"/>
+		<var type="param" name="AR" value="0"/>
+		<var type="param" name="Am" value="0"/>
+		<var type="result" name="M_x" value="-1.23182"/>
+		<var type="result" name="M_y" value="1093.69"/>
+		<var type="result" name="M_z" value="0.0210499"/>
+		<var type="result" name="ML_x" value="-1.23182"/>
+		<var type="result" name="ML_y" value="1093.69"/>
+		<var type="result" name="ML_z" value="0.0210499"/>
+		<var type="result" name="MR_x" value="0"/>
+		<var type="result" name="MR_y" value="0"/>
+		<var type="result" name="MR_z" value="0"/>
+		<var type="result" name="Mm_x" value="0"/>
+		<var type="result" name="Mm_y" value="0"/>
+		<var type="result" name="Mm_z" value="0"/>
+		<var type="result" name="U" value="-3625.46"/>
+		<var type="result" name="UL" value="-3625.46"/>
+		<var type="result" name="UR" value="-0"/>
+		<var type="result" name="Um" value="-0"/>
+		<var type="result" name="UmL" value="-0"/>
+		<var type="result" name="UmR" value="-0"/>
+		<var type="result" name="ULR" value="-0"/>
+		<var type="result" name="c" value="0"/>
+		<var type="result" name="cL" value="0"/>
+		<var type="result" name="cR" value="0"/>
+		<var type="result" name="cm" value="0"/>
+		<var type="result" name="cmL" value="0"/>
+		<var type="result" name="cmR" value="0"/>
+		<var type="result" name="cLR" value="0"/>
+		<var type="result" name="x" value="0"/>
+		<var type="result" name="xL" value="0"/>
+		<var type="result" name="xR" value="0"/>
+		<var type="result" name="xm" value="0"/>
+	</data>
+	<data>
+		<date timestamp="1412707718"/>
+		<var type="param" name="kT" value="0.01"/>
+		<var type="param" name="B_x" value="0"/>
+		<var type="param" name="B_y" value="-1"/>
+		<var type="param" name="B_z" value="0"/>
+		<var type="param" name="JL" value="1"/>
+		<var type="param" name="JR" value="0"/>
+		<var type="param" name="Jm" value="0"/>
+		<var type="param" name="JmL" value="0"/>
+		<var type="param" name="JmR" value="0"/>
+		<var type="param" name="JLR" value="0"/>
+		<var type="param" name="bL" value="0"/>
+		<var type="param" name="bR" value="0"/>
+		<var type="param" name="bm" value="0"/>
+		<var type="param" name="bmL" value="0"/>
+		<var type="param" name="bmR" value="0"/>
+		<var type="param" name="bLR" value="0"/>
+		<var type="param" name="AL" value="0.5"/>
+		<var type="param" name="AR" value="0"/>
+		<var type="param" name="Am" value="0"/>
+		<var type="result" name="M_x" value="409.845"/>
+		<var type="result" name="M_y" value="-1016.68"/>
+		<var type="result" name="M_z" value="0.820192"/>
+		<var type="result" name="ML_x" value="409.845"/>
+		<var type="result" name="ML_y" value="-1016.68"/>
+		<var type="result" name="ML_z" value="0.820192"/>
+		<var type="result" name="MR_x" value="0"/>
+		<var type="result" name="MR_y" value="0"/>
+		<var type="result" name="MR_z" value="0"/>
+		<var type="result" name="Mm_x" value="0"/>
+		<var type="result" name="Mm_y" value="0"/>
+		<var type="result" name="Mm_z" value="0"/>
+		<var type="result" name="U" value="-4062.1"/>
+		<var type="result" name="UL" value="-4062.1"/>
+		<var type="result" name="UR" value="-0"/>
+		<var type="result" name="Um" value="-0"/>
+		<var type="result" name="UmL" value="-0"/>
+		<var type="result" name="UmR" value="-0"/>
+		<var type="result" name="ULR" value="-0"/>
+		<var type="result" name="c" value="0"/>
+		<var type="result" name="cL" value="0"/>
+		<var type="result" name="cR" value="0"/>
+		<var type="result" name="cm" value="0"/>
+		<var type="result" name="cmL" value="0"/>
+		<var type="result" name="cmR" value="0"/>
+		<var type="result" name="cLR" value="0"/>
+		<var type="result" name="x" value="0"/>
+		<var type="result" name="xL" value="0"/>
+		<var type="result" name="xR" value="0"/>
+		<var type="result" name="xm" value="0"/>
+	</data>
+	<data>
+		<date timestamp="1412707721"/>
+		<var type="param" name="kT" value="0.01"/>
+		<var type="param" name="B_x" value="0"/>
+		<var type="param" name="B_y" value="0.9"/>
+		<var type="param" name="B_z" value="0"/>
+		<var type="param" name="JL" value="1"/>
+		<var type="param" name="JR" value="0"/>
+		<var type="param" name="Jm" value="0"/>
+		<var type="param" name="JmL" value="0"/>
+		<var type="param" name="JmR" value="0"/>
+		<var type="param" name="JLR" value="0"/>
+		<var type="param" name="bL" value="0"/>
+		<var type="param" name="bR" value="0"/>
+		<var type="param" name="bm" value="0"/>
+		<var type="param" name="bmL" value="0"/>
+		<var type="param" name="bmR" value="0"/>
+		<var type="param" name="bLR" value="0"/>
+		<var type="param" name="AL" value="0.5"/>
+		<var type="param" name="AR" value="0"/>
+		<var type="param" name="Am" value="0"/>
+		<var type="result" name="M_x" value="-21.2774"/>
+		<var type="result" name="M_y" value="1095.96"/>
+		<var type="result" name="M_z" value="-0.71536"/>
+		<var type="result" name="ML_x" value="-21.2774"/>
+		<var type="result" name="ML_y" value="1095.96"/>
+		<var type="result" name="ML_z" value="-0.71536"/>
+		<var type="result" name="MR_x" value="0"/>
+		<var type="result" name="MR_y" value="0"/>
+		<var type="result" name="MR_z" value="0"/>
+		<var type="result" name="Mm_x" value="0"/>
+		<var type="result" name="Mm_y" value="0"/>
+		<var type="result" name="Mm_z" value="0"/>
+		<var type="result" name="U" value="-3954.97"/>
+		<var type="result" name="UL" value="-3954.97"/>
+		<var type="result" name="UR" value="-0"/>
+		<var type="result" name="Um" value="-0"/>
+		<var type="result" name="UmL" value="-0"/>
+		<var type="result" name="UmR" value="-0"/>
+		<var type="result" name="ULR" value="-0"/>
+		<var type="result" name="c" value="0"/>
+		<var type="result" name="cL" value="0"/>
+		<var type="result" name="cR" value="0"/>
+		<var type="result" name="cm" value="0"/>
+		<var type="result" name="cmL" value="0"/>
+		<var type="result" name="cmR" value="0"/>
+		<var type="result" name="cLR" value="0"/>
+		<var type="result" name="x" value="0"/>
+		<var type="result" name="xL" value="0"/>
+		<var type="result" name="xR" value="0"/>
+		<var type="result" name="xm" value="0"/>
+	</data>
+	<data>
+		<date timestamp="1412707725"/>
+		<var type="param" name="kT" value="0.01"/>
+		<var type="param" name="B_x" value="0"/>
+		<var type="param" name="B_y" value="1.4"/>
+		<var type="param" name="B_z" value="0"/>
+		<var type="param" name="JL" value="1"/>
+		<var type="param" name="JR" value="0"/>
+		<var type="param" name="Jm" value="0"/>
+		<var type="param" name="JmL" value="0"/>
+		<var type="param" name="JmR" value="0"/>
+		<var type="param" name="JLR" value="0"/>
+		<var type="param" name="bL" value="0"/>
+		<var type="param" name="bR" value="0"/>
+		<var type="param" name="bm" value="0"/>
+		<var type="param" name="bmL" value="0"/>
+		<var type="param" name="bmR" value="0"/>
+		<var type="param" name="bLR" value="0"/>
+		<var type="param" name="AL" value="0.5"/>
+		<var type="param" name="AR" value="0"/>
+		<var type="param" name="Am" value="0"/>
+		<var type="result" name="M_x" value="-7.41059"/>
+		<var type="result" name="M_y" value="1097.06"/>
+		<var type="result" name="M_z" value="8.03513"/>
+		<var type="result" name="ML_x" value="-7.41059"/>
+		<var type="result" name="ML_y" value="1097.06"/>
+		<var type="result" name="ML_z" value="8.03513"/>
+		<var type="result" name="MR_x" value="0"/>
+		<var type="result" name="MR_y" value="0"/>
+		<var type="result" name="MR_z" value="0"/>
+		<var type="result" name="Mm_x" value="0"/>
+		<var type="result" name="Mm_y" value="0"/>
+		<var type="result" name="Mm_z" value="0"/>
+		<var type="result" name="U" value="-4505.22"/>
+		<var type="result" name="UL" value="-4505.22"/>
+		<var type="result" name="UR" value="-0"/>
+		<var type="result" name="Um" value="-0"/>
+		<var type="result" name="UmL" value="-0"/>
+		<var type="result" name="UmR" value="-0"/>
+		<var type="result" name="ULR" value="-0"/>
+		<var type="result" name="c" value="0"/>
+		<var type="result" name="cL" value="0"/>
+		<var type="result" name="cR" value="0"/>
+		<var type="result" name="cm" value="0"/>
+		<var type="result" name="cmL" value="0"/>
+		<var type="result" name="cmR" value="0"/>
+		<var type="result" name="cLR" value="0"/>
+		<var type="result" name="x" value="0"/>
+		<var type="result" name="xL" value="0"/>
+		<var type="result" name="xR" value="0"/>
+		<var type="result" name="xm" value="0"/>
+	</data>
+</msd>
+

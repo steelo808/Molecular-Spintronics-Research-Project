@@ -1,0 +1,170 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE msd SYSTEM "msd.dtd">
+<msd>
+	<version major="1" minor="4"/>
+	<msd_version>2.2</msd_version>
+	<gen>
+		<prgm>bin\metropolis</prgm>
+		<date timestamp="1580009058"/>
+	</gen>
+	<global>
+		<var type="param" name="width" value="11"/>
+		<var type="param" name="height" value="10"/>
+		<var type="param" name="depth" value="10"/>
+		<var type="param" name="molPosL" value="5"/>
+		<var type="param" name="molPosR" value="5"/>
+		<var type="param" name="topL" value="3"/>
+		<var type="param" name="bottomL" value="6"/>
+		<var type="param" name="frontR" value="3"/>
+		<var type="param" name="backR" value="6"/>
+		<var type="param" name="t_eq" value="10000"/>
+		<var type="param" name="simCount" value="0"/>
+		<var type="param" name="freq" value="1"/>
+		<ind name="kT">
+			<val>0.34</val>
+		</ind>
+		<ind name="B_x">
+			<val>0</val>
+		</ind>
+		<ind name="B_y">
+			<val>-1.5</val>
+			<val>-1.45</val>
+			<val>-1.4</val>
+			<val>-1.35</val>
+			<val>-1.3</val>
+			<val>-1.25</val>
+			<val>-1.2</val>
+			<val>-1.15</val>
+			<val>-1.1</val>
+			<val>-1.05</val>
+			<val>-1</val>
+			<val>-0.95</val>
+			<val>-0.9</val>
+			<val>-0.85</val>
+			<val>-0.8</val>
+			<val>-0.75</val>
+			<val>-0.7</val>
+			<val>-0.65</val>
+			<val>-0.6</val>
+			<val>-0.55</val>
+			<val>-0.5</val>
+			<val>-0.45</val>
+			<val>-0.4</val>
+			<val>-0.35</val>
+			<val>-0.3</val>
+			<val>-0.25</val>
+			<val>-0.2</val>
+			<val>-0.15</val>
+			<val>-0.1</val>
+			<val>-0.05</val>
+			<val>7.63278e-16</val>
+			<val>0.05</val>
+			<val>0.1</val>
+			<val>0.15</val>
+			<val>0.2</val>
+			<val>0.25</val>
+			<val>0.3</val>
+			<val>0.35</val>
+			<val>0.4</val>
+			<val>0.45</val>
+			<val>0.5</val>
+			<val>0.55</val>
+			<val>0.6</val>
+			<val>0.65</val>
+			<val>0.7</val>
+			<val>0.75</val>
+			<val>0.8</val>
+			<val>0.85</val>
+			<val>0.9</val>
+			<val>0.95</val>
+			<val>1</val>
+			<val>1.05</val>
+			<val>1.1</val>
+			<val>1.15</val>
+			<val>1.2</val>
+			<val>1.25</val>
+			<val>1.3</val>
+			<val>1.35</val>
+			<val>1.4</val>
+			<val>1.45</val>
+			<val>1.5</val>
+		</ind>
+		<ind name="B_z">
+			<val>0</val>
+		</ind>
+		<ind name="JL">
+			<val>1</val>
+		</ind>
+		<ind name="JmL">
+			<val>0.2</val>
+		</ind>
+		<ind name="Jm">
+			<val>0</val>
+		</ind>
+		<ind name="JmR">
+			<val>-0.2</val>
+		</ind>
+		<ind name="JR">
+			<val>1</val>
+		</ind>
+		<ind name="JLR">
+			<val>0</val>
+		</ind>
+		<ind name="bL">
+			<val>0</val>
+		</ind>
+		<ind name="bmL">
+			<val>0</val>
+		</ind>
+		<ind name="bm">
+			<val>0</val>
+		</ind>
+		<ind name="bmR">
+			<val>0</val>
+		</ind>
+		<ind name="bR">
+			<val>0</val>
+		</ind>
+		<ind name="bLR">
+			<val>0</val>
+		</ind>
+		<ind name="AL">
+			<val>0.5</val>
+		</ind>
+		<ind name="AR">
+			<val>0.5</val>
+		</ind>
+		<ind name="Am">
+			<val>0</val>
+		</ind>
+	</global>
+	<data>
+		<date timestamp="1580009058"/>
+		<var type="param" name="kT" value="0.34"/>
+		<var type="param" name="B_x" value="0"/>
+		<var type="param" name="B_y" value="-1.5"/>
+		<var type="param" name="B_z" value="0"/>
+		<var type="param" name="JL" value="1"/>
+		<var type="param" name="JR" value="1"/>
+		<var type="param" name="Jm" value="0"/>
+		<var type="param" name="JmL" value="0.2"/>
+		<var type="param" name="JmR" value="-0.2"/>
+		<var type="param" name="JLR" value="0"/>
+		<var type="param" name="bL" value="0"/>
+		<var type="param" name="bR" value="0"/>
+		<var type="param" name="bm" value="0"/>
+		<var type="param" name="bmL" value="0"/>
+		<var type="param" name="bmR" value="0"/>
+		<var type="param" name="bLR" value="0"/>
+		<var type="param" name="AL" value="0.5"/>
+		<var type="param" name="AR" value="0.5"/>
+		<var type="param" name="Am" value="0"/>
+		<var type="result" name="M_x" value="-51.9871"/>
+		<var type="result" name="M_y" value="800.52"/>
+		<var type="result" name="M_z" value="-24.7209"/>
+		<var type="result" name="ML_x" value="2.09686"/>
+		<var type="result" name="ML_y" value="411.069"/>
+		<var type="result" name="ML_z" value="-12.9329"/>
+		<var type="result" name="MR_x" value="-49.043"/>
+		<var type="result" name="MR_y" value="413.159"/>
+		<var type="result" name="MR_z" value="-9.9333
