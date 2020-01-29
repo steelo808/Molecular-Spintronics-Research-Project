@@ -423,8 +423,16 @@ int main(int argc, char *argv[]) {
 			preInfo.molPosR = p.at("molPosR")[0];
 
 			// TODO: Why are these lines causing an error?!!!!!!!!!!!!!!!!! WTF!
-			cout << (p.find("topL") != p.end()) << '\n';  // WTF!
-			preInfo.topL = 0; // preInfo.topL = p.at("topL")[0];
+			// DEBUG print map keys and values
+			for (auto iDebug = p.begin(); iDebug != p.end(); iDebug++) {
+				cout << " -- " << iDebug->first << " => ";
+				auto val = iDebug->second;
+				for (auto iDebug2 = val.begin(); iDebug2 != val.end(); iDebug2++)
+					cout << *iDebug2 << ' ';
+				cout << '\n';
+			}
+			cout << "\n -- " << (p.find("topL") != p.end()) << "\n\n";  // WTF!
+			/*  preInfo.topL = 0; */ preInfo.topL = p.at("topL")[0];
 			preInfo.bottomL = preInfo.height - 1; // preInfo.bottomL = p.at("bottomL")[0];
 			preInfo.frontR = 0; // preInfo.frontR = p.at("frontR")[0];
 			preInfo.backR = preInfo.depth - 1; // preInfo.backR = p.at("backR")[0];
@@ -505,6 +513,7 @@ int main(int argc, char *argv[]) {
 
 	} catch(out_of_range &e) {
 		cerr << "Parameter file is missing some data!\n";
+		cerr << e.what() << '\n';  // DEBUG
 		return 0x18;
 	}
 

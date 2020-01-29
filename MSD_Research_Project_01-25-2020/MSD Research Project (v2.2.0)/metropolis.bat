@@ -1,5 +1,5 @@
 @set paramFile=parameters-metropolis.txt
-@set threadCount=3
+@set threadCount=1
 
 @rem @set model=UP_DOWN_MODEL
 @set model=CONTINUOUS_SPIN_MODEL
