@@ -127,7 +127,7 @@ int main(int argc, char *argv[]) {
 		stringstream ss;
 		ss << argv[4];
 		ss >> threadCount;
-		if( ss.fail() || ss <= 0 ) {
+		if( ss.fail() || threadCount <= 0 ) {
 			cout << "Invalid number of threads: " << argv[4] << '\n';
 			return -4;
 		}

@@ -693,6 +693,7 @@ Vector MSD::getSpin(unsigned int x, unsigned int y, unsigned int z) const {
 }
 
 void MSD::setSpin(unsigned int a, const Vector &spin) {
+	try {
 	Vector &s = atoms.at(a); //previous spin
 	
 	if( s == spin )
@@ -767,11 +768,13 @@ void MSD::setSpin(unsigned int a, const Vector &spin) {
 				// else, the molecule doesn't exist
 				
 				if( molPosR + 1 != width ) {
-					Vector neighbor = atoms.at(index(molPosR + 1, y, z));
-					double deltaU = parameters.JLR * ( neighbor * (s - spin) )
-			                      + parameters.bLR * ( sq(neighbor * s) - sq(neighbor * spin) );
-					results.U += deltaU;
-					results.ULR += deltaU;
+					try {
+						Vector neighbor = atoms.at(index(molPosR + 1, y, z));
+						double deltaU = parameters.JLR * ( neighbor * (s - spin) )
+				                      + parameters.bLR * ( sq(neighbor * s) - sq(neighbor * spin) );
+						results.U += deltaU;
+						results.ULR += deltaU;
+					} catch(const out_of_range &e) {} // molPosR + 1 atom doesn't exist because we're not in the center
 				} // else, the right ferromagnet doesn't exist
 			} else {
 				Vector neighbor = atoms.at(index(x + 1, y, z));
@@ -841,11 +844,13 @@ void MSD::setSpin(unsigned int a, const Vector &spin) {
 			// else, the molecule doesn't exist
 			
 			if( molPosL != 0 ) {
-				Vector neighbor = atoms.at(index(molPosL - 1, y, z));
-				double deltaU = parameters.JLR * ( neighbor * (s - spin) )
-			                  + parameters.bLR * ( sq(neighbor * s) - sq(neighbor * spin) );
-				results.U += deltaU;
-				results.ULR += deltaU;
+				try {
+					Vector neighbor = atoms.at(index(molPosL - 1, y, z));
+					double deltaU = parameters.JLR * ( neighbor * (s - spin) )
+				                  + parameters.bLR * ( sq(neighbor * s) - sq(neighbor * spin) );
+					results.U += deltaU;
+					results.ULR += deltaU;
+				} catch(const out_of_range &e) {} // molPos - 1 atom doesn't exist because we're not in the center
 			} // else, the left ferromagnet doesn't exist
 		} else {
 			Vector neighbor = atoms.at(index(x - 1, y, z));
@@ -866,38 +871,47 @@ void MSD::setSpin(unsigned int a, const Vector &spin) {
 		}
 		
 		if( x != 0 ) {
-			Vector neighbor = atoms.at(index(x - 1, y, z));
-			if( x == molPosL ) {
-				double deltaU = parameters.JmL * ( neighbor * (s - spin) )
-				              + parameters.bmL * ( sq(neighbor * s) - sq(neighbor * spin) );
-				results.U += deltaU;
-				results.UmL += deltaU;
-			} else {
-				double deltaU = parameters.Jm * ( neighbor * (s - spin) )
-				              + parameters.bm * ( sq(neighbor * s) - sq(neighbor * spin) );
-				results.U += deltaU;
-				results.Um += deltaU;
-			}
+			try {
+				Vector neighbor = atoms.at(index(x - 1, y, z));
+				if( x == molPosL ) {
+					double deltaU = parameters.JmL * ( neighbor * (s - spin) )
+					              + parameters.bmL * ( sq(neighbor * s) - sq(neighbor * spin) );
+					results.U += deltaU;
+					results.UmL += deltaU;
+				} else {
+					double deltaU = parameters.Jm * ( neighbor * (s - spin) )
+					              + parameters.bm * ( sq(neighbor * s) - sq(neighbor * spin) );
+					results.U += deltaU;
+					results.Um += deltaU;
+				}
+			} catch(const out_of_range &e) {}  // x-1 neighbor doesn't exists because we're not in the center
 		}
 		
 		if( x + 1 != width ) {
-			Vector neighbor = atoms.at(index(x + 1, y, z));
-			if( x == molPosR ) {
-				double deltaU = parameters.JmR * ( neighbor * (s - spin) )
-				              + parameters.bmR * ( sq(neighbor * s) - sq(neighbor * spin) );
-				results.U += deltaU;
-				results.UmR += deltaU;
-			} else {
-				double deltaU = parameters.Jm * ( neighbor * (s - spin) )
-				              + parameters.bm * ( sq(neighbor * s) - sq(neighbor * spin) );
-				results.U += deltaU;
-				results.Um += deltaU;
-			}
+			try {
+				Vector neighbor = atoms.at(index(x + 1, y, z));
+				if( x == molPosR ) {
+					double deltaU = parameters.JmR * ( neighbor * (s - spin) )
+					              + parameters.bmR * ( sq(neighbor * s) - sq(neighbor * spin) );
+					results.U += deltaU;
+					results.UmR += deltaU;
+				} else {
+					double deltaU = parameters.Jm * ( neighbor * (s - spin) )
+					              + parameters.bm * ( sq(neighbor * s) - sq(neighbor * spin) );
+					results.U += deltaU;
+					results.Um += deltaU;
+				}
+			} catch(const out_of_range &e) {}  // x+1 neighbor doesn't exists because we're not in the center
 		}
 		
 	}
 	
 	s = spin;
+	} catch(out_of_range &e) {
+		std::cerr << "ERROR in setSpin(" << x(a) << "," << y(a) << "," << z(a) << ")\n";
+		std::cerr << e.what() << '\n';
+		exit(200);
+	}
 	// setParameters(parameters); //recalculate results (the long way!!!)
 }
 

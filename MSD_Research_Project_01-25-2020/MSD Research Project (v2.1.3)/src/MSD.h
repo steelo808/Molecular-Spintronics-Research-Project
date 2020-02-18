@@ -657,6 +657,7 @@ Vector MSD::getSpin(unsigned int x, unsigned int y, unsigned int z) const {
 }
 
 void MSD::setSpin(unsigned int a, const Vector &spin) {
+	try {
 	Vector &s = atoms.at(a); //previous spin
 	
 	if( s == spin )
@@ -862,6 +863,11 @@ void MSD::setSpin(unsigned int a, const Vector &spin) {
 	}
 	
 	s = spin;
+	} catch(out_of_range &e) {
+		std::cerr << "ERROR in setSpin(" << x(a) << "," << y(a) << "," << z(a) << ")\n";
+		std::cerr << e.what() << '\n';
+		exit(200);
+	}
 	// setParameters(parameters); //recalculate results (the long way!!!)
 }
 
