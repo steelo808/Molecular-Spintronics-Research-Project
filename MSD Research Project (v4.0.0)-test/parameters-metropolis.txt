@@ -1,0 +1,36 @@
+width  = 11
+height = 10
+depth  = 10
+
+molPosL = 11
+molPosR = 10
+
+t_eq     = 1000000
+simCount = 10000000
+freq     = 400000
+
+kT : 0.1  1.0  0.1
+
+F = 0.2
+
+B_x = 0
+B_y : -1.0  1.0  0.1
+B_z = 0
+
+JL  = 1
+JR  = 0
+Jm  = 0
+JmL = 0
+JmR = 0
+JLR = 0
+
+AL { 0  0.5 }
+AR = 0
+Am = 0
+
+bL  = 0
+bR  = 0
+bm  = 0
+bmL = 0
+bmR = 0
+bLR = 0

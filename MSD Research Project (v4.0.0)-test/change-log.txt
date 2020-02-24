@@ -1,0 +1,24 @@
+2.1.0:
+(9-18-2014) Major "bug" fix in how random unit vectors are generated. Program output has changed noticeably. Demands recalculation of preliminary results.
+
+2.1.1:
+(9-18-2014) Minor UI changes in user programs. Metropolis now writes XML to file prior to its first thread completion. User programs now output MSD's version number for record keeping.
+
+2.1.2:
+(10-6-2014) Changed magnetize program to start at B_y_max decreasing to B_y_min before increasing back to B_y_max; this is the opposite of how it moved before. This is so the the initial state of 'all up' matches positive B_y saturation.
+
+2.1.3:
+(10-7-2014) Changed magnetize programs to output average magnetizations and energies along with final ones (like heat program already did.) Updated MSD_GUI's magnetize panel to pass "noop" instead of "reinitialize".
+
+2.2.0:
+(12-4-2014) Bug fix in MSD.h on line 578.
+Biquadratic coupling algorithm corrected
+
+3.0.0:
+(12-4-2014) Added our first attempt at spin fluctuation code. This included a major overhaul of the code.
+
+4.0.0:
+(1-22-2015) TODO:
+Changed anisotropy to a vector, effecting energy calculations: -A_x * sum(m_x^2), -A_y * sum(m_y^2), -A_z * sum(m_z^2)
+Add ability to initialize the magnitude of each sections' atoms' spins: s_L, s_m, s_R
+Add ability to "turn off" a percentage of the molecules by setting their spin = 0

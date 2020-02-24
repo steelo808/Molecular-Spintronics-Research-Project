@@ -1,0 +1,44 @@
+"m_norm, orientation: x-axis, horizontal: -z, vertical: y",,,0
+,,0,0
+
+"m_x, orientation: x-axis, horizontal: -z, vertical: y",,,0
+,,0,0
+
+"m_y, orientation: x-axis, horizontal: -z, vertical: y",,,0
+,,0,0
+
+"m_z, orientation: x-axis, horizontal: -z, vertical: y",,,0
+,,0,0
+
+--------------------------------------------------------------------------------
+
+
+
+"m_norm, orientation: y-axis, horizontal: x, vertical: -z",,,0
+,,0,0
+
+"m_x, orientation: y-axis, horizontal: x, vertical: -z",,,0
+,,0,0
+
+"m_y, orientation: y-axis, horizontal: x, vertical: -z",,,0
+,,0,0
+
+"m_z, orientation: y-axis, horizontal: x, vertical: -z",,,0
+,,0,0
+
+--------------------------------------------------------------------------------
+
+
+
+"m_norm, orientation: z-axis, horizontal: x, vertical: y",,,0
+,,14691117,0
+
+"m_x, orientation: z-axis, horizontal: x, vertical: y",,,0
+,,11533120,0
+
+"m_y, orientation: z-axis, horizontal: x, vertical: y",,,0
+,,11533060,0
+
+"m_z, orientation: z-axis, horizontal: x, vertical: y",,,0
+,,23,0
+
