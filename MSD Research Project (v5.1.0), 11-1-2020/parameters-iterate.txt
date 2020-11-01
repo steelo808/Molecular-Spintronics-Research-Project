@@ -1,0 +1,20 @@
+width  = 11
+height = 10
+depth  = 10
+
+molPosL   = 5
+molPosR   = 5
+topL    = 3
+bottomL = 7
+frontR  = 3
+backR   = 7
+
+# turn off front edge of mol.
+[5 4 3] = 0
+[5 5 3] = 0
+[5 6 3] = 0
+
+#turn off back edge of mol.
+[5 4 7] = 0
+[5 5 7] = 0
+[5 6 7] = 0
