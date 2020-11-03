@@ -27,21 +27,6 @@ inline double cube(double x) {
 	return x * x * x;
 }
 
-/** raise a number to an integer power
-    quicker then std::pow in <cmath> */
-double pow(double x, int n) {
-	double result = 1;
-	while( n < 0 ) {
-		result /= x;
-		n++;
-	}
-	while( n > 0 ) {
-		result *= x;
-		n--;
-	}
-	return result;
-}
-
 } //end of namespace
 
 #endif

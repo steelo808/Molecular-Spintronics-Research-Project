@@ -1,0 +1,22 @@
+{
+	"files.associations": {
+		"xtree": "cpp",
+		"stdexcept": "cpp",
+		"algorithm": "cpp",
+		"fstream": "cpp",
+		"functional": "cpp",
+		"initializer_list": "cpp",
+		"iterator": "cpp",
+		"list": "cpp",
+		"random": "cpp",
+		"vector": "cpp",
+		"xhash": "cpp",
+		"xlocmon": "cpp",
+		"xloctime": "cpp",
+		"xstring": "cpp",
+		"xutility": "cpp",
+		"ostream": "cpp",
+		"iostream": "cpp",
+		"xiosbase": "cpp"
+	}
+}

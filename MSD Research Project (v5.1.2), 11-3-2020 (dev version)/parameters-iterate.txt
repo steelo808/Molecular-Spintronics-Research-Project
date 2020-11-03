@@ -1,0 +1,49 @@
+width  = 11
+height = 10
+depth  = 10
+
+molPosL   = 5
+molPosR   = 5
+topL    = 3
+bottomL = 7
+frontR  = 3
+backR   = 7
+
+kT = 0.1
+
+B = 0 0 0
+
+sL = 1
+sR = 1
+sm = 1
+FL = 0
+FR = 0
+Fm = 0
+
+JL = 1
+JR = -1
+Jm = 0
+JmL = 1
+JmR = -1
+JLR = 0
+
+AL = 0 0 0
+AR = 0 0 0
+Am = 0 0 0
+
+bL = 0
+bR = 0
+bm = 0
+bmL = 0
+bmR = 0
+bLR = 0
+
+# turn off front edge of mol.
+[5 4 3] = 0
+[5 5 3] = 0
+[5 6 3] = 0
+
+#turn off back edge of mol.
+[5 4 7] = 0
+[5 5 7] = 0
+[5 6 7] = 0

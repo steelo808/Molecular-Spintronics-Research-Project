@@ -1,14 +1,14 @@
 /*
  * MSD.h
  *
- *  Last Edited: February 24, 2020
+ *  Last Edited: November 3, 2020
  *       Author: Christopher D'Angelo
  */
 
 #ifndef UDC_MSD
 #define UDC_MSD
 
-#define UDC_MSD_VERSION "5.0"
+#define UDC_MSD_VERSION "5.1"
 
 #include <cstdlib>
 #include <cmath>
@@ -568,7 +568,9 @@ void MSD::setParameters(const MSD::Parameters &p) {
 	parameters = p;
 	
 	//Spin and Spin Flux Magnitudes
-	{	double T_c = (parameters.JL * sq(parameters.sL) * (molPosL) + parameters.JR * sq(parameters.sR) * (width - 1 - molPosR)) / (width - 1 - (molPosR - molPosL)); //approximate curie temp
+	{	double T_c = (abs(parameters.JL) * sq(parameters.sL) * (molPosL) + abs(parameters.JR) * sq(parameters.sR) * (width - 1 - molPosR)) / (width - 1 - (molPosR - molPosL)); //approximate curie temp
+		if (T_c == 0)
+			std::cerr << "Warning: T_c = 0\n";
 		for( auto iter = begin(); iter != end(); ++iter ) {
 			unsigned int i = iter.getIndex();
 			unsigned int x = iter.getX();
@@ -720,7 +722,7 @@ void MSD::setParameters(const MSD::Parameters &p) {
 			}
 	results.ULR *= -parameters.JLR;
 	results.ULR -= parameters.bLR * biquad_LR;
-	
+	 
 	results.U = results.UL + results.UR + results.Um + results.UmL + results.UmR + results.ULR;
 }
 

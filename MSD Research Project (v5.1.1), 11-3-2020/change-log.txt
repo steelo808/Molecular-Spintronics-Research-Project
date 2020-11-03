@@ -40,6 +40,10 @@ Also changed curie temperature approximation to be J * s^2.
 (11-1-2020) Added ability to change the magnitude of specific atoms.
 This allows us to turn off some atoms, to turn off 2 "edges" of the molecule, and to potentially make certian molecule sites stronger.
 
+5.1.1:
+(11-3-2020) Fixed major bug where MSD::metropolis() was calling the wrong pow() function!
+Also added fix for T_c approximation in MSD::setParameters().
+
 TODO:
 1. Add ability to "turn off" a percentage of the molecules by setting their spin = 0
 2. Turn off half the molecules, so they are only on two sides instead of four
