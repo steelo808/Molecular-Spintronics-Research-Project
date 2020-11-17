@@ -1,14 +1,14 @@
 /*
  * MSD.h
  *
- *  Last Edited: November 3, 2020
+ *  Last Edited: November 17, 2020
  *       Author: Christopher D'Angelo
  */
 
 #ifndef UDC_MSD
 #define UDC_MSD
 
-#define UDC_MSD_VERSION "5.1"
+#define UDC_MSD_VERSION "5.2"
 
 #include <cstdlib>
 #include <cmath>
@@ -201,6 +201,9 @@ class MSD {
 	unsigned int getBackR() const;
 	void getInnerBounds(unsigned int &topL, unsigned int &bottomL, unsigned int &frontR, unsigned int &backR) const;
 	
+	void setSeed(unsigned long seed);  // change the seed of the prng, and restart the pseudo-random sequence
+	unsigned long getSeed() const;  // get the seed currently being used
+
 	void reinitialize(bool reseed = true); //reseed iff you want a new seed, true by default
 	void randomize(bool reseed = true); //similar to reinitialize, but initial state is random
 	void metropolis(unsigned long long N);
@@ -1090,6 +1093,16 @@ void MSD::getInnerBounds(unsigned int &topL, unsigned int &bottomL, unsigned int
 	bottomL = this->bottomL;
 	frontR = this->frontR;
 	backR = this->backR;
+}
+
+
+void MSD::setSeed(unsigned long seed) {
+	this->seed = seed;
+	prng.seed(seed);
+}
+
+unsigned long MSD::getSeed() const {
+	return seed;
 }
 
 

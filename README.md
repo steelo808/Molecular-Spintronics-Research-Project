@@ -17,3 +17,4 @@ v5.*.* is the current development version. Planned additions:
 
 (11-1-2020) Version 5.1.0 is now complete and ready to be beta tested.
 (11-3-2020) Version 5.1.1 has a major bug fix in calculations!
+(11-17-2020) Version 5.2.0 is being worked on. Currently adding small changes to the code, including the MSD model.

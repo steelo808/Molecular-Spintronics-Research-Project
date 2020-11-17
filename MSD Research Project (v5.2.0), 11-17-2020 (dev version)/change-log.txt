@@ -44,6 +44,8 @@ This allows us to turn off some atoms, to turn off 2 "edges" of the molecule, an
 (11-3-2020) Fixed major bug where MSD::metropolis() was calling the wrong pow() function!
 Also added fix for T_c approximation in MSD::setParameters().
 
+5.2.0:
+(11-17-2020) Added the ability to set a custom seed in the MSD model, and incorperated this functionality into the iterate program.
+
 TODO:
-1. Add ability to "turn off" a percentage of the molecules by setting their spin = 0
-2. Turn off half the molecules, so they are only on two sides instead of four
+1. (old) Add ability to "turn off" a percentage of the molecules by setting their spin = 0

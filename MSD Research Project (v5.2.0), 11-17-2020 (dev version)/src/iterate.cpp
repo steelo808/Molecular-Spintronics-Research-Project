@@ -94,16 +94,16 @@ int main(int argc, char *argv[]) {
 			cout << "Unrecognized third argument! Defaulting to 'CONTINUOUS_SPIN_MODEL'.\n";
 	} else
 		cout << "Defaulting to 'CONTINUOUS_SPIN_MODEL'.\n";
-	
+
 	map<string, string> params;
 	vector<Spin> spins;
-	if (argc > 4) {
+	if (argc > 5) {
 		ifstream paramsFile;
 		paramsFile.exceptions( ios::badbit | ios::failbit );
 		try {
-			paramsFile.open(argv[4]);
+			paramsFile.open(argv[5]);
 		} catch(const ios::failure &e) {
-			cerr << "Error opening input file \"" << argv[4] << "\": " << e.what() << '\n';
+			cerr << "Error opening input file \"" << argv[5] << "\": " << e.what() << '\n';
 			return 5;
 		}
 
@@ -143,7 +143,7 @@ int main(int argc, char *argv[]) {
 			}
 		} catch(const ios::failure &e) {
 			if (!paramsFile.eof()) {
-				cerr << "Error occured while reading from input file \"" << argv[4] << "\": " << e.what() << '\n';
+				cerr << "Error occured while reading from input file \"" << argv[5] << "\": " << e.what() << '\n';
 				return 5;
 			}
 		}
@@ -229,6 +229,21 @@ int main(int argc, char *argv[]) {
 	msd.flippingAlgorithm = arg2;
 	msd.setParameters(p);
 
+	bool customSeed = argc > 4 && string(argv[4]) != string("unique");
+	if (customSeed) {
+		unsigned long seed;
+		istringstream ss(argv[4]);
+		ss >> seed;
+		if (ss.bad()) {
+			cerr << "Invalid seed: " << argv[4] << '\n';
+			return 6;
+		}
+		msd.setSeed(seed);
+	}
+
+	if( argc > 3 && string(argv[3]) != string("0") )
+		msd.randomize(!customSeed);
+
 	try {
 		//print info/headings
 		file << "t,,M_x,M_y,M_z,M_norm,M_theta,M_phi,,ML_x,ML_y,ML_z,ML_norm,ML_theta,ML_phi,,MR_x,MR_y,MR_z,MR_norm,MR_theta,MR_phi,,"
@@ -267,13 +282,12 @@ int main(int argc, char *argv[]) {
 			 << ",bmL = " << p.bmL
 			 << ",bmR = " << p.bmR
 			 << ",bLR = " << p.bLR
+			 << ",seed = " << msd.getSeed()
 			 << ",,msd_version = " << UDC_MSD_VERSION
 			 << '\n';
 	
 		//run simulations
 		cout << "Starting simulation...\n";
-		if( argc > 3 && string(argv[3]) != string("0") )
-			msd.randomize();
 		for (auto const &s : spins) {
 			try {
 				Vector vec = msd.getSpin(s.x, s.y, s.z);

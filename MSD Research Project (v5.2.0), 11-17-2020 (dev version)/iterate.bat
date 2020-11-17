@@ -1,5 +1,6 @@
 @set model=CONTINUOUS_SPIN_MODEL
 @set randomize=1
+@set seed=unique
 @set input_file=parameters-iterate.txt
 
 
@@ -38,7 +39,7 @@
 @date /t
 @time /t
 @echo ----------------------------------------
-bin\%prgm% %out_file% %model% %randomize% %input_file%
+bin\%prgm% %out_file% %model% %randomize% %seed% %input_file%
 @echo ----------------------------------------
 @date /t
 @time /t
