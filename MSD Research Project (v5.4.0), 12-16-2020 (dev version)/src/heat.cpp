@@ -29,10 +29,10 @@ enum ARG3 {
 
 
 int main(int argc, char *argv[]) {
-	//get command line argument
+	//get command line argument(s)
 	if( argc > 1 ) {
-		ifstream file(argv[1]);
-		if( file.good() ) {
+		ifstream test(argv[1]);
+		if( test.good() ) {
 			char ans;
 			cout << "File \"" << argv[1] << "\" already exists. Overwrite it (Y/N)? ";
 			cin >> ans;
@@ -66,7 +66,12 @@ int main(int argc, char *argv[]) {
 			arg3 = REINITIALIZE;
 		else if( s == string("randomize") )
 			arg3 = RANDOMIZE;
-	}
+		else if( s == string("noop") )
+			arg3 = NOOP;
+		else
+			cout << "Unrecognized second argument! Defaulting to 'noop'.\n";
+	} else
+		cout << "Defaulting to 'noop'.\n";
 	
 	ofstream file(argv[1]);
 	file.exceptions( ios::badbit | ios::failbit );
@@ -74,7 +79,7 @@ int main(int argc, char *argv[]) {
 	//get parameters
 	unsigned int width, height, depth, molPosL, molPosR, topL, bottomL, frontR, backR;
 	unsigned long long t_eq, simCount, freq;
-	double B_y_min, B_y_max, B_y_inc;
+	double kT_min, kT_max, kT_inc;
 	MSD::Parameters p;
 	
 	cin.exceptions( ios::badbit | ios::failbit | ios::eofbit );
@@ -95,11 +100,11 @@ int main(int argc, char *argv[]) {
 		ask("> simCount = ", simCount);
 		ask("> freq     = ", freq);
 		cout << '\n';
-		ask("> kT = ", p.kT);
+		ask("> kT_min = ", kT_min);
+		ask("> kT_max = ", kT_max);
+		ask("> kT_inc = ", kT_inc);
 		cout << '\n';
-		ask("> B_y_min = ", B_y_min);
-		ask("> B_y_max = ", B_y_max);
-		ask("> B_y_inc = ", B_y_inc);
+		ask("> B = ", p.B);
 		cout << '\n';
 		ask("> sL = ", p.sL);
 		ask("> sR = ", p.sR);
@@ -134,12 +139,11 @@ int main(int argc, char *argv[]) {
 	//create MSD model
 	MSD msd(width, height, depth, molPosL, molPosR, topL, bottomL, frontR, backR);
 	msd.flippingAlgorithm = arg2;
-	msd.setParameters(p);
 	
 	try {
 		//print info/headings
-		file << "B_x,B_y,B_z,,"
-		        "<M>_x,<M>_y,<M>_z,<M>_norm,<M>_theta,<M>_phi,,"
+		file << "kT,,"
+			    "<M>_x,<M>_y,<M>_z,<M>_norm,<M>_theta,<M>_phi,,"
 				"<ML>_x,<ML>_y,<ML>_z,<ML>_norm,<ML>_theta,<ML>_phi,,"
 				"<MR>_x,<MR>_y,<MR>_z,<MR>_norm,<MR>_theta,<MR>_phi,,"
 			    "<Mm>_x,<Mm>_y,<Mm>_z,<Mm>_norm,<Mm>_theta,<Mm>_phi,,"
@@ -151,7 +155,7 @@ int main(int argc, char *argv[]) {
 				"MR_x,MR_y,MR_z,MR_norm,MR_theta,MR_phi,,"
 				"Mm_x,Mm_y,Mm_z,Mm_norm,Mm_theta,Mm_phi,,"
 				"U,UL,UR,Um,UmL,UmR,ULR,"
-			    ",width = " << msd.getWidth()
+			 << ",width = " << msd.getWidth()
 			 << ",height = " << msd.getHeight()
 			 << ",depth = " << msd.getDepth()
 			 << ",molPosL = " << msd.getMolPosL()
@@ -163,7 +167,7 @@ int main(int argc, char *argv[]) {
 			 << ",t_eq = " << t_eq
 			 << ",simCount = " << simCount
 			 << ",freq = " << freq
-			 << ",kT = " << p.kT
+			 << ",\"B = " << p.B << '"'
 			 << ",sL = " << p.sL
 			 << ",sR = " << p.sR
 			 << ",sm = " << p.sm
@@ -190,16 +194,16 @@ int main(int argc, char *argv[]) {
 	
 		//run simulations
 		cout << "Starting simulation...\n";
-		
-		auto sim = [&]() {
+		for( p.kT = kT_min; p.kT <= kT_max; p.kT += kT_inc ) {
+			
 			if( arg3 == REINITIALIZE )
 				msd.reinitialize();
 			else if( arg3 == RANDOMIZE )
 				msd.randomize();
 			msd.record.clear();
 			
-			cout << "B_y = " << p.B.y << '\n';
-			msd.setB(p.B);
+			cout << "kT = " << p.kT << '\n';
+			msd.setParameters(p);
 			msd.metropolis(t_eq);
 			msd.metropolis(simCount, freq);
 			
@@ -216,8 +220,8 @@ int main(int argc, char *argv[]) {
 			double avgUmL = msd.meanUmL();
 			double avgUmR = msd.meanUmR();
 			double avgULR = msd.meanULR();
-			file << p.B.x  << ',' << p.B.y  << ',' << p.B.z  << ",,"
-				<< avgM.x  << ',' << avgM.y  << ',' << avgM.z  << ',' << avgM.norm()  << ',' << avgM.theta()  << ',' << avgM.phi()  << ",,"
+			file << p.kT << ",,"
+				 << avgM.x  << ',' << avgM.y  << ',' << avgM.z  << ',' << avgM.norm()  << ',' << avgM.theta()  << ',' << avgM.phi()  << ",,"
 				 << avgML.x << ',' << avgML.y << ',' << avgML.z << ',' << avgML.norm() << ',' << avgML.theta() << ',' << avgML.phi() << ",,"
 				 << avgMR.x << ',' << avgMR.y << ',' << avgMR.z << ',' << avgMR.norm() << ',' << avgMR.theta() << ',' << avgMR.phi() << ",,"
 				 << avgMm.x << ',' << avgMm.y << ',' << avgMm.z << ',' << avgMm.norm() << ',' << avgMm.theta() << ',' << avgMm.phi() << ",,"
@@ -231,13 +235,8 @@ int main(int argc, char *argv[]) {
 				 << r.MR.x << ',' << r.MR.y << ',' << r.MR.z << ',' << r.MR.norm() << ',' << r.MR.theta() << ',' << r.MR.phi() << ",,"
 				 << r.Mm.x << ',' << r.Mm.y << ',' << r.Mm.z << ',' << r.Mm.norm() << ',' << r.Mm.theta() << ',' << r.Mm.phi() << ",,"
 				 << r.U << ',' << r.UL << ',' << r.UR << ',' << r.Um << ',' << r.UmL << ',' << r.UmR << ',' << r.ULR << '\n';
-		};
-		
-		for( p.B.y = B_y_max; p.B.y > B_y_min; p.B.y -= B_y_inc )
-			sim();
-		for( p.B.y = B_y_min; p.B.y < B_y_max; p.B.y += B_y_inc )
-			sim();
-		
+			
+		}
 	} catch(ios::failure &e) {
 		cerr << "Couldn't write to output file \"" << argv[1] << "\": " << e.what() << '\n';
 		return 3;

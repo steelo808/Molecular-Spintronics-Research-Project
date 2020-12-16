@@ -1,7 +1,7 @@
 
 /*
  * Christopher D'Angelo
- * 2-6-2015
+ * 12-15-2015
  */
 
 #include <fstream>
@@ -61,7 +61,7 @@ int main(int argc, char *argv[]) {
 	//get parameters
 	unsigned int width, height, depth, molPosL, molPosR, topL, bottomL, frontR, backR;
 	unsigned long long t_eq, freq; // freq: how often we record a reading
-	double B_y_min, B_y_max, B_y_rate; // B_y_rate = d B_y / d t
+	double B_min, B_max, B_rate, B_theta, B_phi; // B_rate = d |B| / d t
 	MSD::Parameters p;
 	
 	cin.exceptions( ios::badbit | ios::failbit | ios::eofbit );
@@ -83,9 +83,11 @@ int main(int argc, char *argv[]) {
 		cout << '\n';
 		ask("> kT = ", p.kT);
 		cout << '\n';
-		ask("> B_y_min  = ", B_y_min);
-		ask("> B_y_max  = ", B_y_max);
-		ask("> B_y_rate = ", B_y_rate);
+		ask("> B_min  = ", B_min);
+		ask("> B_max  = ", B_max);
+		ask("> B_rate = ", B_rate);
+		ask("> B_theta = ", B_theta);
+		ask("> B_phi = ", B_phi);
 		cout << '\n';
 		ask("> sL = ", p.sL);
 		ask("> sR = ", p.sR);
@@ -142,7 +144,11 @@ int main(int argc, char *argv[]) {
 			 << ",t_eq = " << t_eq
 			 << ",freq = " << freq
 			 << ",kT = " << p.kT
-			 << ",B_y_rate = " << B_y_rate
+			 << ",B_min = " << B_min
+			 << ",B_max = " << B_max
+			 << ",B_rate = " << B_rate
+			 << ",B_theta = " << B_theta
+			 << ",B_phi = " << B_phi
 			 << ",sL = " << p.sL
 			 << ",sR = " << p.sR
 			 << ",sm = " << p.sm
@@ -167,9 +173,14 @@ int main(int argc, char *argv[]) {
 			 << ",,msd_version = " << UDC_MSD_VERSION
 			 << '\n';
 		
+		// convert from degrees to radians
+		B_theta *= PI / 180.0;
+		B_phi *= PI / 180.0;
+		Vector dB = Vector::sphericalForm(B_rate, B_theta, B_phi);
+
 		// define some lambda functions
 		auto recordResults = [&]() {
-			cout << "B_y = " << p.B.y << '\n';
+			cout << "B = " << p.B << '\n';
 			cout << "Saving data...\n";
 			
 			MSD::Results r = msd.getResults();
@@ -202,20 +213,30 @@ int main(int argc, char *argv[]) {
 		simCount = freq - 1; // record after next sim
 		
 		if( !(argc > 4 && string(argv[4]) != string("0")) ) {
-			// running B_y from 0 to B_y_max
-			for( p.B.y = 0; p.B.y < B_y_max; p.B.y += B_y_rate )
+			// running B from 0 to B_max
+			p.B = Vector::ZERO;
+			for( double rho = 0; rho < B_max; rho += B_rate ) {
 				sim();
+				p.B += dB;
+			}
 			simCount = freq - 1;
 		}
 		
 		// running B_y from B_y_max to B_y_min
-		for( p.B.y = B_y_max; p.B.y > B_y_min; p.B.y -= B_y_rate )
+		p.B = Vector::sphericalForm(B_max, B_theta, B_phi);
+		for( double rho = B_max; rho > B_min; rho -= B_rate ) {
 			sim();
+			p.B -= dB;
+		}
 		simCount = freq - 1;
 		
 		// running B_y from B_y_min to B_y_max
-		for( p.B.y = B_y_min; p.B.y < B_y_max; p.B.y += B_y_rate )
+		double B_max2 = B_max + B_rate / 2;  // to correct for floating point errors
+		p.B = Vector::sphericalForm(B_min, B_theta, B_phi);
+		for( double rho = B_min; rho <= B_max2; rho += B_rate ) {
 			sim();
+			p.B += dB;
+		}
 		
 	} catch(ios::failure &e) {
 		cerr << "Couldn't write to output file \"" << argv[1] << "\": " << e.what() << '\n';

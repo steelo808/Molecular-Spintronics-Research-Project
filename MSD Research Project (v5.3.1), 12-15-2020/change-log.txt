@@ -49,7 +49,9 @@ Also added fix for T_c approximation in MSD::setParameters().
 
 5.3.0:
 (12-15-2020) Changed the spin fluxtuation algorithm so that now spin fluxtuations are a uniformaly random vector with a random magnitude betwwen [0, F).
-TODO: Updated the magnetization and magnetization2 programs to allow for a change of B along any axis, not just in the y direction.
+
+5.3.1:
+(12-15-2020) Updated the magnetization and magnetization2 programs to allow for a change of B along any axis, not just in the y direction.
 
 TODO:
 1. Add new exchange coupling parameters to connect each electron to (1) its local atom, (2) its nearest neighbor atoms, and (3) its nearest neighbor electrons.
