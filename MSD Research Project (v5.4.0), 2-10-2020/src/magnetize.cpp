@@ -1,7 +1,7 @@
 
 /*
  * Christopher D'Angelo
- * 2-24-2020
+ * 2-10-2021
  */
 
 #include <fstream>
@@ -29,10 +29,10 @@ enum ARG3 {
 
 
 int main(int argc, char *argv[]) {
-	//get command line argument(s)
+	//get command line argument
 	if( argc > 1 ) {
-		ifstream test(argv[1]);
-		if( test.good() ) {
+		ifstream file(argv[1]);
+		if( file.good() ) {
 			char ans;
 			cout << "File \"" << argv[1] << "\" already exists. Overwrite it (Y/N)? ";
 			cin >> ans;
@@ -66,12 +66,7 @@ int main(int argc, char *argv[]) {
 			arg3 = REINITIALIZE;
 		else if( s == string("randomize") )
 			arg3 = RANDOMIZE;
-		else if( s == string("noop") )
-			arg3 = NOOP;
-		else
-			cout << "Unrecognized second argument! Defaulting to 'noop'.\n";
-	} else
-		cout << "Defaulting to 'noop'.\n";
+	}
 	
 	ofstream file(argv[1]);
 	file.exceptions( ios::badbit | ios::failbit );
@@ -79,7 +74,7 @@ int main(int argc, char *argv[]) {
 	//get parameters
 	unsigned int width, height, depth, molPosL, molPosR, topL, bottomL, frontR, backR;
 	unsigned long long t_eq, simCount, freq;
-	double kT_min, kT_max, kT_inc;
+	double B_min, B_max, B_inc, B_theta, B_phi;
 	MSD::Parameters p;
 	
 	cin.exceptions( ios::badbit | ios::failbit | ios::eofbit );
@@ -100,11 +95,13 @@ int main(int argc, char *argv[]) {
 		ask("> simCount = ", simCount);
 		ask("> freq     = ", freq);
 		cout << '\n';
-		ask("> kT_min = ", kT_min);
-		ask("> kT_max = ", kT_max);
-		ask("> kT_inc = ", kT_inc);
+		ask("> kT = ", p.kT);
 		cout << '\n';
-		ask("> B = ", p.B);
+		ask("> B_min = ", B_min);
+		ask("> B_max = ", B_max);
+		ask("> B_inc = ", B_inc);
+		ask("> B_theta = ", B_theta);
+		ask("> B_phi = ", B_phi);
 		cout << '\n';
 		ask("> sL = ", p.sL);
 		ask("> sR = ", p.sR);
@@ -119,6 +116,24 @@ int main(int argc, char *argv[]) {
 		ask("> JmL = ", p.JmL);
 		ask("> JmR = ", p.JmR);
 		ask("> JLR = ", p.JLR);
+		cout << '\n';
+		ask("> Je0L  = ", p.Je0L);
+		ask("> Je0R  = ", p.Je0R);
+		ask("> Je0m  = ", p.Je0m);
+		cout << '\n';
+		ask("> Je1L  = ", p.Je1L);
+		ask("> Je1R  = ", p.Je1R);
+		ask("> Je1m  = ", p.Je1m);
+		ask("> Je1mL = ", p.Je1mL);
+		ask("> Je1mR = ", p.Je1mR);
+		ask("> Je1LR = ", p.Je1LR);
+		cout << '\n';
+		ask("> JeeL  = ", p.JeeL);
+		ask("> JeeR  = ", p.JeeR);
+		ask("> Jeem  = ", p.Jeem);
+		ask("> JeemL = ", p.JeemL);
+		ask("> JeemR = ", p.JeemR);
+		ask("> JeeLR = ", p.JeeLR);
 		cout << '\n';
 		ask("> AL = ", p.AL);
 		ask("> AR = ", p.AR);
@@ -139,11 +154,12 @@ int main(int argc, char *argv[]) {
 	//create MSD model
 	MSD msd(width, height, depth, molPosL, molPosR, topL, bottomL, frontR, backR);
 	msd.flippingAlgorithm = arg2;
+	msd.setParameters(p);
 	
 	try {
 		//print info/headings
-		file << "kT,,"
-			    "<M>_x,<M>_y,<M>_z,<M>_norm,<M>_theta,<M>_phi,,"
+		file << "B_x,B_y,B_z,B_norm,,"
+		        "<M>_x,<M>_y,<M>_z,<M>_norm,<M>_theta,<M>_phi,,"
 				"<ML>_x,<ML>_y,<ML>_z,<ML>_norm,<ML>_theta,<ML>_phi,,"
 				"<MR>_x,<MR>_y,<MR>_z,<MR>_norm,<MR>_theta,<MR>_phi,,"
 			    "<Mm>_x,<Mm>_y,<Mm>_z,<Mm>_norm,<Mm>_theta,<Mm>_phi,,"
@@ -155,7 +171,7 @@ int main(int argc, char *argv[]) {
 				"MR_x,MR_y,MR_z,MR_norm,MR_theta,MR_phi,,"
 				"Mm_x,Mm_y,Mm_z,Mm_norm,Mm_theta,Mm_phi,,"
 				"U,UL,UR,Um,UmL,UmR,ULR,"
-			 << ",width = " << msd.getWidth()
+			    ",width = " << msd.getWidth()
 			 << ",height = " << msd.getHeight()
 			 << ",depth = " << msd.getDepth()
 			 << ",molPosL = " << msd.getMolPosL()
@@ -167,7 +183,12 @@ int main(int argc, char *argv[]) {
 			 << ",t_eq = " << t_eq
 			 << ",simCount = " << simCount
 			 << ",freq = " << freq
-			 << ",\"B = " << p.B << '"'
+			 << ",kT = " << p.kT
+			 << ",B_min = " << B_min
+			 << ",B_max = " << B_max
+			 << ",B_inc = " << B_inc
+			 << ",B_theta = " << B_theta
+			 << ",B_phi = " << B_phi
 			 << ",sL = " << p.sL
 			 << ",sR = " << p.sR
 			 << ",sm = " << p.sm
@@ -180,6 +201,21 @@ int main(int argc, char *argv[]) {
 			 << ",JmL = " << p.JmL
 			 << ",JmR = " << p.JmR
 			 << ",JLR = " << p.JLR
+			 << ",Je0L = " << p.Je0L
+			 << ",Je0R = " << p.Je0R
+			 << ",Je0m = " << p.Je0m
+			 << ",Je1L = " << p.Je1L
+			 << ",Je1R = " << p.Je1R
+			 << ",Je1m = " << p.Je1m
+			 << ",Je1mL = " << p.Je1mL
+			 << ",Je1mR = " << p.Je1mR
+			 << ",Je1LR = " << p.Je1LR
+			 << ",JeeL = " << p.JeeL
+			 << ",JeeR = " << p.JeeR
+			 << ",Jeem = " << p.Jeem
+			 << ",JeemL = " << p.JeemL
+			 << ",JeemR = " << p.JeemR
+			 << ",JeeLR = " << p.JeeLR
 			 << ",\"AL = " << p.AL << '"'
 			 << ",\"AR = " << p.AR << '"'
 			 << ",\"Am = " << p.Am << '"'
@@ -191,19 +227,24 @@ int main(int argc, char *argv[]) {
 			 << ",bLR = " << p.bLR
 			 << ",,msd_version = " << UDC_MSD_VERSION
 			 << '\n';
-	
+
+		// convert from degrees to radians
+		B_theta *= PI / 180.0;
+		B_phi *= PI / 180.0;
+		Vector dB = Vector::sphericalForm(B_inc, B_theta, B_phi);
+
 		//run simulations
 		cout << "Starting simulation...\n";
-		for( p.kT = kT_min; p.kT <= kT_max; p.kT += kT_inc ) {
-			
+		
+		auto sim = [&]() {
 			if( arg3 == REINITIALIZE )
 				msd.reinitialize();
 			else if( arg3 == RANDOMIZE )
 				msd.randomize();
 			msd.record.clear();
 			
-			cout << "kT = " << p.kT << '\n';
-			msd.setParameters(p);
+			cout << "B = " << p.B << '\n';
+			msd.setB(p.B);
 			msd.metropolis(t_eq);
 			msd.metropolis(simCount, freq);
 			
@@ -220,7 +261,7 @@ int main(int argc, char *argv[]) {
 			double avgUmL = msd.meanUmL();
 			double avgUmR = msd.meanUmR();
 			double avgULR = msd.meanULR();
-			file << p.kT << ",,"
+			file << p.B.x  << ',' << p.B.y  << ',' << p.B.z  << ',' << p.B.norm() << ",,"
 				 << avgM.x  << ',' << avgM.y  << ',' << avgM.z  << ',' << avgM.norm()  << ',' << avgM.theta()  << ',' << avgM.phi()  << ",,"
 				 << avgML.x << ',' << avgML.y << ',' << avgML.z << ',' << avgML.norm() << ',' << avgML.theta() << ',' << avgML.phi() << ",,"
 				 << avgMR.x << ',' << avgMR.y << ',' << avgMR.z << ',' << avgMR.norm() << ',' << avgMR.theta() << ',' << avgMR.phi() << ",,"
@@ -235,8 +276,26 @@ int main(int argc, char *argv[]) {
 				 << r.MR.x << ',' << r.MR.y << ',' << r.MR.z << ',' << r.MR.norm() << ',' << r.MR.theta() << ',' << r.MR.phi() << ",,"
 				 << r.Mm.x << ',' << r.Mm.y << ',' << r.Mm.z << ',' << r.Mm.norm() << ',' << r.Mm.theta() << ',' << r.Mm.phi() << ",,"
 				 << r.U << ',' << r.UL << ',' << r.UR << ',' << r.Um << ',' << r.UmL << ',' << r.UmR << ',' << r.ULR << '\n';
-			
+		};
+
+		if (B_inc == 0) {
+			cerr << "B_inc == 0: infinite loop!\n";
+			return 8;
 		}
+		
+		p.B = Vector::sphericalForm(B_max, B_theta, B_phi);
+		for( double rho = B_max; rho > B_min; rho -= B_inc ) {
+			sim();
+			p.B -= dB;
+		}
+		
+		double B_max2 = B_max + B_inc / 2;  // to correct for floating point errors
+		p.B = Vector::sphericalForm(B_min, B_theta, B_phi);
+		for( double rho = B_min; rho <= B_max2; rho += B_inc ) {
+			sim();
+			p.B += dB;
+		}
+		
 	} catch(ios::failure &e) {
 		cerr << "Couldn't write to output file \"" << argv[1] << "\": " << e.what() << '\n';
 		return 3;

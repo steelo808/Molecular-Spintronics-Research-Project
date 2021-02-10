@@ -1,7 +1,7 @@
 
 /*
  * Christopher D'Angelo
- * 11-1-2020
+ * 2-10-2021
  */
 
 #include <fstream>
@@ -198,6 +198,24 @@ int main(int argc, char *argv[]) {
 		getParam(params, "JmR", p.JmR);
 		getParam(params, "JLR", p.JLR);
 		cout << '\n';
+		getParam(params, "Je0L ", p.Je0L);
+		getParam(params, "Je0R ", p.Je0R);
+		getParam(params, "Je0m ", p.Je0m);
+		cout << '\n';
+		getParam(params, "Je1L ", p.Je1L);
+		getParam(params, "Je1R ", p.Je1R);
+		getParam(params, "Je1m ", p.Je1m);
+		getParam(params, "Je1mL", p.Je1mL);
+		getParam(params, "Je1mR", p.Je1mR);
+		getParam(params, "Je1LR", p.Je1LR);
+		cout << '\n';
+		getParam(params, "JeeL ", p.Je1L);
+		getParam(params, "JeeR ", p.Je1R);
+		getParam(params, "Jeem ", p.Je1m);
+		getParam(params, "JeemL", p.Je1mL);
+		getParam(params, "JeemR", p.Je1mR);
+		getParam(params, "JeeLR", p.Je1LR);
+		cout << '\n';
 		getParam(params, "AL", p.AL);
 		getParam(params, "AR", p.AR);
 		getParam(params, "Am", p.Am);
@@ -273,6 +291,21 @@ int main(int argc, char *argv[]) {
 			 << ",JmL = " << p.JmL
 			 << ",JmR = " << p.JmR
 			 << ",JLR = " << p.JLR
+			 << ",Je0L = " << p.Je0L
+			 << ",Je0R = " << p.Je0R
+			 << ",Je0m = " << p.Je0m
+			 << ",Je1L = " << p.Je1L
+			 << ",Je1R = " << p.Je1R
+			 << ",Je1m = " << p.Je1m
+			 << ",Je1mL = " << p.Je1mL
+			 << ",Je1mR = " << p.Je1mR
+			 << ",Je1LR = " << p.Je1LR
+			 << ",JeeL = " << p.JeeL
+			 << ",JeeR = " << p.JeeR
+			 << ",Jeem = " << p.Jeem
+			 << ",JeemL = " << p.JeemL
+			 << ",JeemR = " << p.JeemR
+			 << ",JeeLR = " << p.JeeLR
 			 << ",\"AL = " << p.AL << '"'
 			 << ",\"AR = " << p.AR << '"'
 			 << ",\"Am = " << p.Am << '"'

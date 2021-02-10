@@ -66,6 +66,7 @@ Second bug fix. In MSD::setParameters()
 (1-21-2021) Added Parameters Je0, Je1, Jee (including L, R, mL, mR, m, LR variations where applicable)
 Added new exchange coupling parameters to connect each electron to (Je0) its local atom, (Je1) its nearest neighbor atoms, and (Jee) its nearest neighbor electrons.
 Changed Heisenburg exchange coupling constant J so only bond the spin, s, and NOT the local magnetization, m = s + f.
-
-TODO:
-- Add support for new J variables in all applicable programs: iterate, heat, magnetize(2), metropolis
+(2-10-2021) Add support for new J variables in all applicable programs: iterate, heat, magnetize(2), metropolis.
+kT_inc < 0 now cools in "heat" program.
+Added B_norm to output of "magnetize" and "magnetize2".
+Added a check for kT_inc == 0, B_inc == 0, or B_rate == 0 to avoid an infinite loop (in their respective programs).

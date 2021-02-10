@@ -1,7 +1,7 @@
 
 /*
  * Christopher D'Angelo
- * 2-24-2020
+ * 2-10-2021
  */
 
 #include <fstream>
@@ -22,10 +22,6 @@ void ask(string msg, Vector &vec) {
 	cout << msg;
 	cin >> vec.x >> vec.y >> vec.z;
 }
-
-enum ARG3 {
-	NOOP, REINITIALIZE, RANDOMIZE
-};
 
 
 int main(int argc, char *argv[]) {
@@ -59,22 +55,13 @@ int main(int argc, char *argv[]) {
 	} else
 		cout << "Defaulting to 'CONTINUOUS_SPIN_MODEL'.\n";
 	
-	ARG3 arg3 = NOOP;
-	if( argc > 3 ) {
-		string s(argv[3]);
-		if( s == string("reinitialize") )
-			arg3 = REINITIALIZE;
-		else if( s == string("randomize") )
-			arg3 = RANDOMIZE;
-	}
-	
 	ofstream file(argv[1]);
 	file.exceptions( ios::badbit | ios::failbit );
 	
 	//get parameters
 	unsigned int width, height, depth, molPosL, molPosR, topL, bottomL, frontR, backR;
-	unsigned long long t_eq, simCount, freq;
-	double B_min, B_max, B_inc, B_theta, B_phi;
+	unsigned long long t_eq, freq; // freq: how often we record a reading
+	double B_min, B_max, B_rate, B_theta, B_phi; // B_rate = d |B| / d t
 	MSD::Parameters p;
 	
 	cin.exceptions( ios::badbit | ios::failbit | ios::eofbit );
@@ -91,15 +78,14 @@ int main(int argc, char *argv[]) {
 		ask("> frontR  = ", frontR);
 		ask("> backR   = ", backR);
 		cout << '\n';
-		ask("> t_eq     = ", t_eq);
-		ask("> simCount = ", simCount);
-		ask("> freq     = ", freq);
+		ask("> t_eq = ", t_eq);
+		ask("> freq = ", freq);
 		cout << '\n';
 		ask("> kT = ", p.kT);
 		cout << '\n';
-		ask("> B_min = ", B_min);
-		ask("> B_max = ", B_max);
-		ask("> B_inc = ", B_inc);
+		ask("> B_min  = ", B_min);
+		ask("> B_max  = ", B_max);
+		ask("> B_rate = ", B_rate);
 		ask("> B_theta = ", B_theta);
 		ask("> B_phi = ", B_phi);
 		cout << '\n';
@@ -116,6 +102,24 @@ int main(int argc, char *argv[]) {
 		ask("> JmL = ", p.JmL);
 		ask("> JmR = ", p.JmR);
 		ask("> JLR = ", p.JLR);
+		cout << '\n';
+		ask("> Je0L  = ", p.Je0L);
+		ask("> Je0R  = ", p.Je0R);
+		ask("> Je0m  = ", p.Je0m);
+		cout << '\n';
+		ask("> Je1L  = ", p.Je1L);
+		ask("> Je1R  = ", p.Je1R);
+		ask("> Je1m  = ", p.Je1m);
+		ask("> Je1mL = ", p.Je1mL);
+		ask("> Je1mR = ", p.Je1mR);
+		ask("> Je1LR = ", p.Je1LR);
+		cout << '\n';
+		ask("> JeeL  = ", p.JeeL);
+		ask("> JeeR  = ", p.JeeR);
+		ask("> Jeem  = ", p.Jeem);
+		ask("> JeemL = ", p.JeemL);
+		ask("> JeemR = ", p.JeemR);
+		ask("> JeeLR = ", p.JeeLR);
 		cout << '\n';
 		ask("> AL = ", p.AL);
 		ask("> AR = ", p.AR);
@@ -140,14 +144,7 @@ int main(int argc, char *argv[]) {
 	
 	try {
 		//print info/headings
-		file << "B_x,B_y,B_z,,"
-		        "<M>_x,<M>_y,<M>_z,<M>_norm,<M>_theta,<M>_phi,,"
-				"<ML>_x,<ML>_y,<ML>_z,<ML>_norm,<ML>_theta,<ML>_phi,,"
-				"<MR>_x,<MR>_y,<MR>_z,<MR>_norm,<MR>_theta,<MR>_phi,,"
-			    "<Mm>_x,<Mm>_y,<Mm>_z,<Mm>_norm,<Mm>_theta,<Mm>_phi,,"
-				"<U>,<UL>,<UR>,<Um>,<UmL>,<UmR>,<ULR>,,"
-				"c,cL,cR,cm,cmL,cmR,cLR,,"
-				"x,xL,xR,xm,,"
+		file << "B_x,B_y,B_z,B_norm,,"
 				"M_x,M_y,M_z,M_norm,M_theta,M_phi,,"
 				"ML_x,ML_y,ML_z,ML_norm,ML_theta,ML_phi,,"
 				"MR_x,MR_y,MR_z,MR_norm,MR_theta,MR_phi,,"
@@ -163,12 +160,11 @@ int main(int argc, char *argv[]) {
 			 << ",frontR = " << msd.getFrontR()
 			 << ",backR = " << msd.getBackR()
 			 << ",t_eq = " << t_eq
-			 << ",simCount = " << simCount
 			 << ",freq = " << freq
 			 << ",kT = " << p.kT
 			 << ",B_min = " << B_min
 			 << ",B_max = " << B_max
-			 << ",B_inc = " << B_inc
+			 << ",B_rate = " << B_rate
 			 << ",B_theta = " << B_theta
 			 << ",B_phi = " << B_phi
 			 << ",sL = " << p.sL
@@ -183,6 +179,21 @@ int main(int argc, char *argv[]) {
 			 << ",JmL = " << p.JmL
 			 << ",JmR = " << p.JmR
 			 << ",JLR = " << p.JLR
+			  << ",Je0L = " << p.Je0L
+			 << ",Je0R = " << p.Je0R
+			 << ",Je0m = " << p.Je0m
+			 << ",Je1L = " << p.Je1L
+			 << ",Je1R = " << p.Je1R
+			 << ",Je1m = " << p.Je1m
+			 << ",Je1mL = " << p.Je1mL
+			 << ",Je1mR = " << p.Je1mR
+			 << ",Je1LR = " << p.Je1LR
+			 << ",JeeL = " << p.JeeL
+			 << ",JeeR = " << p.JeeR
+			 << ",Jeem = " << p.Jeem
+			 << ",JeemL = " << p.JeemL
+			 << ",JeemR = " << p.JeemR
+			 << ",JeeLR = " << p.JeeLR
 			 << ",\"AL = " << p.AL << '"'
 			 << ",\"AR = " << p.AR << '"'
 			 << ",\"Am = " << p.Am << '"'
@@ -194,50 +205,19 @@ int main(int argc, char *argv[]) {
 			 << ",bLR = " << p.bLR
 			 << ",,msd_version = " << UDC_MSD_VERSION
 			 << '\n';
-
+		
 		// convert from degrees to radians
 		B_theta *= PI / 180.0;
 		B_phi *= PI / 180.0;
-		Vector dB = Vector::sphericalForm(B_inc, B_theta, B_phi);
+		Vector dB = Vector::sphericalForm(B_rate, B_theta, B_phi);
 
-		//run simulations
-		cout << "Starting simulation...\n";
-		
-		auto sim = [&]() {
-			if( arg3 == REINITIALIZE )
-				msd.reinitialize();
-			else if( arg3 == RANDOMIZE )
-				msd.randomize();
-			msd.record.clear();
-			
-			cout << "B = " << p.B << '\n';
-			msd.setB(p.B);
-			msd.metropolis(t_eq);
-			msd.metropolis(simCount, freq);
-			
+		// define some lambda functions
+		auto recordResults = [&]() {
+			cout << "B = " << p.B << "; |B| = " << p.B.norm() << '\n';
 			cout << "Saving data...\n";
+			
 			MSD::Results r = msd.getResults();
-			Vector avgM   = msd.meanM();
-			Vector avgML  = msd.meanML();
-			Vector avgMR  = msd.meanMR();
-			Vector avgMm  = msd.meanMm();
-			double avgU   = msd.meanU();
-			double avgUL  = msd.meanUL();
-			double avgUR  = msd.meanUR();
-			double avgUm  = msd.meanUm();
-			double avgUmL = msd.meanUmL();
-			double avgUmR = msd.meanUmR();
-			double avgULR = msd.meanULR();
-			file << p.B.x  << ',' << p.B.y  << ',' << p.B.z  << ",,"
-				<< avgM.x  << ',' << avgM.y  << ',' << avgM.z  << ',' << avgM.norm()  << ',' << avgM.theta()  << ',' << avgM.phi()  << ",,"
-				 << avgML.x << ',' << avgML.y << ',' << avgML.z << ',' << avgML.norm() << ',' << avgML.theta() << ',' << avgML.phi() << ",,"
-				 << avgMR.x << ',' << avgMR.y << ',' << avgMR.z << ',' << avgMR.norm() << ',' << avgMR.theta() << ',' << avgMR.phi() << ",,"
-				 << avgMm.x << ',' << avgMm.y << ',' << avgMm.z << ',' << avgMm.norm() << ',' << avgMm.theta() << ',' << avgMm.phi() << ",,"
-				 << avgU << ',' << avgUL << ',' << avgUR << ',' << avgUm << ',' << avgUmL << ',' << avgUmR << ',' << avgULR << ",,"
-				 << msd.specificHeat()    << ',' << msd.specificHeat_L()  << ',' << msd.specificHeat_R()  << ',' << msd.specificHeat_m() << ','
-				 << msd.specificHeat_mL() << ',' << msd.specificHeat_mR() << ',' << msd.specificHeat_LR() << ",,"
-				 << msd.magneticSusceptibility()   << ',' << msd.magneticSusceptibility_L() << ','
-				 << msd.magneticSusceptibility_R() << ',' << msd.magneticSusceptibility_m() << ",,"
+			file << p.B.x  << ',' << p.B.y  << ',' << p.B.z  << ',' << p.B.norm()  << ",,"
 				 << r.M.x  << ',' << r.M.y  << ',' << r.M.z  << ',' << r.M.norm()  << ',' << r.M.theta()  << ',' << r.M.phi()  << ",,"
 				 << r.ML.x << ',' << r.ML.y << ',' << r.ML.z << ',' << r.ML.norm() << ',' << r.ML.theta() << ',' << r.ML.phi() << ",,"
 				 << r.MR.x << ',' << r.MR.y << ',' << r.MR.z << ',' << r.MR.norm() << ',' << r.MR.theta() << ',' << r.MR.phi() << ",,"
@@ -245,15 +225,53 @@ int main(int argc, char *argv[]) {
 				 << r.U << ',' << r.UL << ',' << r.UR << ',' << r.Um << ',' << r.UmL << ',' << r.UmR << ',' << r.ULR << '\n';
 		};
 		
+		unsigned long long simCount = 0L;
+		auto sim = [&]() {
+			msd.setB(p.B);
+			msd.metropolis(1);
+			
+			if( ++simCount == freq ) {
+				recordResults();
+				simCount = 0;
+			}
+		};
+
+		//run simulations
+		cout << "Starting simulation...\n";
+		if( argc > 3 && string(argv[3]) != string("0") )
+			msd.randomize();
+		
+		if (B_rate == 0) {
+			cerr << "B_inc == 0: infinite loop!\n";
+			return 8;
+		}
+		
+		// running to equilibrium
+		msd.metropolis(t_eq);
+		simCount = freq - 1; // record after next sim
+		
+		if( !(argc > 4 && string(argv[4]) != string("0")) ) {
+			// running B from 0 to B_max
+			p.B = Vector::ZERO;
+			for( double rho = 0; rho < B_max; rho += B_rate ) {
+				sim();
+				p.B += dB;
+			}
+			simCount = freq - 1;
+		}
+		
+		// running B from B_max to B_min
 		p.B = Vector::sphericalForm(B_max, B_theta, B_phi);
-		for( double rho = B_max; rho > B_min; rho -= B_inc ) {
+		for( double rho = B_max; rho > B_min; rho -= B_rate ) {
 			sim();
 			p.B -= dB;
 		}
+		simCount = freq - 1;
 		
-		double B_max2 = B_max + B_inc / 2;  // to correct for floating point errors
+		// running B from B_min to B_max
+		double B_max2 = B_max + B_rate / 2;  // to correct for floating point errors
 		p.B = Vector::sphericalForm(B_min, B_theta, B_phi);
-		for( double rho = B_min; rho <= B_max2; rho += B_inc ) {
+		for( double rho = B_min; rho <= B_max2; rho += B_rate ) {
 			sim();
 			p.B += dB;
 		}

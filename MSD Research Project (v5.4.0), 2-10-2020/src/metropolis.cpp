@@ -1,7 +1,7 @@
 
 /*
  * Christopher D'Angelo
- * 1-23-2015
+ * 2-10-2021
  */
 
 #include <cstdlib>
@@ -213,7 +213,10 @@ int main(int argc, char *argv[]) {
 		const double step = 100.0 / ( p.at("kT").size() * p.at("B_x").size() * p.at("B_y").size() * p.at("B_z").size()
 		                            * p.at("sL").size() * p.at("sR").size() * p.at("sm").size() * p.at("FL").size() * p.at("FR").size() * p.at("Fm").size()
 		                            * p.at("JL").size() * p.at("JR").size() * p.at("Jm").size() * p.at("JmL").size() * p.at("JmR").size() * p.at("JLR").size()
-		                            * p.at("bL").size() * p.at("bR").size() * p.at("bm").size() * p.at("bmL").size() * p.at("bmR").size() * p.at("bLR").size()
+									* p.at("Je0L").size() * p.at("Je0R").size() * p.at("Je0m").size()
+									* p.at("Je1L").size() * p.at("Je1R").size() * p.at("Je1m").size() * p.at("Je1mL").size() * p.at("Je1mR").size() * p.at("Je1LR").size()
+									* p.at("JeeL").size() * p.at("JeeR").size() * p.at("Jeem").size() * p.at("JeemL").size() * p.at("JeemR").size() * p.at("JeeLR").size()
+									* p.at("bL").size() * p.at("bR").size() * p.at("bm").size() * p.at("bmL").size() * p.at("bmR").size() * p.at("bLR").size()
 		                            * p.at("AL_x").size() * p.at("AL_y").size() * p.at("AL_z").size()
 		                            * p.at("AR_x").size() * p.at("AR_y").size() * p.at("AR_z").size()
 		                            * p.at("Am_x").size() * p.at("Am_y").size() * p.at("Am_z").size() );
@@ -265,6 +268,9 @@ int main(int argc, char *argv[]) {
 			string inds[SIZE] = { "kT", "B_x", "B_y", "B_z",
 			                      "sL", "sR", "sm", "FL", "FR", "Fm",
 			                      "JL", "JmL", "Jm", "JmR", "JR", "JLR",
+								  "Je0L", "Je0m", "Je0R",
+								  "Je1L", "Je1mL", "Je1m", "Je1mR", "Je1R", "Je1LR",
+								  "JeeL", "JeemL", "Jeem", "JeemR", "JeeR", "JeeLR",
 			                      "bL", "bmL", "bm", "bmR", "bR", "bLR",
 								  "AL_x", "AL_y", "AL_z",
 			                      "AR_x", "AR_y", "AR_z",
@@ -331,6 +337,21 @@ int main(int argc, char *argv[]) {
 			recordVar( doc, *data, "param", "JmL", info.parameters.JmL );
 			recordVar( doc, *data, "param", "JmR", info.parameters.JmR );
 			recordVar( doc, *data, "param", "JLR", info.parameters.JLR );
+			recordVar( doc, *data, "param", "Je0L", info.parameters.Je0L );
+			recordVar( doc, *data, "param", "Je0R", info.parameters.Je0R );
+			recordVar( doc, *data, "param", "Je0m", info.parameters.Je0m );
+			recordVar( doc, *data, "param", "Je1L", info.parameters.Je1L );
+			recordVar( doc, *data, "param", "Je1R", info.parameters.Je1R );
+			recordVar( doc, *data, "param", "Je1m", info.parameters.Je1m );
+			recordVar( doc, *data, "param", "Je1mL", info.parameters.Je1mL );
+			recordVar( doc, *data, "param", "Je1mR", info.parameters.Je1mR );
+			recordVar( doc, *data, "param", "Je1LR", info.parameters.Je1LR );
+			recordVar( doc, *data, "param", "JeeL", info.parameters.JeeL );
+			recordVar( doc, *data, "param", "JeeR", info.parameters.JeeR );
+			recordVar( doc, *data, "param", "Jeem", info.parameters.Jeem );
+			recordVar( doc, *data, "param", "JeemL", info.parameters.JeemL );
+			recordVar( doc, *data, "param", "JeemR", info.parameters.JeemR );
+			recordVar( doc, *data, "param", "JeeLR", info.parameters.JeeLR );
 			recordVar( doc, *data, "param", "bL", info.parameters.bL );
 			recordVar( doc, *data, "param", "bR", info.parameters.bR );
 			recordVar( doc, *data, "param", "bm", info.parameters.bm );
@@ -423,6 +444,24 @@ int main(int argc, char *argv[]) {
 		for( auto iJmR = p.at("JmR").begin(); iJmR != p.at("JmR").end(); iJmR++ ) {
 		for( auto iJLR = p.at("JLR").begin(); iJLR != p.at("JLR").end(); iJLR++ ) {
 		
+		for( auto iJe0L = p.at("Je0L").begin(); iJe0L != p.at("Je0L").end(); iJe0L++ ) {
+		for( auto iJe0R = p.at("Je0R").begin(); iJe0R != p.at("Je0R").end(); iJe0R++ ) {
+		for( auto iJe0m = p.at("Je0m").begin(); iJe0m != p.at("Je0m").end(); iJe0m++ ) {
+		
+		for( auto iJe1L = p.at("Je1L").begin(); iJe1L != p.at("Je1L").end(); iJe1L++ ) {
+		for( auto iJe1R = p.at("Je1R").begin(); iJe1R != p.at("Je1R").end(); iJe1R++ ) {
+		for( auto iJe1m = p.at("Je1m").begin(); iJe1m != p.at("Je1m").end(); iJe1m++ ) {
+		for( auto iJe1mL = p.at("Je1mL").begin(); iJe1mL != p.at("Je1mL").end(); iJe1mL++ ) {
+		for( auto iJe1mR = p.at("Je1mR").begin(); iJe1mR != p.at("Je1mR").end(); iJe1mR++ ) {
+		for( auto iJe1LR = p.at("Je1LR").begin(); iJe1LR != p.at("Je1LR").end(); iJe1LR++ ) {
+		
+		for( auto iJeeL = p.at("JeeL").begin(); iJeeL != p.at("JeeL").end(); iJeeL++ ) {
+		for( auto iJeeR = p.at("JeeR").begin(); iJeeR != p.at("JeeR").end(); iJeeR++ ) {
+		for( auto iJeem = p.at("Jeem").begin(); iJeem != p.at("Jeem").end(); iJeem++ ) {
+		for( auto iJeemL = p.at("JeemL").begin(); iJeemL != p.at("JeemL").end(); iJeemL++ ) {
+		for( auto iJeemR = p.at("JeemR").begin(); iJeemR != p.at("JeemR").end(); iJeemR++ ) {
+		for( auto iJeeLR = p.at("JeeLR").begin(); iJeeLR != p.at("JeeLR").end(); iJeeLR++ ) {
+		
 		for( auto ibL = p.at("bL").begin(); ibL != p.at("bL").end(); ibL++ ) {
 		for( auto ibR = p.at("bR").begin(); ibR != p.at("bR").end(); ibR++ ) {
 		for( auto ibm = p.at("bm").begin(); ibm != p.at("bm").end(); ibm++ ) {
@@ -478,6 +517,24 @@ int main(int argc, char *argv[]) {
 			preInfo.parameters.JmL = *iJmL;
 			preInfo.parameters.JmR = *iJmR;
 			preInfo.parameters.JLR = *iJLR;
+
+			preInfo.parameters.Je0L = *iJe0L;
+			preInfo.parameters.Je0R = *iJe0R;
+			preInfo.parameters.Je0m = *iJe0m;
+
+			preInfo.parameters.Je1L = *iJe1L;
+			preInfo.parameters.Je1R = *iJe1R;
+			preInfo.parameters.Je1m = *iJe1m;
+			preInfo.parameters.Je1mL = *iJe1mL;
+			preInfo.parameters.Je1mR = *iJe1mR;
+			preInfo.parameters.Je1LR = *iJe1LR;
+
+			preInfo.parameters.JeeL = *iJeeL;
+			preInfo.parameters.JeeR = *iJeeR;
+			preInfo.parameters.Jeem = *iJeem;
+			preInfo.parameters.JeemL = *iJeemL;
+			preInfo.parameters.JeemR = *iJeemR;
+			preInfo.parameters.JeeLR = *iJeeLR;
 			
 			preInfo.parameters.bL = *ibL;
 			preInfo.parameters.bR = *ibR;
@@ -523,7 +580,7 @@ int main(int argc, char *argv[]) {
 			if( validResult )
 				recordData(postInfo);
 			
-		}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}} //end of iterations
+		}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}} //end of iterations
 		
 		//clean up thread pool (wait for the last few simulations)
 		if( threadCount > 1 ) {
