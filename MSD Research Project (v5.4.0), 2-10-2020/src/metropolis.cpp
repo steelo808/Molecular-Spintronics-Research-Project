@@ -264,17 +264,17 @@ int main(int argc, char *argv[]) {
 			recordVar( doc, *global, "param", "t_eq", p.at("t_eq")[0] );
 			recordVar( doc, *global, "param", "simCount", p.at("simCount")[0] );
 			recordVar( doc, *global, "param", "freq", p.at("freq")[0] );
-			const unsigned int SIZE = 31;
-			string inds[SIZE] = { "kT", "B_x", "B_y", "B_z",
-			                      "sL", "sR", "sm", "FL", "FR", "Fm",
-			                      "JL", "JmL", "Jm", "JmR", "JR", "JLR",
-								  "Je0L", "Je0m", "Je0R",
-								  "Je1L", "Je1mL", "Je1m", "Je1mR", "Je1R", "Je1LR",
-								  "JeeL", "JeemL", "Jeem", "JeemR", "JeeR", "JeeLR",
-			                      "bL", "bmL", "bm", "bmR", "bR", "bLR",
-								  "AL_x", "AL_y", "AL_z",
-			                      "AR_x", "AR_y", "AR_z",
-			                      "Am_x", "Am_y", "Am_z" };
+			const unsigned int SIZE = 46;
+			string inds[SIZE] = { "kT", "B_x", "B_y", "B_z",  // 4
+			                      "sL", "sR", "sm", "FL", "FR", "Fm",  // 6
+			                      "JL", "JmL", "Jm", "JmR", "JR", "JLR",  // 6
+								  "Je0L", "Je0m", "Je0R",  // 3
+								  "Je1L", "Je1mL", "Je1m", "Je1mR", "Je1R", "Je1LR",  // 6
+								  "JeeL", "JeemL", "Jeem", "JeemR", "JeeR", "JeeLR",  // 6
+			                      "bL", "bmL", "bm", "bmR", "bR", "bLR",  // 6
+								  "AL_x", "AL_y", "AL_z",  // 3
+			                      "AR_x", "AR_y", "AR_z",  // 3
+			                      "Am_x", "Am_y", "Am_z" };  // 3
 			for( unsigned int i = 0; i < SIZE; i++ ) {
 				xml_node<> *ind = doc.allocate_node( node_element, "ind", "" );
 				ind->append_attribute( doc.allocate_attribute("name", doc.allocate_string( inds[i].c_str() )) );

@@ -10,7 +10,7 @@ bottomL = 7
 frontR = 3
 backR = 7
 
-t_eq     = 10000000
+t_eq     = 100000
 simCount = 0
 freq     = 1
 
@@ -30,8 +30,8 @@ Fm = 0
 JL  = 1
 JR  = 1
 Jm  = 0
-JmL : -1.0  -0.25  0.25
-JmR : 0.25  1.0  0.25
+JmL = -1
+JmR = 1
 JLR = 0
 
 AL_x = 0
