@@ -34,6 +34,24 @@ JmL = -1
 JmR = 1
 JLR = 0
 
+Je0L  = 0
+Je0R  = 0
+Je0m  = 0
+
+Je1L  = 0
+Je1R  = 0
+Je1m  = 0
+Je1mL = 0
+Je1mR = 0
+Je1LR = 0
+
+JeeL  = 0
+JeeR  = 0
+Jeem  = 0
+JeemL = 0
+JeemR = 0
+JeeLR = 0
+
 AL_x = 0
 AL_y = 0
 AL_z = 0
