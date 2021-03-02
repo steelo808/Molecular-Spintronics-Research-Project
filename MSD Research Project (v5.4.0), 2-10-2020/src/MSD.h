@@ -296,6 +296,11 @@ bool MSD::Parameters::operator==(const Parameters &p) const {
 	    && FL  == p.FL  && FR  == p.FR  && Fm  == p.Fm
 	    && JL  == p.JL  && JR  == p.JR  && Jm  == p.Jm
 	    && JmL == p.JmL && JmR == p.JmR && JLR == p.JLR
+		&& Je0L  == p.Je0L && Je0R  == p.Je0R && Je0m == p.Je0m
+		&& Je1L  == p.Je1L && Je1R  == p.Je1R && Je1m == p.Je1m
+		&& Je1mL == p.Je1L && Je1mR == p.Je1R && Je1m == p.Je1LR
+		&& JeeL  == p.JeeL && JeeR  == p.JeeR && Jeem == p.Jeem
+		&& JeemL == p.JeeL && JeemR == p.JeeR && Jeem == p.JeeLR
 	    && bL  == p.bL  && bR  == p.bR  && bm  == p.bm
 	    && bmL == p.bmL && bmR == p.bmR && bLR == p.bLR
 	    && AL  == p.AL  && AR  == p.AR  && Am  == p.Am
