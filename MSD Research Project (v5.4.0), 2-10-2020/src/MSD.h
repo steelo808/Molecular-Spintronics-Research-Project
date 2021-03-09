@@ -376,7 +376,7 @@ MSD::Iterator::operator unsigned int() const {
 MSD::Iterator& MSD::Iterator::operator++() {
 	unsigned int next = i + 1;
 	if (next >= msd.indices.size())
-		out_of_range("can't increment MSD::Iterator == msd.end()");
+		throw out_of_range("can't increment MSD::Iterator == msd.end()");
 	i = next;
 	return *this;
 }
