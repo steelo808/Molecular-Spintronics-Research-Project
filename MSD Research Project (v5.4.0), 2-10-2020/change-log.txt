@@ -71,3 +71,4 @@ Second bug fix. In MSD::setParameters()
 	Added B_norm to output of "magnetize" and "magnetize2".
 	Added a check for kT_inc == 0, B_inc == 0, or B_rate == 0 to avoid an infinite loop (in their respective programs).
 (3-2-2021) Added new parameters to MSD::Parameters::operator==
+(3-9-2021) Added missing "throw" keyword on MSD.h:379, MSD::Iterator::operator++()
