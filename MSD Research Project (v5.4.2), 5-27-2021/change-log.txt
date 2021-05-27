@@ -85,4 +85,4 @@ Second bug fix. In MSD::setParameters()
 	Added custom spin support to parameters-metropolis.txt input file.
 	Added snapshot of final configuration (as XML) after each simualtion.
 	Slight optimization in energy calculation: factored out Je1.
-TODO: Program is not ending at the right time. Goes past 100% ???
+(5-27-2021) Added build_metropolis.bat to only build metropolis program (saves time)

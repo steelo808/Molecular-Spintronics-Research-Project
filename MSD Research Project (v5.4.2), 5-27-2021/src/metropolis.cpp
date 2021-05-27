@@ -1,7 +1,7 @@
 
 /*
  * Christopher D'Angelo
- * 5-25-2021
+ * 5-27-2021
  */
 
 #include <cstdlib>
@@ -321,7 +321,8 @@ int main(int argc, char *argv[]) {
 					lbl = key;  // use key as default label if none was given
 
 				p[key] = vec;
-				labelNames.push_back(lbl);
+				if (labelMap.find(lbl) == labelMap.end())  // don't add the labels more then once into "labelNames"
+					labelNames.push_back(lbl);
 				labelMap[lbl].insert(key);
 				labelMapInv[key] = lbl;
 				iters[lbl] = 0;
