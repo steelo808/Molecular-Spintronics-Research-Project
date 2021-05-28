@@ -1,7 +1,7 @@
 /*
  * MSD.h
  *
- *  Last Edited: May 25, 2021
+ *  Last Edited: May 28, 2021
  *       Author: Christopher D'Angelo
  */
 
@@ -46,26 +46,23 @@ using udc::Vector;
 
 /**
  * An abstract Molecular Spintronic Device.
- *
- * To do: The various D (Dipolar Coupling)
- *        parameters are not taken into account yet.
  */
 class MSD {
  public:
 	typedef function<Vector(const Vector &, function<double()>)> FlippingAlgorithm;
 	
 	struct Parameters {
-		double kT; //Temperature
-		Vector B; //Magnetic field
-		double sL, sm, sR; //spin magnitudes
-		double FL, FR, Fm; //Spin fluctuation constants, flux.norm() = uniform random between [0, F)
-		double JL, JR, Jm, JmL, JmR, JLR; // Heisenberg exchange coupling between s_i and s_j: local spin and neighboring spins
+		double kT;  // Temperature
+		Vector B;  // Magnetic field
+		double sL, sm, sR;  // spin magnitudes
+		double FL, FR, Fm;  // Spin fluctuation constants, flux.norm() = uniform random between [0, F)
+		double JL, JR, Jm, JmL, JmR, JLR;  // Heisenberg exchange coupling between s_i and s_j: local spin and neighboring spins
 		double Je0L, Je0R, Je0m;  // Exchange coupling between s_i and f_i: local spin and local flux vector
 		double Je1L, Je1R, Je1m, Je1mL, Je1mR, Je1LR;  // Exchange coupling between s_i and f_j: local spin and neighboring flux vectors
 		double JeeL, JeeR, Jeem, JeemL, JeemR, JeeLR;  // Exchange coupling between f_i and f_j: local flux and neighboring flux vectors
-		double bL, bR, bm, bmL, bmR, bLR; //Biquadratic Coupling
-		Vector AL, AR, Am; //Anisotropy
-		double DL, DR, Dm, DmL, DmR, DLR; //Dipolar Coupling
+		double bL, bR, bm, bmL, bmR, bLR;  // Biquadratic Coupling
+		Vector AL, AR, Am;  // Anisotropy
+		Vector DL, DR, Dm, DmL, DmR, DLR;  // Dzyaloshinskii-Moriya interaction (i.e. Skyrmions)
 		
 		Parameters();
 		
@@ -287,7 +284,7 @@ MSD::Parameters::Parameters()
   JeeL(0), JeeR(0), Jeem(0), JeemL(0), JeemR(0), JeeLR(0),
   bL(0), bR(0), bm(0), bmL(0), bmR(0), bLR(0),
   AL(Vector::ZERO), AR(Vector::ZERO), Am(Vector::ZERO),
-  DL(0), DR(0), Dm(0), DmL(0), DmR(0), DLR(0) {
+  DL(Vector::ZERO), DR(Vector::ZERO), Dm(Vector::ZERO), DmL(Vector::ZERO), DmR(Vector::ZERO), DLR(Vector::ZERO) {
 }
 
 bool MSD::Parameters::operator==(const Parameters &p) const {
@@ -644,6 +641,7 @@ void MSD::setParameters(const MSD::Parameters &p) {
 	double couple_e1_L = 0;  // sum(s_i * f_j)
 	double couple_ee_L = 0;  // sum(f_i * f_j)
 	double biquad_L = 0;
+	Vector dmi_L = Vector::ZERO;  // sum(m_i x m_j);  where x is cross product, and i < j
 	for( unsigned int z = 0; z < depth; z++ )
 		for( unsigned int y = topL; y <= bottomL; y++ )
 			for( unsigned int x = 0; x < molPosL; x++ ) {
@@ -661,6 +659,7 @@ void MSD::setParameters(const MSD::Parameters &p) {
 					couple_e1_L += f * spin;
 					couple_ee_L += f * flux;
 					biquad_L += sq(m * mag);
+					dmi_L += m.crossProduct(mag);
 				}
 				if( y + 1 <= bottomL ) {
 					unsigned int neighbor = index(x, y + 1, z);
@@ -672,6 +671,7 @@ void MSD::setParameters(const MSD::Parameters &p) {
 					couple_e1_L += f * spin;
 					couple_ee_L += f * flux;
 					biquad_L += sq(m * mag);
+					dmi_L += m.crossProduct(mag);
 				}
 				if( z + 1 < depth ) {
 					unsigned int neighbor = index(x, y, z + 1);
@@ -683,6 +683,7 @@ void MSD::setParameters(const MSD::Parameters &p) {
 					couple_e1_L += f * spin;
 					couple_ee_L += f * flux;
 					biquad_L += sq(m * mag);
+					dmi_L += m.crossProduct(mag);
 				}
 			}
 	results.UL = 0;
@@ -693,11 +694,13 @@ void MSD::setParameters(const MSD::Parameters &p) {
 	results.UL -= parameters.B * results.ML;
 	results.UL -= parameters.AL * anisotropy_L;
 	results.UL -= parameters.bL * biquad_L;
+	results.UL -= parameters.DL * dmi_L;
 	
 	double couple_ss_R = 0;  // sum(s_i * s_j)
 	double couple_e1_R = 0;  // sum(s_i * f_j)
 	double couple_ee_R = 0;  // sum(f_i * f_j)
 	double biquad_R = 0;
+	Vector dmi_R = Vector::ZERO;  // sum(m_i x m_j);  where x is cross product, and i < j
 	for( unsigned int z = frontR; z <= backR; z++ )
 		for( unsigned int y = 0; y < height; y++ )
 			for( unsigned int x = molPosR + 1; x < width; x++ ) {
@@ -715,6 +718,7 @@ void MSD::setParameters(const MSD::Parameters &p) {
 					couple_e1_R += f * spin;
 					couple_ee_R += f * flux;
 					biquad_R += sq(m * mag);
+					dmi_R += m.crossProduct(mag);
 				}
 				if( y + 1 < height ) {
 					unsigned int neighbor = index(x, y + 1, z);
@@ -726,6 +730,7 @@ void MSD::setParameters(const MSD::Parameters &p) {
 					couple_e1_R += f * spin;
 					couple_ee_R += f * flux;
 					biquad_R += sq(m * mag);
+					dmi_R += m.crossProduct(mag);
 				}
 				if( z + 1 <= backR ) {
 					unsigned int neighbor = index(x, y, z + 1);
@@ -737,6 +742,7 @@ void MSD::setParameters(const MSD::Parameters &p) {
 					couple_e1_R += f * spin;
 					couple_ee_R += f * flux;
 					biquad_R += sq(m * mag);
+					dmi_R += m.crossProduct(mag);
 				}
 			}
 	results.UR = 0;
@@ -747,11 +753,13 @@ void MSD::setParameters(const MSD::Parameters &p) {
 	results.UR -= parameters.B * results.MR;
 	results.UR -= parameters.AR * anisotropy_R;
 	results.UR -= parameters.bR * biquad_R;
+	results.UR -= parameters.DR * dmi_R;
 	
 	double couple_ss_m = 0;  // sum(s_i * s_j)
 	double couple_e1_m = 0;  // sum(s_i * f_j)
 	double couple_ee_m = 0;  // sum(f_i * f_j)
 	double biquad_m = 0;
+	Vector dmi_m = Vector::ZERO;  // sum(m_i x m_j);  where x is cross product, and i < j
 	for( unsigned int x = molPosL; x < molPosR; x++ )
 		for( unsigned int y = topL; y <= bottomL; y++ )
 			for( unsigned int z = frontR; z <= backR; z++ )
@@ -769,6 +777,7 @@ void MSD::setParameters(const MSD::Parameters &p) {
 					couple_e1_m += f * spin;
 					couple_ee_m += f * flux;
 					biquad_m += sq(m * mag);
+					dmi_m += m.crossProduct(mag);
 				}
 	results.Um = 0;
 	results.Um -= parameters.Jm * couple_ss_m;
@@ -778,11 +787,13 @@ void MSD::setParameters(const MSD::Parameters &p) {
 	results.Um -= parameters.B * results.Mm;
 	results.Um -= parameters.Am * anisotropy_m;
 	results.Um -= parameters.bm * biquad_m;
+	results.Um -= parameters.Dm * dmi_m;
 	
 	double couple_ss_mL = 0;  // sum(s_i * s_j)
 	double couple_e1_mL = 0;  // sum(s_i * f_j)
 	double couple_ee_mL = 0;  // sum(f_i * f_j)
 	double biquad_mL = 0;
+	Vector dmi_mL = Vector::ZERO;  // sum(m_i x m_j);  where x is cross product, and i < j
 	const unsigned int x1 = molPosL - 1; //only useful if( molPosL != 0 )
 	if( molPosL != 0 && molPosL <= molPosR )
 		for( unsigned int y = topL; y <= bottomL; y++ )
@@ -801,17 +812,20 @@ void MSD::setParameters(const MSD::Parameters &p) {
 					couple_e1_mL += f * spin;
 					couple_ee_mL += f * flux;
 					biquad_mL += sq(m * mag);
+					dmi_mL += m.crossProduct(mag);  // location(m)=x1 in "L" < location(mag)=molPosL in "m"
 				}
 	results.UmL = 0;
 	results.UmL -= parameters.JmL * couple_ss_mL;
 	results.UmL -= parameters.Je1mL * couple_e1_mL;
 	results.UmL -= parameters.JeemL * couple_ee_mL;
 	results.UmL -= parameters.bmL * biquad_mL;
+	results.UmL -= parameters.DmL * dmi_mL;
 	
 	double couple_ss_mR = 0;  // sum(s_i * s_j)
 	double couple_e1_mR = 0;  // sum(s_i * f_j)
 	double couple_ee_mR = 0;  // sum(f_i * f_j)
 	double biquad_mR = 0;
+	Vector dmi_mR = Vector::ZERO;  // sum(m_i x m_j);  where x is cross product, and i < j
 	const unsigned int x2 = molPosR + 1; //only useful if( molPosR != width - 1 )
 	if( x2 != width && molPosR >= molPosL )
 		for( unsigned int y = topL; y <= bottomL; y++ )
@@ -830,17 +844,20 @@ void MSD::setParameters(const MSD::Parameters &p) {
 					couple_e1_mR += f * spin;
 					couple_ee_mR += f * flux;
 					biquad_mR += sq(m * mag);
+					dmi_mR += m.crossProduct(mag); // location(m)=molPosR in "m" < location(mag)=x2 in "R"
 				}
 	results.UmR = 0;
 	results.UmR -= parameters.JmR * couple_ss_mR;
 	results.UmR -= parameters.Je1mR * couple_e1_mR;
 	results.UmR -= parameters.JeemR * couple_ee_mR;
 	results.UmR -= parameters.bmR * biquad_mR;
+	results.UmR -= parameters.DmR * dmi_mR;
 	
 	double couple_ss_LR = 0;  // sum(s_i * s_j)
 	double couple_e1_LR = 0;  // sum(s_i * f_j)
 	double couple_ee_LR = 0;  // sum(f_i * f_j)
 	double biquad_LR = 0;
+	Vector dmi_LR = Vector::ZERO;  // sum(m_i x m_j);  where x is cross product, and i < j
 	if( molPosL != 0 && x2 != width )
 		for( unsigned int z = frontR; z <= backR; z++ )
 			for( unsigned int y = topL; y <= bottomL; y++ ) {
@@ -857,12 +874,14 @@ void MSD::setParameters(const MSD::Parameters &p) {
 				couple_e1_LR += f * spin;
 				couple_ee_LR += f * flux;
 				biquad_LR += sq(m * mag);
+				dmi_LR += m.crossProduct(mag); // location(m) = x1 in "L" < location(mag) = x2 in "R"
 			}
 	results.ULR = 0;
 	results.ULR -= parameters.JLR * couple_ss_LR;
 	results.ULR -= parameters.Je1LR * couple_e1_LR;
 	results.ULR -= parameters.JeeLR * couple_ee_LR;
 	results.ULR -= parameters.bLR * biquad_LR;
+	results.ULR -= parameters.DLR * dmi_LR;
 	 
 	results.U = results.UL + results.UR + results.Um + results.UmL + results.UmR + results.ULR;
 }
@@ -979,7 +998,8 @@ void MSD::setLocalM(unsigned int a, const Vector &spin, const Vector &flux) {
 			double deltaU = parameters.JL * ( neighbor_s * deltaS )
 						  + parameters.Je1L * ( neighbor_f * deltaS + neighbor_s * deltaF )
 						  + parameters.JeeL * ( neighbor_f * deltaF )
-			              + parameters.bL * ( sq(neighbor_m * mag) - sq(neighbor_m * m) );
+			              + parameters.bL * ( sq(neighbor_m * mag) - sq(neighbor_m * m) )
+						  + parameters.DL * neighbor_m.crossProduct(deltaM);  // (a1 < a): right vector changed
 			results.U -= deltaU;
 			results.UL -= deltaU;
 		} // else, x - 1 neighbor doesn't exist
@@ -991,7 +1011,8 @@ void MSD::setLocalM(unsigned int a, const Vector &spin, const Vector &flux) {
 			double deltaU = parameters.JL * ( neighbor_s * deltaS )
 						  + parameters.Je1L * ( neighbor_f * deltaS + neighbor_s * deltaF )
 						  + parameters.JeeL * ( neighbor_f * deltaF )
-			              + parameters.bL * ( sq(neighbor_m * mag) - sq(neighbor_m * m) );
+			              + parameters.bL * ( sq(neighbor_m * mag) - sq(neighbor_m * m) )
+						  + parameters.DL * neighbor_m.crossProduct(deltaM);  // (a1 < a): right vector changed
 			results.U -= deltaU;
 			results.UL -= deltaU;
 		} // else, y - 1 neighbor doesn't exist
@@ -1003,7 +1024,8 @@ void MSD::setLocalM(unsigned int a, const Vector &spin, const Vector &flux) {
 			double deltaU = parameters.JL * ( neighbor_s * deltaS )
 						  + parameters.Je1L * ( neighbor_f * deltaS + neighbor_s * deltaF )
 						  + parameters.JeeL * ( neighbor_f * deltaF )
-			              + parameters.bL * ( sq(neighbor_m * mag) - sq(neighbor_m * m) );
+			              + parameters.bL * ( sq(neighbor_m * mag) - sq(neighbor_m * m) )
+						  + parameters.DL * deltaM.crossProduct(neighbor_m);  // (a < a1): left vector changed
 			results.U -= deltaU;
 			results.UL -= deltaU;
 		} // else, y + 1 neighbor doesn't exist
@@ -1015,7 +1037,8 @@ void MSD::setLocalM(unsigned int a, const Vector &spin, const Vector &flux) {
 			double deltaU = parameters.JL * ( neighbor_s * deltaS )
 						  + parameters.Je1L * ( neighbor_f * deltaS + neighbor_s * deltaF )
 						  + parameters.JeeL * ( neighbor_f * deltaF )
-			              + parameters.bL * ( sq(neighbor_m * mag) - sq(neighbor_m * m) );
+			              + parameters.bL * ( sq(neighbor_m * mag) - sq(neighbor_m * m) )
+						  + parameters.DL * neighbor_m.crossProduct(deltaM);  // (a1 < a): right vector changed
 			results.U -= deltaU;
 			results.UL -= deltaU;
 		} // else, z - 1 neighbor doesn't exist
@@ -1027,7 +1050,8 @@ void MSD::setLocalM(unsigned int a, const Vector &spin, const Vector &flux) {
 			double deltaU = parameters.JL * ( neighbor_s * deltaS )
 						  + parameters.Je1L * ( neighbor_f * deltaS + neighbor_s * deltaF )
 						  + parameters.JeeL * ( neighbor_f * deltaF )
-			              + parameters.bL * ( sq(neighbor_m * mag) - sq(neighbor_m * m) );
+			              + parameters.bL * ( sq(neighbor_m * mag) - sq(neighbor_m * m) )
+						  + parameters.DL * deltaM.crossProduct(neighbor_m);  // (a < a1): left vector changed
 			results.U -= deltaU;
 			results.UL -= deltaU;
 		} // else, z + 1 neighbor doesn't exist
@@ -1043,7 +1067,8 @@ void MSD::setLocalM(unsigned int a, const Vector &spin, const Vector &flux) {
 						double deltaU = parameters.JmL * ( neighbor_s * deltaS )
 						              + parameters.Je1mL * ( neighbor_f * deltaS + neighbor_s * deltaF )
 						              + parameters.JeemL * ( neighbor_f * deltaF )
-						              + parameters.bmL * ( sq(neighbor_m * mag) - sq(neighbor_m * m) );
+						              + parameters.bmL * ( sq(neighbor_m * mag) - sq(neighbor_m * m) )
+									  + parameters.DmL * deltaM.crossProduct(neighbor_m);  // (a < a1): left vector changed
 						results.U -= deltaU;
 						results.UmL -= deltaU;
 					} catch(const out_of_range &e) {} // x + 1 neighbor doesn't exist because it's in the buffer zone
@@ -1058,7 +1083,8 @@ void MSD::setLocalM(unsigned int a, const Vector &spin, const Vector &flux) {
 						double deltaU = parameters.JLR * ( neighbor_s * deltaS )
 						              + parameters.Je1LR * ( neighbor_f * deltaS + neighbor_s * deltaF )
 						              + parameters.JeeLR * ( neighbor_f * deltaF )
-						              + parameters.bLR * ( sq(neighbor_m * mag) - sq(neighbor_m * m) );
+						              + parameters.bLR * ( sq(neighbor_m * mag) - sq(neighbor_m * m) )
+									  + parameters.DLR * deltaM.crossProduct(neighbor_m);  // (a < a1): left vector changed
 						results.U -= deltaU;
 						results.ULR -= deltaU;
 					} catch(const out_of_range &e) {} // molPosR + 1 atom doesn't exist because we're not in the center
@@ -1071,7 +1097,8 @@ void MSD::setLocalM(unsigned int a, const Vector &spin, const Vector &flux) {
 				double deltaU = parameters.JL * ( neighbor_s * deltaS )
 				              + parameters.Je1L * ( neighbor_f * deltaS + neighbor_s * deltaF )
 				              + parameters.JeeL * ( neighbor_f * deltaF )
-				              + parameters.bL * ( sq(neighbor_m * mag) - sq(neighbor_m * m) );
+				              + parameters.bL * ( sq(neighbor_m * mag) - sq(neighbor_m * m) )
+							  + parameters.DL * deltaM.crossProduct(neighbor_m);  // (a < a1): left vector changed
 				results.U -= deltaU;
 				results.UL -= deltaU;
 			}
@@ -1096,7 +1123,8 @@ void MSD::setLocalM(unsigned int a, const Vector &spin, const Vector &flux) {
 			double deltaU = parameters.JR * ( neighbor_s * deltaS )
 			              + parameters.Je1R * ( neighbor_f * deltaS + neighbor_s * deltaF )
 			              + parameters.JeeR * ( neighbor_f * deltaF )
-			              + parameters.bR * ( sq(neighbor_m * mag) - sq(neighbor_m * m) );
+			              + parameters.bR * ( sq(neighbor_m * mag) - sq(neighbor_m * m) )
+						  + parameters.DR * deltaM.crossProduct(neighbor_m);  // (a < a1): left vector changed
 			results.U -= deltaU;
 			results.UR -= deltaU;
 		} // else, x + 1 neighbor doesn't exist
@@ -1108,7 +1136,8 @@ void MSD::setLocalM(unsigned int a, const Vector &spin, const Vector &flux) {
 			double deltaU = parameters.JR * ( neighbor_s * deltaS )
 			              + parameters.Je1R * ( neighbor_f * deltaS + neighbor_s * deltaF )
 			              + parameters.JeeR * ( neighbor_f * deltaF )
-			              + parameters.bR * ( sq(neighbor_m * mag) - sq(neighbor_m * m) );
+			              + parameters.bR * ( sq(neighbor_m * mag) - sq(neighbor_m * m) )
+						  + parameters.DR * neighbor_m.crossProduct(deltaM);  // (a1 < a): right vector changed
 			results.U -= deltaU;
 			results.UR -= deltaU;
 		} // else, y - 1 neighbor doesn't exist
@@ -1120,7 +1149,8 @@ void MSD::setLocalM(unsigned int a, const Vector &spin, const Vector &flux) {
 			double deltaU = parameters.JR * ( neighbor_s * deltaS )
 			              + parameters.Je1R * ( neighbor_f * deltaS + neighbor_s * deltaF )
 			              + parameters.JeeR * ( neighbor_f * deltaF )
-			              + parameters.bR * ( sq(neighbor_m * mag) - sq(neighbor_m * m) );
+			              + parameters.bR * ( sq(neighbor_m * mag) - sq(neighbor_m * m) )
+						  + parameters.DR * deltaM.crossProduct(neighbor_m);  // (a < a1): left vector changed
 			results.U -= deltaU;
 			results.UR -= deltaU;
 		} // else, y + 1 neighbor doesn't exist
@@ -1132,7 +1162,8 @@ void MSD::setLocalM(unsigned int a, const Vector &spin, const Vector &flux) {
 			double deltaU = parameters.JR * ( neighbor_s * deltaS )
 			              + parameters.Je1R * ( neighbor_f * deltaS + neighbor_s * deltaF )
 			              + parameters.JeeR * ( neighbor_f * deltaF )
-			              + parameters.bR * ( sq(neighbor_m * mag) - sq(neighbor_m * m) );
+			              + parameters.bR * ( sq(neighbor_m * mag) - sq(neighbor_m * m) )
+						  + parameters.DR * neighbor_m.crossProduct(deltaM);  // (a1 < a): right vector changed
 			results.U -= deltaU;
 			results.UR -= deltaU;
 		} // else, z - 1 neighbor doesn't exist
@@ -1144,7 +1175,8 @@ void MSD::setLocalM(unsigned int a, const Vector &spin, const Vector &flux) {
 			double deltaU = parameters.JR * ( neighbor_s * deltaS )
 			              + parameters.Je1R * ( neighbor_f * deltaS + neighbor_s * deltaF )
 			              + parameters.JeeR * ( neighbor_f * deltaF )
-			              + parameters.bR * ( sq(neighbor_m * mag) - sq(neighbor_m * m) );
+			              + parameters.bR * ( sq(neighbor_m * mag) - sq(neighbor_m * m) )
+						  + parameters.DR * deltaM.crossProduct(neighbor_m);  // (a < a1): left vector changed
 			results.U -= deltaU;
 			results.UR -= deltaU;
 		} // else, z + 1 neighbor doesn't exist
@@ -1160,7 +1192,8 @@ void MSD::setLocalM(unsigned int a, const Vector &spin, const Vector &flux) {
 					double deltaU = parameters.JmR * ( neighbor_s * deltaS )
 					              + parameters.Je1mR * ( neighbor_f * deltaS + neighbor_s * deltaF )
 					              + parameters.JeemR * ( neighbor_f * deltaF )
-					              + parameters.bmR * ( sq(neighbor_m * mag) - sq(neighbor_m * m) );
+					              + parameters.bmR * ( sq(neighbor_m * mag) - sq(neighbor_m * m) )
+								  + parameters.DmR * neighbor_m.crossProduct(deltaM);  // (a1 < a): right vector changed
 					results.U -= deltaU;
 					results.UmR -= deltaU;
 				} catch(const out_of_range &e) {} // x - 1 neighbor doesn't exist because it's in the buffer zone
@@ -1175,7 +1208,8 @@ void MSD::setLocalM(unsigned int a, const Vector &spin, const Vector &flux) {
 					double deltaU = parameters.JLR * ( neighbor_s * deltaS )
 					              + parameters.Je1LR * ( neighbor_f * deltaS + neighbor_s * deltaF )
 					              + parameters.JeeLR * ( neighbor_f * deltaF )
-					              + parameters.bLR * ( sq(neighbor_m * mag) - sq(neighbor_m * m) );
+					              + parameters.bLR * ( sq(neighbor_m * mag) - sq(neighbor_m * m) )
+								  + parameters.DLR * neighbor_m.crossProduct(deltaM);  // (a1 < a): right vector changed
 					results.U -= deltaU;
 					results.ULR -= deltaU;
 				} catch(const out_of_range &e) {} // molPos - 1 atom doesn't exist because we're not in the center
@@ -1188,7 +1222,8 @@ void MSD::setLocalM(unsigned int a, const Vector &spin, const Vector &flux) {
 			double deltaU = parameters.JR * ( neighbor_s * deltaS )
 			              + parameters.Je1R * ( neighbor_f * deltaS + neighbor_s * deltaF )
 			              + parameters.JeeR * ( neighbor_f * deltaF )
-			              + parameters.bR * ( sq(neighbor_m * mag) - sq(neighbor_m * m) );
+			              + parameters.bR * ( sq(neighbor_m * mag) - sq(neighbor_m * m) )
+						  + parameters.DR * neighbor_m.crossProduct(deltaM);  // (a1 < a): right vector changed
 			results.U -= deltaU;
 			results.UR -= deltaU;
 		}
@@ -1213,14 +1248,16 @@ void MSD::setLocalM(unsigned int a, const Vector &spin, const Vector &flux) {
 				double deltaU = parameters.JmL * ( neighbor_s * deltaS )
 				              + parameters.Je1mL * ( neighbor_f * deltaS + neighbor_s * deltaF )
 				              + parameters.JeemL * ( neighbor_f * deltaF )
-				              + parameters.bmL * ( sq(neighbor_m * mag) - sq(neighbor_m * m) );
+				              + parameters.bmL * ( sq(neighbor_m * mag) - sq(neighbor_m * m) )
+							  + parameters.DmL * neighbor_m.crossProduct(deltaM);  // (a1 < a): right vector changed
 				results.U -= deltaU;
 				results.UmL -= deltaU;
 			} else {
 				double deltaU = parameters.Jm * ( neighbor_s * deltaS )
 				              + parameters.Je1m * ( neighbor_f * deltaS + neighbor_s * deltaF )
 				              + parameters.Jeem * ( neighbor_f * deltaF )
-				              + parameters.bm * ( sq(neighbor_m * mag) - sq(neighbor_m * m) );
+				              + parameters.bm * ( sq(neighbor_m * mag) - sq(neighbor_m * m) )
+							  + parameters.Dm * neighbor_m.crossProduct(deltaM);  // (a1 < a): right vector changed
 				results.U -= deltaU;
 				results.Um -= deltaU;
 			}
@@ -1235,14 +1272,16 @@ void MSD::setLocalM(unsigned int a, const Vector &spin, const Vector &flux) {
 				double deltaU = parameters.JmR * ( neighbor_s * deltaS )
 				              + parameters.Je1mR * ( neighbor_f * deltaS + neighbor_s * deltaF )
 				              + parameters.JeemR * ( neighbor_f * deltaF )
-				              + parameters.bmR * ( sq(neighbor_m * mag) - sq(neighbor_m * m) );
+				              + parameters.bmR * ( sq(neighbor_m * mag) - sq(neighbor_m * m) )
+							  + parameters.DmR * deltaM.crossProduct(neighbor_m);  // (a < a1): left vector changed
 				results.U -= deltaU;
 				results.UmR -= deltaU;
 			} else {
 				double deltaU = parameters.Jm * ( neighbor_s * deltaS )
 				              + parameters.Je1m * ( neighbor_f * deltaS + neighbor_s * deltaF )
 				              + parameters.Jeem * ( neighbor_f * deltaF )
-				              + parameters.bm * ( sq(neighbor_m * mag) - sq(neighbor_m * m) );
+				              + parameters.bm * ( sq(neighbor_m * mag) - sq(neighbor_m * m) )
+							  + parameters.Dm * deltaM.crossProduct(neighbor_m);  // (a < a1): left vector changed
 				results.U -= deltaU;
 				results.Um -= deltaU;
 			}

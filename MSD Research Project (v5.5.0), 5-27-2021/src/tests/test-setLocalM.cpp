@@ -96,6 +96,7 @@ int main(int argc, char *argv[]) {
 	p.JeeL = rand();  p.JeeR = rand();  p.Jeem = rand();  p.JeemL = rand();  p.JeemR = rand();  p.JeeLR = rand();
 	p.bL = rand();  p.bR = rand();  p.bm = rand();  p.bmL = rand();  p.bmR = rand();  p.bLR = rand();
 	p.AL = randV();  p.AR = randV();  p.Am = randV();
+	p.DL = randV(); p.DR = randV(); p.Dm = randV(); p.DmL = randV(); p.DmR = randV(); p.DLR = randV();
 	cout << p;
 	msd.setParameters(p);
 	cout << msd.getResults();

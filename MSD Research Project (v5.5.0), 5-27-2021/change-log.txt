@@ -95,3 +95,9 @@ Second bug fix. In MSD::setParameters()
 	Minor optimization in MSD::specificHeat methods.
 	Changed XML version to 1.7.
 	Added "return ERRNO" to fix potential bug in metropolis.cpp when parsing cmd args and argv[3] or argv[4] where missing.
+
+5.5.0:
+(5-28-2021) Removed unused Dipolar coupling parameters.
+	Added Dzyaloshinskii-Moriya interaction (i.e. Skyrmions) parameters: DL, DR, Dm.
+	Modified MSD::setParameters and MSD::setLocalM to account for Dzyaloshinskii-Moriya interaction (i.e. Skyrmions).
+	
