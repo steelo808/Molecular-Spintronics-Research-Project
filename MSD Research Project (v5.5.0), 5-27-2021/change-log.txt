@@ -100,4 +100,7 @@ Second bug fix. In MSD::setParameters()
 (5-28-2021) Removed unused Dipolar coupling parameters.
 	Added Dzyaloshinskii-Moriya interaction (i.e. Skyrmions) parameters: DL, DR, Dm.
 	Modified MSD::setParameters and MSD::setLocalM to account for Dzyaloshinskii-Moriya interaction (i.e. Skyrmions).
+(6-1-2021) In magnetize.cpp:281 changed "if (B_inc == 0) {" to "if (B_inc <= 0) {" for infinite loop error check.
+	In magnetize2.cpp:244 changed "if (B_rate == 0) {" to "if (B_rate <= 0) {" for infinite loop error check (and updated error message).
+	
 	

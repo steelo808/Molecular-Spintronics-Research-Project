@@ -241,8 +241,8 @@ int main(int argc, char *argv[]) {
 		if( argc > 3 && string(argv[3]) != string("0") )
 			msd.randomize();
 		
-		if (B_rate == 0) {
-			cerr << "B_inc == 0: infinite loop!\n";
+		if (B_rate <= 0) {
+			cerr << "B_rate <= 0: infinite loop!\n";
 			return 8;
 		}
 		

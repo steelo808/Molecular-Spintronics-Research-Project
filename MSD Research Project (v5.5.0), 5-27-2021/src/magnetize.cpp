@@ -278,8 +278,8 @@ int main(int argc, char *argv[]) {
 				 << r.U << ',' << r.UL << ',' << r.UR << ',' << r.Um << ',' << r.UmL << ',' << r.UmR << ',' << r.ULR << '\n';
 		};
 
-		if (B_inc == 0) {
-			cerr << "B_inc == 0: infinite loop!\n";
+		if (B_inc <= 0) {
+			cerr << "B_inc <= 0: infinite loop!\n";
 			return 8;
 		}
 		
