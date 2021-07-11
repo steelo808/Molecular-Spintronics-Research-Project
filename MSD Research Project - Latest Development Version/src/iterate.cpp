@@ -1,7 +1,7 @@
 
 /*
  * Christopher D'Angelo
- * 2-10-2021
+ * 7-11-2021
  */
 
 #include <fstream>
@@ -271,8 +271,14 @@ int main(int argc, char *argv[]) {
 
 	try {
 		//print info/headings
-		file << "t,,M_x,M_y,M_z,M_norm,M_theta,M_phi,,ML_x,ML_y,ML_z,ML_norm,ML_theta,ML_phi,,MR_x,MR_y,MR_z,MR_norm,MR_theta,MR_phi,,"
-		     << "Mm_x,Mm_y,Mm_z,Mm_norm,Mm_theta,Mm_phi,,U,UL,UR,Um,UmL,UmR,ULR,,,x,y,z,m_x,m_y,m_z,s_x,s_y,s_z,f_x,f_y,f_z,,"
+		file << "t,,"
+		        "M_x,M_y,M_z,M_norm,M_theta,M_phi,,ML_x,ML_y,ML_z,ML_norm,ML_theta,ML_phi,,"
+				"MR_x,MR_y,MR_z,MR_norm,MR_theta,MR_phi,,Mm_x,Mm_y,Mm_z,Mm_norm,Mm_theta,Mm_phi,,"
+				"MS_x,MS_y,MS_z,MS_norm,MS_theta,MS_phi,,MSL_x,MSL_y,MSL_z,MSL_norm,MSL_theta,MSL_phi,,"
+				"MSR_x,MSR_y,MSR_z,MSR_norm,MSR_theta,MSR_phi,,MSm_x,MSm_y,MSm_z,MSm_norm,MSm_theta,MSm_phi,,"
+				"MF_x,MF_y,MF_z,MF_norm,MF_theta,MF_phi,,MFL_x,MFL_y,MFL_z,MFL_norm,MFL_theta,MFL_phi,,"
+				"MFR_x,MFR_y,MFR_z,MFR_norm,MFR_theta,MFR_phi,,MFm_x,MFm_y,MFm_z,MFm_norm,MFm_theta,MFm_phi,,"
+				"U,UL,UR,Um,UmL,UmR,ULR,,,x,y,z,m_x,m_y,m_z,s_x,s_y,s_z,f_x,f_y,f_z,,"
 			    ",width = " << msd.getWidth()
 			 << ",height = " << msd.getHeight()
 			 << ",depth = " << msd.getDepth()
@@ -356,6 +362,14 @@ int main(int argc, char *argv[]) {
 				 << iter->ML.x << ',' << iter->ML.y << ',' << iter->ML.z << ',' << iter->ML.norm() << ',' << iter->ML.theta() << ',' << iter->ML.phi() << ",,"
 				 << iter->MR.x << ',' << iter->MR.y << ',' << iter->MR.z << ',' << iter->MR.norm() << ',' << iter->MR.theta() << ',' << iter->MR.phi() << ",,"
 				 << iter->Mm.x << ',' << iter->Mm.y << ',' << iter->Mm.z << ',' << iter->Mm.norm() << ',' << iter->Mm.theta() << ',' << iter->Mm.phi() << ",,"
+				 << iter->MS.x  << ',' << iter->MS.y  << ',' << iter->MS.z  << ',' << iter->MS.norm()  << ',' << iter->MS.theta()  << ',' << iter->MS.phi()  << ",,"
+				 << iter->MSL.x << ',' << iter->MSL.y << ',' << iter->MSL.z << ',' << iter->MSL.norm() << ',' << iter->MSL.theta() << ',' << iter->MSL.phi() << ",,"
+				 << iter->MSR.x << ',' << iter->MSR.y << ',' << iter->MSR.z << ',' << iter->MSR.norm() << ',' << iter->MSR.theta() << ',' << iter->MSR.phi() << ",,"
+				 << iter->MSm.x << ',' << iter->MSm.y << ',' << iter->MSm.z << ',' << iter->MSm.norm() << ',' << iter->MSm.theta() << ',' << iter->MSm.phi() << ",,"
+				 << iter->MF.x  << ',' << iter->MF.y  << ',' << iter->MF.z  << ',' << iter->MF.norm()  << ',' << iter->MF.theta()  << ',' << iter->MF.phi()  << ",,"
+				 << iter->MFL.x << ',' << iter->MFL.y << ',' << iter->MFL.z << ',' << iter->MFL.norm() << ',' << iter->MFL.theta() << ',' << iter->MFL.phi() << ",,"
+				 << iter->MFR.x << ',' << iter->MFR.y << ',' << iter->MFR.z << ',' << iter->MFR.norm() << ',' << iter->MFR.theta() << ',' << iter->MFR.phi() << ",,"
+				 << iter->MFm.x << ',' << iter->MFm.y << ',' << iter->MFm.z << ',' << iter->MFm.norm() << ',' << iter->MFm.theta() << ',' << iter->MFm.phi() << ",,"
 			     << iter->U << ',' << iter->UL << ',' << iter->UR << ',' << iter->Um << ',' << iter->UmL << ',' << iter->UmR << ',' << iter->ULR << ",,,";
 			if( msdIter != msd.end() ) {
 				Vector m = msdIter.getLocalM(), s = msdIter.getSpin(), f = msdIter.getFlux();

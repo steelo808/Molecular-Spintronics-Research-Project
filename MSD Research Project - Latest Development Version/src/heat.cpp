@@ -1,7 +1,7 @@
 
 /*
  * Christopher D'Angelo
- * 2-10-2021
+ * 7-11-2021
  */
 
 #include <fstream>
@@ -149,12 +149,12 @@ int main(int argc, char *argv[]) {
 		ask("> bmR = ", p.bmR);
 		ask("> bLR = ", p.bLR);
 		cout << '\n';
-		ask("> DL", p.DL);
-		ask("> DR", p.DR);
-		ask("> Dm", p.Dm);
-		ask("> DmL", p.DmL);
-		ask("> DmR", p.DmR);
-		ask("> DLR", p.DLR);
+		ask("> DL  = ", p.DL);
+		ask("> DR  = ", p.DR);
+		ask("> Dm  = ", p.Dm);
+		ask("> DmL = ", p.DmL);
+		ask("> DmR = ", p.DmR);
+		ask("> DLR = ", p.DLR);
 		cout << '\n';
 	} catch(ios::failure &e) {
 		cerr << "Invalid parameter: " << e.what() << '\n';
@@ -172,6 +172,14 @@ int main(int argc, char *argv[]) {
 				"<ML>_x,<ML>_y,<ML>_z,<ML>_norm,<ML>_theta,<ML>_phi,,"
 				"<MR>_x,<MR>_y,<MR>_z,<MR>_norm,<MR>_theta,<MR>_phi,,"
 			    "<Mm>_x,<Mm>_y,<Mm>_z,<Mm>_norm,<Mm>_theta,<Mm>_phi,,"
+				"<MS>_x,<MS>_y,<MS>_z,<MS>_norm,<MS>_theta,<MS>_phi,,"
+				"<MSL>_x,<MSL>_y,<MSL>_z,<MSL>_norm,<MSL>_theta,<MSL>_phi,,"
+				"<MSR>_x,<MSR>_y,<MSR>_z,<MSR>_norm,<MSR>_theta,<MSR>_phi,,"
+			    "<MSm>_x,<MSm>_y,<MSm>_z,<MSm>_norm,<MSm>_theta,<MSm>_phi,,"
+				"<MF>_x,<MF>_y,<MF>_z,<MF>_norm,<MF>_theta,<MF>_phi,,"
+				"<MFL>_x,<MFL>_y,<MFL>_z,<MFL>_norm,<MFL>_theta,<MFL>_phi,,"
+				"<MFR>_x,<MFR>_y,<MFR>_z,<MFR>_norm,<MFR>_theta,<MFR>_phi,,"
+			    "<MFm>_x,<MFm>_y,<MFm>_z,<MFm>_norm,<MFm>_theta,<MFm>_phi,,"
 				"<U>,<UL>,<UR>,<Um>,<UmL>,<UmR>,<ULR>,,"
 				"c,cL,cR,cm,cmL,cmR,cLR,,"
 				"x,xL,xR,xm,,"
@@ -179,6 +187,14 @@ int main(int argc, char *argv[]) {
 				"ML_x,ML_y,ML_z,ML_norm,ML_theta,ML_phi,,"
 				"MR_x,MR_y,MR_z,MR_norm,MR_theta,MR_phi,,"
 				"Mm_x,Mm_y,Mm_z,Mm_norm,Mm_theta,Mm_phi,,"
+				"MS_x,MS_y,MS_z,MS_norm,MS_theta,MS_phi,,"
+				"MSL_x,MSL_y,MSL_z,MSL_norm,MSL_theta,MSL_phi,,"
+				"MSR_x,MSR_y,MSR_z,MSR_norm,MSR_theta,MSR_phi,,"
+				"MSm_x,MSm_y,MSm_z,MSm_norm,MSm_theta,MSm_phi,,"
+				"MF_x,MF_y,MF_z,MF_norm,MF_theta,MF_phi,,"
+				"MFL_x,MFL_y,MFL_z,MFL_norm,MFL_theta,MFL_phi,,"
+				"MFR_x,MFR_y,MFR_z,MFR_norm,MFR_theta,MFR_phi,,"
+				"MFm_x,MFm_y,MFm_z,MFm_norm,MFm_theta,MFm_phi,,"
 				"U,UL,UR,Um,UmL,UmR,ULR,"
 			 << ",width = " << msd.getWidth()
 			 << ",height = " << msd.getHeight()
@@ -259,6 +275,14 @@ int main(int argc, char *argv[]) {
 			Vector avgML  = msd.meanML();
 			Vector avgMR  = msd.meanMR();
 			Vector avgMm  = msd.meanMm();
+			Vector avgMS   = msd.meanMS();
+			Vector avgMSL  = msd.meanMSL();
+			Vector avgMSR  = msd.meanMSR();
+			Vector avgMSm  = msd.meanMSm();
+			Vector avgMF   = msd.meanMF();
+			Vector avgMFL  = msd.meanMFL();
+			Vector avgMFR  = msd.meanMFR();
+			Vector avgMFm  = msd.meanMFm();
 			double avgU   = msd.meanU();
 			double avgUL  = msd.meanUL();
 			double avgUR  = msd.meanUR();
@@ -271,6 +295,14 @@ int main(int argc, char *argv[]) {
 				 << avgML.x << ',' << avgML.y << ',' << avgML.z << ',' << avgML.norm() << ',' << avgML.theta() << ',' << avgML.phi() << ",,"
 				 << avgMR.x << ',' << avgMR.y << ',' << avgMR.z << ',' << avgMR.norm() << ',' << avgMR.theta() << ',' << avgMR.phi() << ",,"
 				 << avgMm.x << ',' << avgMm.y << ',' << avgMm.z << ',' << avgMm.norm() << ',' << avgMm.theta() << ',' << avgMm.phi() << ",,"
+				 << avgMS.x  << ',' << avgMS.y  << ',' << avgMS.z  << ',' << avgMS.norm()  << ',' << avgMS.theta()  << ',' << avgMS.phi()  << ",,"
+				 << avgMSL.x << ',' << avgMSL.y << ',' << avgMSL.z << ',' << avgMSL.norm() << ',' << avgMSL.theta() << ',' << avgMSL.phi() << ",,"
+				 << avgMSR.x << ',' << avgMSR.y << ',' << avgMSR.z << ',' << avgMSR.norm() << ',' << avgMSR.theta() << ',' << avgMSR.phi() << ",,"
+				 << avgMSm.x << ',' << avgMSm.y << ',' << avgMSm.z << ',' << avgMSm.norm() << ',' << avgMSm.theta() << ',' << avgMSm.phi() << ",,"
+				 << avgMF.x  << ',' << avgMF.y  << ',' << avgMF.z  << ',' << avgMF.norm()  << ',' << avgMF.theta()  << ',' << avgMF.phi()  << ",,"
+				 << avgMFL.x << ',' << avgMFL.y << ',' << avgMFL.z << ',' << avgMFL.norm() << ',' << avgMFL.theta() << ',' << avgMFL.phi() << ",,"
+				 << avgMFR.x << ',' << avgMFR.y << ',' << avgMFR.z << ',' << avgMFR.norm() << ',' << avgMFR.theta() << ',' << avgMFR.phi() << ",,"
+				 << avgMFm.x << ',' << avgMFm.y << ',' << avgMFm.z << ',' << avgMFm.norm() << ',' << avgMFm.theta() << ',' << avgMFm.phi() << ",,"
 				 << avgU << ',' << avgUL << ',' << avgUR << ',' << avgUm << ',' << avgUmL << ',' << avgUmR << ',' << avgULR << ",,"
 				 << msd.specificHeat()    << ',' << msd.specificHeat_L()  << ',' << msd.specificHeat_R()  << ',' << msd.specificHeat_m() << ','
 				 << msd.specificHeat_mL() << ',' << msd.specificHeat_mR() << ',' << msd.specificHeat_LR() << ",,"
@@ -280,6 +312,14 @@ int main(int argc, char *argv[]) {
 				 << r.ML.x << ',' << r.ML.y << ',' << r.ML.z << ',' << r.ML.norm() << ',' << r.ML.theta() << ',' << r.ML.phi() << ",,"
 				 << r.MR.x << ',' << r.MR.y << ',' << r.MR.z << ',' << r.MR.norm() << ',' << r.MR.theta() << ',' << r.MR.phi() << ",,"
 				 << r.Mm.x << ',' << r.Mm.y << ',' << r.Mm.z << ',' << r.Mm.norm() << ',' << r.Mm.theta() << ',' << r.Mm.phi() << ",,"
+				 << r.MS.x  << ',' << r.MS.y  << ',' << r.MS.z  << ',' << r.MS.norm()  << ',' << r.MS.theta()  << ',' << r.MS.phi()  << ",,"
+				 << r.MSL.x << ',' << r.MSL.y << ',' << r.MSL.z << ',' << r.MSL.norm() << ',' << r.MSL.theta() << ',' << r.MSL.phi() << ",,"
+				 << r.MSR.x << ',' << r.MSR.y << ',' << r.MSR.z << ',' << r.MSR.norm() << ',' << r.MSR.theta() << ',' << r.MSR.phi() << ",,"
+				 << r.MSm.x << ',' << r.MSm.y << ',' << r.MSm.z << ',' << r.MSm.norm() << ',' << r.MSm.theta() << ',' << r.MSm.phi() << ",,"
+				 << r.MF.x  << ',' << r.MF.y  << ',' << r.MF.z  << ',' << r.MF.norm()  << ',' << r.MF.theta()  << ',' << r.MF.phi()  << ",,"
+				 << r.MFL.x << ',' << r.MFL.y << ',' << r.MFL.z << ',' << r.MFL.norm() << ',' << r.MFL.theta() << ',' << r.MFL.phi() << ",,"
+				 << r.MFR.x << ',' << r.MFR.y << ',' << r.MFR.z << ',' << r.MFR.norm() << ',' << r.MFR.theta() << ',' << r.MFR.phi() << ",,"
+				 << r.MFm.x << ',' << r.MFm.y << ',' << r.MFm.z << ',' << r.MFm.norm() << ',' << r.MFm.theta() << ',' << r.MFm.phi() << ",,"
 				 << r.U << ',' << r.UL << ',' << r.UR << ',' << r.Um << ',' << r.UmL << ',' << r.UmR << ',' << r.ULR << '\n';
 		};
 		if (kT_inc > 0) {

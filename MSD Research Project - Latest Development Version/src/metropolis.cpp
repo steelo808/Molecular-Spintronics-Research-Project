@@ -1,7 +1,7 @@
 
 /*
  * Christopher D'Angelo
- * 5-27-2021
+ * 7-11-2021
  */
 
 #include <cstdlib>
@@ -54,7 +54,7 @@ void reportTime(time_t sec) {
 	     << setw(2) << sec << ']';
 }
 
-void recordVar( memory_pool<> &mem, xml_node<> &data, char *type, char *name, double value) {
+void recordVar( memory_pool<> &mem, xml_node<> &data, const char *type, const char *name, double value) {
 	ostringstream ss;
 	ss << value;
 	xml_node<> *var = mem.allocate_node( node_element, "var" );
@@ -115,6 +115,16 @@ Info algorithm(Info info) {
 	info.results.ML = msd.meanML();
 	info.results.MR = msd.meanMR();
 	info.results.Mm = msd.meanMm();
+
+	info.results.MS = msd.meanMS();
+	info.results.MSL = msd.meanMSL();
+	info.results.MSR = msd.meanMSR();
+	info.results.MSm = msd.meanMSm();
+
+	info.results.MF = msd.meanMF();
+	info.results.MFL = msd.meanMFL();
+	info.results.MFR = msd.meanMFR();
+	info.results.MFm = msd.meanMFm();
 	
 	info.results.U = msd.meanU();
 	info.results.UL = msd.meanUL();
@@ -413,20 +423,20 @@ int main(int argc, char *argv[]) {
 			recordVar( doc, *global, "param", "simCount", p.at("simCount")[0] );
 			recordVar( doc, *global, "param", "freq", p.at("freq")[0] );
 			const unsigned int SIZE = 64;
-			string inds[SIZE] = { "kT", "B_x", "B_y", "B_z",  // +4  (sum: 4)
-			                      "sL", "sR", "sm", "FL", "FR", "Fm",  // +6  (sum: 10)
-			                      "JL", "JmL", "Jm", "JmR", "JR", "JLR",  // +6  (sum: 16)
-								  "Je0L", "Je0m", "Je0R",  // +3  (sum: 19)
-								  "Je1L", "Je1mL", "Je1m", "Je1mR", "Je1R", "Je1LR",  // +6  (sum: 25)
-								  "JeeL", "JeemL", "Jeem", "JeemR", "JeeR", "JeeLR",  // +6  (sum: 31)
-			                      "bL", "bmL", "bm", "bmR", "bR", "bLR",  // +6  (sum: 37)
-								  "AL_x", "AL_y", "AL_z",  // +9 = 3 * 3  (sum: 46)
+			string inds[SIZE] = { "kT", "B_x", "B_y", "B_z",  // + 4 (sum: 4)
+			                      "sL", "sR", "sm", "FL", "FR", "Fm",  // + 6 (sum: 10)
+			                      "JL", "JmL", "Jm", "JmR", "JR", "JLR",  // + 6 (sum: 16)
+								  "Je0L", "Je0m", "Je0R",  // + 3 (sum: 19)
+								  "Je1L", "Je1mL", "Je1m", "Je1mR", "Je1R", "Je1LR",  // + 6 (sum: 25)
+								  "JeeL", "JeemL", "Jeem", "JeemR", "JeeR", "JeeLR",  // + 6 (sum: 31)
+			                      "bL", "bmL", "bm", "bmR", "bR", "bLR",  // + 6 (sum: 37)
+								  "AL_x", "AL_y", "AL_z",  // + 9 == 3 * 3 (sum: 46)
 			                      "AR_x", "AR_y", "AR_z",
 			                      "Am_x", "Am_y", "Am_z",
-								  "DL_x",  "DL_y",  "DL_z",  // +18 = 3 * 6  (sum: 64)
+								  "DL_x",  "DL_y",  "DL_z",  // + 18 == 3 * 6 (sum: 64)
 								  "DR_x",  "DR_y",  "DR_z",
 								  "Dm_x",  "Dm_y",  "Dm_z",
-								  "DmL_x", "DML_y", "DmL_z",
+								  "DmL_x", "DmL_y", "DmL_z",
 								  "DmR_x", "DmR_y", "DmR_z",
 								  "DLR_x", "DLR_y", "DLR_z" };
 			for( unsigned int i = 0; i < SIZE; i++ ) {
@@ -435,6 +445,7 @@ int main(int argc, char *argv[]) {
 				auto label = labelMapInv.find(inds[i]);
 				if (label != labelMapInv.end() && label->second != inds[i])
 					ind->append_attribute( doc.allocate_attribute("label", doc.allocate_string( label->second.c_str() )) );
+				// cout << "[LINE " << __LINE__ + 1 << "]: p.at(" << inds[i] << ")\n";  // DEBUG
 				for( auto j = p.at(inds[i]).begin(); j != p.at(inds[i]).end(); j++ ) {
 					ostringstream oss;
 					oss << *j;
@@ -572,6 +583,38 @@ int main(int argc, char *argv[]) {
 			recordVar( doc, *data, "result", "Mm_x", info.results.Mm.x );
 			recordVar( doc, *data, "result", "Mm_y", info.results.Mm.y );
 			recordVar( doc, *data, "result", "Mm_z", info.results.Mm.z );
+
+			recordVar( doc, *data, "result", "MS_x", info.results.MS.x );
+			recordVar( doc, *data, "result", "MS_y", info.results.MS.y );
+			recordVar( doc, *data, "result", "MS_z", info.results.MS.z );
+			
+			recordVar( doc, *data, "result", "MSL_x", info.results.MSL.x );
+			recordVar( doc, *data, "result", "MSL_y", info.results.MSL.y );
+			recordVar( doc, *data, "result", "MSL_z", info.results.MSL.z );
+			
+			recordVar( doc, *data, "result", "MSR_x", info.results.MSR.x );
+			recordVar( doc, *data, "result", "MSR_y", info.results.MSR.y );
+			recordVar( doc, *data, "result", "MSR_z", info.results.MSR.z );
+			
+			recordVar( doc, *data, "result", "MSm_x", info.results.MSm.x );
+			recordVar( doc, *data, "result", "MSm_y", info.results.MSm.y );
+			recordVar( doc, *data, "result", "MSm_z", info.results.MSm.z );
+
+			recordVar( doc, *data, "result", "MF_x", info.results.MF.x );
+			recordVar( doc, *data, "result", "MF_y", info.results.MF.y );
+			recordVar( doc, *data, "result", "MF_z", info.results.MF.z );
+			
+			recordVar( doc, *data, "result", "MFL_x", info.results.MFL.x );
+			recordVar( doc, *data, "result", "MFL_y", info.results.MFL.y );
+			recordVar( doc, *data, "result", "MFL_z", info.results.MFL.z );
+			
+			recordVar( doc, *data, "result", "MFR_x", info.results.MFR.x );
+			recordVar( doc, *data, "result", "MFR_y", info.results.MFR.y );
+			recordVar( doc, *data, "result", "MFR_z", info.results.MFR.z );
+			
+			recordVar( doc, *data, "result", "MFm_x", info.results.MFm.x );
+			recordVar( doc, *data, "result", "MFm_y", info.results.MFm.y );
+			recordVar( doc, *data, "result", "MFm_z", info.results.MFm.z );
 			
 			recordVar( doc, *data, "result", "U", info.results.U );
 			recordVar( doc, *data, "result", "UL", info.results.UL );
@@ -745,6 +788,7 @@ int main(int argc, char *argv[]) {
 
 			// set Info::parameters
 			for (auto iIters = iters.begin(); iIters != iters.end(); ++iIters) {
+				// cout << "[LINE " << __LINE__ + 1 << "]: labelMap.at(" << iIters->first << ")\n";  // DEBUG
 				auto params = labelMap.at(iIters->first);  // set of paramerts associated with this label
 				for (auto iParams = params.begin(); iParams != params.end(); ++iParams)
 					try {

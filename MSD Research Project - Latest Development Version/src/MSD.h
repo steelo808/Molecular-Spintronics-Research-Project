@@ -1,14 +1,14 @@
 /*
  * MSD.h
  *
- *  Last Edited: June 10, 2021
+ *  Last Edited: July 11, 2021
  *       Author: Christopher D'Angelo
  */
 
 #ifndef UDC_MSD
 #define UDC_MSD
 
-#define UDC_MSD_VERSION "5.5"
+#define UDC_MSD_VERSION "5.5a"
 
 #include <cstdlib>
 #include <cmath>
@@ -71,9 +71,11 @@ class MSD {
 	};
 	
 	struct Results {
-		unsigned long long t; //time, i.e. current iteration
-		Vector M, ML, MR, Mm; //Magnetization
-		double U, UL, UR, Um, UmL, UmR, ULR; //Internal Energy
+		unsigned long long t;  // time, i.e. current iteration
+		Vector M, ML, MR, Mm;  // Magnetization
+		Vector MS, MSL, MSR, MSm;  // Magnetization due to spin only (no flux)
+		Vector MF, MFL, MFR, MFm;  // Magnetization due to flux only (no spin) 
+		double U, UL, UR, Um, UmL, UmR, ULR;  // Internal Energy
 		
 		Results();
 		
@@ -241,6 +243,14 @@ class MSD {
 	Vector meanML() const;
 	Vector meanMR() const;
 	Vector meanMm() const;
+	Vector meanMS() const;
+	Vector meanMSL() const;
+	Vector meanMSR() const;
+	Vector meanMSm() const;
+	Vector meanMF() const;
+	Vector meanMFL() const;
+	Vector meanMFR() const;
+	Vector meanMFm() const;
 	double meanU() const;
 	double meanUL() const;
 	double meanUR() const;
@@ -283,6 +293,8 @@ ostream& operator <<(ostream &out, const MSD::Results &r) {
 	return out
 		<< "t   = " << r.t   << "\n\n"
 		<< "M   = " << r.M   << '\n' << "ML  = " << r.ML  << '\n' << "MR  = " << r.MR  << '\n' << "Mm  = " << r.Mm  << "\n\n"
+		<< "MS  = " << r.MS  << '\n' << "MSL = " << r.MSL << '\n' << "MSR = " << r.MSR << '\n' << "MSm = " << r.MSm << "\n\n"
+		<< "MF  = " << r.MF  << '\n' << "MFL = " << r.MFL << '\n' << "MFR = " << r.MFR << '\n' << "MFm = " << r.MFm << "\n\n"
 		<< "U   = " << r.U   << '\n' << "UL  = " << r.UL  << '\n' << "UR  = " << r.UR  << '\n' << "Um  = " << r.Um  << '\n'
 		<< "UmL = " << r.UmL << '\n' << "UmR = " << r.UmR << '\n' << "ULR = " << r.ULR << '\n';
 }
@@ -328,13 +340,17 @@ bool MSD::Parameters::operator!=(const Parameters &p) const {
 
 MSD::Results::Results()
 : t(0), M(Vector::ZERO), ML(Vector::ZERO), MR(Vector::ZERO), Mm(Vector::ZERO),
+  MS(Vector::ZERO), MSL(Vector::ZERO), MSR(Vector::ZERO), MSm(Vector::ZERO),
+  MF(Vector::ZERO), MFL(Vector::ZERO), MFR(Vector::ZERO), MFm(Vector::ZERO),
   U(0), UL(0), UR(0), Um(0), UmL(0), UmR(0), ULR(0) {
 }
 
 bool MSD::Results::operator==(const Results &r) const {
 	return t   == r.t
-	    && M   == r.M   && ML  == r.ML  && MR  == r.MR && Mm == r.Mm
-	    && U   == r.U   && UL  == r.UL  && UR  == r.UR && Um == r.Um
+	    && M   == r.M   && ML  == r.ML  && MR  == r.MR  && Mm  == r.Mm
+		&& MS  == r.MS  && MSL == r.MSL && MSR == r.MSR && MSm == r.MSm
+		&& MF  == r.MF  && MFL == r.MFL && MFR == r.MFR && MFm == r.MFm
+	    && U   == r.U   && UL  == r.UL  && UR  == r.UR  && Um == r.Um
 		&& UmL == r.UmL && UmR == r.UmR && ULR == r.ULR;
 }
 
@@ -647,7 +663,8 @@ void MSD::setParameters(const MSD::Parameters &p) {
 	}
 	
 	// Magnetization, Anisotropy, and other local phenomenon
-	results.ML = results.MR = results.Mm = Vector::ZERO;
+	results.MSL = results.MSR = results.MSm =
+	results.MFL = results.MFR = results.MFm = Vector::ZERO;
 	Vector anisotropy_L = Vector::ZERO, anisotropy_R = Vector::ZERO, anisotropy_m = Vector::ZERO;
 	double couple_e0_L = 0, couple_e0_R = 0, couple_e0_m = 0;  // sum(s_i * f_i)
 	for( auto iter = begin(); iter != end(); ++iter ) {
@@ -656,26 +673,34 @@ void MSD::setParameters(const MSD::Parameters &p) {
 		Vector f = iter.getFlux();
 		Vector localM = s + f;
 		if( x < molPosL ) {
-			results.ML += localM;
+			results.MSL += s;
+			results.MFL += f;
 			anisotropy_L.x += sq( localM.x );
 			anisotropy_L.y += sq( localM.y );
 			anisotropy_L.z += sq( localM.z );
 			couple_e0_L += s * f;
 		} else if( x > molPosR ) {
-			results.MR += localM;
+			results.MSR += s;
+			results.MFR += f;
 			anisotropy_R.x += sq( localM.x );
 			anisotropy_R.y += sq( localM.y );
 			anisotropy_R.z += sq( localM.z );
 			couple_e0_R += s * f;
 		} else {
-			results.Mm += localM;
+			results.MSm += s;
+			results.MFm += f;
 			anisotropy_m.x += sq( localM.x );
 			anisotropy_m.y += sq( localM.y );
 			anisotropy_m.z += sq( localM.z );
 			couple_e0_m += s * f;
 		}
 	}
-	results.M = results.ML + results.MR + results.Mm;
+	results.MS = results.MSL + results.MSR + results.MSm;  // aggregate spins
+	results.MF = results.MFL + results.MFR + results.MFm;  // aggregate fluxes
+	results.ML = results.MSL + results.MFL;  // aggregate Left FM
+	results.MR = results.MSR + results.MFR;  // aggregate Right FM
+	results.Mm = results.MSm + results.MFm;  // aggregate mol.
+	results.M = results.ML + results.MR + results.Mm;  // aggregate total
 	
 
 	//Internal Energy
@@ -1016,6 +1041,8 @@ void MSD::setLocalM(unsigned int a, const Vector &spin, const Vector &flux) {
 	Vector deltaF = flux - f;
 	Vector deltaM = mag - m;
 	results.M += deltaM;
+	results.MS += deltaS;
+	results.MF += deltaF;
 	
 	// delta U's are actually negative, simply grouping the negatives in front of each energy coefficient into deltaU -= ... (instead of +=)
 	double deltaU_B = parameters.B * deltaM;
@@ -1024,6 +1051,8 @@ void MSD::setLocalM(unsigned int a, const Vector &spin, const Vector &flux) {
 	if( x < molPosL ) {
 	
 		results.ML += deltaM;
+		results.MSL += deltaS;
+		results.MFL += deltaF;
 		results.UL -= deltaU_B;
 		
 		{	double deltaU = parameters.AL * ( Vector(sq(mag.x), sq(mag.y), sq(mag.z)) - Vector(sq(m.x), sq(m.y), sq(m.z)) )
@@ -1149,6 +1178,8 @@ void MSD::setLocalM(unsigned int a, const Vector &spin, const Vector &flux) {
 	} else if( x > molPosR ) {
 	
 		results.MR += deltaM;
+		results.MSR += deltaS;
+		results.MFR += deltaF;
 		results.UR -= deltaU_B;
 		
 		{	double deltaU = parameters.AR * ( Vector(sq(mag.x), sq(mag.y), sq(mag.z)) - Vector(sq(m.x), sq(m.y), sq(m.z)) )
@@ -1273,6 +1304,8 @@ void MSD::setLocalM(unsigned int a, const Vector &spin, const Vector &flux) {
 	} else { // molPosL <= x <= molPosR
 	
 		results.Mm += deltaM;
+		results.MSm += deltaS;
+		results.MFm += deltaF;
 		results.Um -= deltaU_B;
 		
 		{	double deltaU = parameters.Am * ( Vector(sq(mag.x), sq(mag.y), sq(mag.z)) - Vector(sq(m.x), sq(m.y), sq(m.z)) )
@@ -1872,6 +1905,104 @@ Vector MSD::meanMm() const {
 		const Results &r0 = record[i - 1];
 		const Results &r1 = record[i];
 		s += (r1.t - r0.t) * (r0.Mm + r1.Mm);
+	}
+	return (0.5 / (record[record.size() - 1].t - record[0].t)) * s;
+}
+
+Vector MSD::meanMS() const {
+	if( record.size() <= 1 )
+		return record.at(0).MS;
+	//compensates for t by using the trapezoidal rule; (and the same below)
+	Vector s = Vector::ZERO;
+	for( size_t i = 1; i < record.size(); i++ ) {
+		const Results &r0 = record[i - 1];
+		const Results &r1 = record[i];
+		s += (r1.t - r0.t) * (r0.MS + r1.MS);
+	}
+	return (0.5 / (record[record.size() - 1].t - record[0].t)) * s;
+}
+
+Vector MSD::meanMSL() const {
+	if( record.size() <= 1 )
+		return record.at(0).MSL;
+	Vector s = Vector::ZERO;
+	for( size_t i = 1; i < record.size(); i++ ) {
+		const Results &r0 = record[i - 1];
+		const Results &r1 = record[i];
+		s += (r1.t - r0.t) * (r0.MSL + r1.MSL);
+	}
+	return (0.5 / (record[record.size() - 1].t - record[0].t)) * s;
+}
+
+Vector MSD::meanMSR() const {
+	if( record.size() <= 1 )
+		return record.at(0).MSR;
+	Vector s = Vector::ZERO;
+	for( size_t i = 1; i < record.size(); i++ ) {
+		const Results &r0 = record[i - 1];
+		const Results &r1 = record[i];
+		s += (r1.t - r0.t) * (r0.MSR + r1.MSR);
+	}
+	return (0.5 / (record[record.size() - 1].t - record[0].t)) * s;
+}
+
+Vector MSD::meanMSm() const {
+	if( record.size() <= 1 )
+		return record.at(0).MSm;
+	Vector s = Vector::ZERO;
+	for( size_t i = 1; i < record.size(); i++ ) {
+		const Results &r0 = record[i - 1];
+		const Results &r1 = record[i];
+		s += (r1.t - r0.t) * (r0.MSm + r1.MSm);
+	}
+	return (0.5 / (record[record.size() - 1].t - record[0].t)) * s;
+}
+
+Vector MSD::meanMF() const {
+	if( record.size() <= 1 )
+		return record.at(0).MF;
+	//compensates for t by using the trapezoidal rule; (and the same below)
+	Vector s = Vector::ZERO;
+	for( size_t i = 1; i < record.size(); i++ ) {
+		const Results &r0 = record[i - 1];
+		const Results &r1 = record[i];
+		s += (r1.t - r0.t) * (r0.MF + r1.MF);
+	}
+	return (0.5 / (record[record.size() - 1].t - record[0].t)) * s;
+}
+
+Vector MSD::meanMFL() const {
+	if( record.size() <= 1 )
+		return record.at(0).MFL;
+	Vector s = Vector::ZERO;
+	for( size_t i = 1; i < record.size(); i++ ) {
+		const Results &r0 = record[i - 1];
+		const Results &r1 = record[i];
+		s += (r1.t - r0.t) * (r0.MFL + r1.MFL);
+	}
+	return (0.5 / (record[record.size() - 1].t - record[0].t)) * s;
+}
+
+Vector MSD::meanMFR() const {
+	if( record.size() <= 1 )
+		return record.at(0).MFR;
+	Vector s = Vector::ZERO;
+	for( size_t i = 1; i < record.size(); i++ ) {
+		const Results &r0 = record[i - 1];
+		const Results &r1 = record[i];
+		s += (r1.t - r0.t) * (r0.MFR + r1.MFR);
+	}
+	return (0.5 / (record[record.size() - 1].t - record[0].t)) * s;
+}
+
+Vector MSD::meanMFm() const {
+	if( record.size() <= 1 )
+		return record.at(0).MFm;
+	Vector s = Vector::ZERO;
+	for( size_t i = 1; i < record.size(); i++ ) {
+		const Results &r0 = record[i - 1];
+		const Results &r1 = record[i];
+		s += (r1.t - r0.t) * (r0.MFm + r1.MFm);
 	}
 	return (0.5 / (record[record.size() - 1].t - record[0].t)) * s;
 }

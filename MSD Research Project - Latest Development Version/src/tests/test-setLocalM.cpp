@@ -1,6 +1,6 @@
 /*
  * Christopher D'Angelo
- * 3-23-2021
+ * 7-11-2021
  */
 
 #include <cstdlib>
@@ -41,10 +41,22 @@ double diff(Vector x, Vector y, double e, string prefix) {
 // return the max difference
 double cmpResults(const MSD::Results &r1, const MSD::Results &r2, double e) {
 	double d = 0;
+
 	d = max(d, diff( r1.M,   r2.M,   e, "M:   " ));
 	d = max(d, diff( r1.ML,  r2.ML,  e, "ML:  " ));
 	d = max(d, diff( r1.MR,  r2.MR,  e, "MR:  " ));
 	d = max(d, diff( r1.Mm,  r2.Mm,  e, "Mm:  " ));
+	
+	d = max(d, diff( r1.MS,  r2.MS,  e, "MS:  " ));
+	d = max(d, diff( r1.MSL, r2.MSL, e, "MSL: " ));
+	d = max(d, diff( r1.MSR, r2.MSR, e, "MSR: " ));
+	d = max(d, diff( r1.MSm, r2.MSm, e, "MSm: " ));
+
+	d = max(d, diff( r1.MF,  r2.MF,  e, "MF:  " ));
+	d = max(d, diff( r1.MFL, r2.MFL, e, "MFL: " ));
+	d = max(d, diff( r1.MFR, r2.MFR, e, "MFR: " ));
+	d = max(d, diff( r1.MFm, r2.MFm, e, "MFm: " ));
+
 	d = max(d, diff( r1.U,   r2.U,   e, "U:   " ));
 	d = max(d, diff( r1.UL,  r2.UL,  e, "UL:  " ));
 	d = max(d, diff( r1.UR,  r2.UR,  e, "UR:  " ));
@@ -52,6 +64,7 @@ double cmpResults(const MSD::Results &r1, const MSD::Results &r2, double e) {
 	d = max(d, diff( r1.UmL, r2.UmL, e, "UmL: " ));
 	d = max(d, diff( r1.UmR, r2.UmR, e, "UmR: " ));
 	d = max(d, diff( r1.ULR, r2.ULR, e, "ULR: " ));
+
 	return d;
 }
 

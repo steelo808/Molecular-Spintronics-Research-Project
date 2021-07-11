@@ -110,3 +110,10 @@ Second bug fix. In MSD::setParameters()
 	Added checks in MSD::init to avoid potential edge case width, height, or depth == 0
 (6-11-2021) Experimental! Updated the various MSD::magneticSusceptibility and MSD::specificHeat methods to use a modified trapizoidal rule.
 	Also updated MSD::magneticSusceptibility and MSD::specificHeat methods to use new nL, nR, etc. fields instead of always using the global "n" like before.
+
+5.5.1:
+(7-5-2021) Added MS and MF "result" (i.e. output) variables to MSD.h.
+(7-11-2021) Updated tests/test-setLocalM.cpp with new variables: MS, MF
+	Added MS and MF outputs to all applications.
+	Added missing "=" (equals sign) after D (Dzyaloshinskii-Moriya, i.e. Skyrmions) parameters in heat, magnetize, and magnetize2
+	Fixed a bug/typo in metropolis:439 ("DmL_x", "DML_y", "DmL_z",) changed to ("DmL_x", "DmL_y", "DmL_z",)

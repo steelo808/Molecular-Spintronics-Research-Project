@@ -1,5 +1,5 @@
 # dimensions of bounding box
-width = 11
+width  = 11
 height = 11
 depth  = 11
 
@@ -34,9 +34,9 @@ B_z = 0
 sL = 1    # Magnitude of spin vectors
 sR = 1
 sm = 1
-FL = 0    # Magnitude of spin fluctuation ("flux") vectors
-FR = 0
-Fm = 0
+FL = 0.5  # Magnitude of spin fluctuation ("flux") vectors
+FR = 0.5
+Fm = 0.5
 
 # Heisenberg exchange coupling between two neighboring spins
 JL  = 1
@@ -47,9 +47,9 @@ JmR _j : 1.2  -1.2  -0.4
 JLR = 0
 
 # exchange coupling between a spin and its local flux
-Je0L  = 0
-Je0R  = 0
-Je0m  = 0
+Je0L  = 0.25
+Je0R  = 0.25
+Je0m  = 0.25
 
 # exchange coupling between a spin and its neighboring flux (and vice versa)
 Je1L  = 0
