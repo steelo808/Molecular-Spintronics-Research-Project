@@ -1,0 +1,119 @@
+2.1.0:
+(9-18-2014) Major "bug" fix in how random unit vectors are generated. Program output has changed noticeably. Demands recalculation of preliminary results.
+
+2.1.1:
+(9-18-2014) Minor UI changes in user programs. Metropolis now writes XML to file prior to its first thread completion. User programs now output MSD's version number for record keeping.
+
+2.1.2:
+(10-6-2014) Changed magnetize program to start at B_y_max decreasing to B_y_min before increasing back to B_y_max; this is the opposite of how it moved before. This is so the the initial state of 'all up' matches positive B_y saturation.
+
+2.1.3:
+(10-7-2014) Changed magnetize programs to output average magnetizations and energies along with final ones (like heat program already did.) Updated MSD_GUI's magnetize panel to pass "noop" instead of "reinitialize".
+
+2.2.0:
+(12-4-2014) Bug fix in MSD.h on line 578.
+Biquadratic coupling algorithm corrected
+
+3.0.0:
+(12-4-2014) Added our first attempt at spin fluctuation code. This included a major overhaul of the code.
+
+3.1.0:
+(1-23-2015) Changed anisotropy to a vector, effecting energy calculations: -A_x * sum(m_x^2) - A_y * sum(m_y^2) - A_z * sum(m_z^2).
+Added the ability to initialize the magnitude of each sections' atoms' spins: s_L, s_m, s_R.
+Split spin flux F variable into three variables: FL, FR, Fm.
+
+3.2.0:
+(2-4-2015) Fix major bug in energy calculation in MSD::setLocalM. mL, LR and mR, LR sections under "if(x < molPosL)" and "if(x > molPosR)" section were written incorrectly as JL and JR respectively.
+
+3.3.0:
+(2-6-2015) Added new "magnetization2" program, which is given an initial t_eq, then a B_y_rate to slowly, continuously increase or decrease the magnetic field over time.
+Optimize change in magnetic field energy calculations! Useful for the new magnetization2 program.
+Also changed curie temperature approximation to be J * s^2.
+
+3.3.1:
+(2-13-2015) Added new program, "mfm_aggregator" (Magnetic Force Microscope Aggregator). This program takes copied Excel data from the "iterate" program and splits out formatted data for Excel to plot as 3D graphs.
+
+5.0.0:
+(2-24-2020) Added four new parameters: topL, bottomL, frontR, backR. This allows us to change the geometry of the device to a cross shape.
+
+5.1.0:
+(11-1-2020) Added ability to change the magnitude of specific atoms.
+This allows us to turn off some atoms, to turn off 2 "edges" of the molecule, and to potentially make certian molecule sites stronger.
+
+5.1.1:
+(11-3-2020) Fixed major bug where MSD::metropolis() was calling the wrong pow() function!
+Also added fix for T_c approximation in MSD::setParameters().
+
+5.2.0:
+(11-17-2020) Added the ability to set a custom seed in the MSD model, and incorperated this functionality into the iterate program.
+
+5.3.0:
+(12-15-2020) Changed the spin fluxtuation algorithm so that now spin fluxtuations are a uniformaly random vector with a random magnitude betwwen [0, F).
+
+5.3.1:
+(12-15-2020) Updated the magnetization and magnetization2 programs to allow for a change of B along any axis, not just in the y direction.
+
+5.3.2:
+(2-5-2021) Bug fix in MSD::setParameters(). Was accidentally normalizing the flux vectors, when instead they should just be scaled by p.FL / p0.FL.
+Also added a build_all.bat file which compiles all the .cpp program files using "cl".
+Second bug fix. In MSD::setParameters()
+        MSD.h:628    if( y + 1 < bottomL ) {
+       changed to    if( y + 1 <= bottomL ) {
+  also, MSD.h:660    if( z + 1 < backR ) {
+       changed to    if( z + 1 <= backR ) {
+
+5.4.0:
+(1-21-2021) Added Parameters Je0, Je1, Jee (including L, R, mL, mR, m, LR variations where applicable)
+	Added new exchange coupling parameters to connect each electron to (Je0) its local atom, (Je1) its nearest neighbor atoms, and (Jee) its nearest neighbor electrons.
+	Changed Heisenburg exchange coupling constant J so only bond the spin, s, and NOT the local magnetization, m = s + f.
+(2-10-2021) Add support for new J variables in all applicable programs: iterate, heat, magnetize(2), metropolis.
+	kT_inc < 0 now cools in "heat" program.
+	Added B_norm to output of "magnetize" and "magnetize2".
+	Added a check for kT_inc == 0, B_inc == 0, or B_rate == 0 to avoid an infinite loop (in their respective programs).
+(3-2-2021) Added new parameters to MSD::Parameters::operator==
+(3-9-2021) Added missing "throw" keyword on MSD.h:379, MSD::Iterator::operator++()
+
+5.4.1:
+(3-23-2021) Major bug fixes in MSD.h. The Je1 energy term was not being calculated correctly in MSD::setParameters().
+	Fixes a bug in MSD::Iterator::operator++ / += where an exception was thrown when trying to iterate to MSD::end().
+	Added build_tests.bat file and bin/tests directory for tests.
+	Uncommented out the Je0, Je1, and Jee tests in test-setLocalM.
+	Added RADNOMIZE and REINITIALIZE options for metropolis program.
+
+5.4.2:
+(5-25-2021) Added "Label" support to parameters-metropolis.txt input file.
+	Added custom spin support to parameters-metropolis.txt input file.
+	Added snapshot of final configuration (as XML) after each simualtion.
+	Slight optimization in energy calculation: factored out Je1.
+(5-27-2021) Added build_metropolis.bat to only build metropolis program (saves time)
+
+5.4.3:
+(5-27-2021) Changed Vector::I, Vector::J, Vector::K, and Vector::ZERO to "const".
+	Created benchmarks to test optimizations to Vector.h normalize, and compound arithmetic operators. Finished these optimizations.
+	Added Vector.normSq() method.
+	Fixed the calculation error in MSD::magneticSusceptibility methods.
+	Minor optimization in MSD::specificHeat methods.
+	Changed XML version to 1.7.
+	Added "return ERRNO" to fix potential bug in metropolis.cpp when parsing cmd args and argv[3] or argv[4] where missing.
+
+5.5.0:
+(5-28-2021) Removed unused Dipolar coupling parameters.
+	Added Dzyaloshinskii-Moriya interaction (i.e. Skyrmions) parameters: DL, DR, Dm.
+	Modified MSD::setParameters and MSD::setLocalM to account for Dzyaloshinskii-Moriya interaction (i.e. Skyrmions).
+(6-1-2021) In magnetize.cpp:281 changed "if (B_inc == 0) {" to "if (B_inc <= 0) {" for infinite loop error check.
+	In magnetize2.cpp:244 changed "if (B_rate == 0) {" to "if (B_rate <= 0) {" for infinite loop error check (and updated error message).
+(6-10-2021) Updated MSD.h #define UDC_MSD_VERSION 5.5
+	Added D (Dzyaloshinskii-Moriya, i.e. Skyrmions) parameters to all apps: heat.cpp, iterate.cpp, magnetize.cpp, magnetize2.cpp, metropolis.cpp
+	Added msd.getSeed() output to CSV headed for remaining apps: heat.cpp, magnetize.cpp, magnetize2.cpp
+	Added more comments to parameter files: parameters-iterate.txt, parameters-metropolis.txt
+	Added new private fields and getters to MSD for nL, nR, n_m, n_mL, n_mR, nLR, FM_L_exists, FM_R_exists, mol_exists
+	Added checks in MSD::init to avoid potential edge case width, height, or depth == 0
+(6-11-2021) Experimental! Updated the various MSD::magneticSusceptibility and MSD::specificHeat methods to use a modified trapizoidal rule.
+	Also updated MSD::magneticSusceptibility and MSD::specificHeat methods to use new nL, nR, etc. fields instead of always using the global "n" like before.
+
+5.5.1:
+(7-5-2021) Added MS and MF "result" (i.e. output) variables to MSD.h.
+(7-11-2021) Updated tests/test-setLocalM.cpp with new variables: MS, MF
+	Added MS and MF outputs to all applications.
+	Added missing "=" (equals sign) after D (Dzyaloshinskii-Moriya, i.e. Skyrmions) parameters in heat, magnetize, and magnetize2
+	Fixed a bug/typo in metropolis:439 ("DmL_x", "DML_y", "DmL_z",) changed to ("DmL_x", "DmL_y", "DmL_z",)

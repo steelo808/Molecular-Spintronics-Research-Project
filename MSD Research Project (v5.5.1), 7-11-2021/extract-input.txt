@@ -1,0 +1,35 @@
+out\metropolis, CONTINUOUS_SPIN_MODEL, 02-04-2015, 4.xml
+kT
+JmL
+JmR
+M_x
+M_y
+M_z
+ML_x
+ML_y
+ML_z
+MR_x
+MR_y
+MR_z
+Mm_x
+Mm_y
+Mm_z
+U
+UL
+UR
+UmL
+UmR
+ULR
+c
+cL
+cR
+cmL
+cmR
+cLR
+x
+xL
+xR
+xm
+
+
+out\metropolis, CONTINUOUS_SPIN_MODEL, 02-04-2015, 4 - extract_kT=0.1,F=0.csv
