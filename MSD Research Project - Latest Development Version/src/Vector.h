@@ -72,6 +72,9 @@ class Vector {
 	Vector& normalize();
 };
 
+Vector operator *(double k, const Vector &v);
+ostream& operator <<(ostream &out, const Vector &v);
+
 
 //--------------------------------------------------------------------------------
 double Vector::turn(double angle) {

@@ -1,18 +1,19 @@
 /*
  * MSD.h
  *
- *  Last Edited: July 18, 2021
+ *  Last Edited: August 20, 2021
  *       Author: Christopher D'Angelo
  */
 
 #ifndef UDC_MSD
 #define UDC_MSD
 
-#define UDC_MSD_VERSION "5.5b"
+#define UDC_MSD_VERSION "6.0"
 
 #include <cstdlib>
 #include <cmath>
 #include <ctime>
+#include <cstring>
 #include <functional>
 #include <iostream>
 #include <random>
@@ -42,7 +43,75 @@ using udc::PI;
 using udc::sq;
 using udc::Vector;
 using udc::SparseArray;
+using udc::bread;
+using udc::bwrite;
 
+
+class MSD;
+class Molecule;
+
+/**
+ * An abstract molecule. Used in MSD.
+ */
+class Molecule {
+ public:
+	/**
+	 * Information about an edge between two Nodes. 
+	 */
+	struct EdgeParameters {
+		// nearest-neighbor parameters
+		double Jm;    // spin * spin
+		double Je1m;  // spin * flux
+		double Jeem;  // flux * flux
+		double bm;    // Biquadratic Coupling
+		Vector Dm;    // Dzyaloshinskii-Moriya interaction (i.e. Skyrmions)
+	};
+
+	/** local parameters */
+	struct NodeParameters {
+		double Sm, Fm;  // spin and spin fluctuation magnetude scalars
+		double Je0;     // spin * flux (local)
+		Vector Am;      // Anisotropy
+	};
+
+ private:
+	struct Node;
+	struct Edge;
+
+	struct Edge {
+		size_t edgeIndex, nodeIndex, selfIndex;
+		EdgeParameters *parameters;
+		Node *node, *self;  // "node" is the neighbor. "self" is the node this Edge is attached to.
+
+		Edge(size_t edgeIndex, size_t nodeIndex, size_t selfIndex, EdgeParameters *parameters, Node *node, Node *self);
+		Edge(Molecule &mol, size_t edgeIndex, size_t nodeIndex, size_t selfIndex);
+	};
+
+	struct Node {
+		Vector spin, flux;
+		NodeParameters parameters;
+		std::vector<Edge> neighbors;
+	};
+
+	const MSD *msd;  // a reference to the MSD that this mol is attached to.
+	std::vector<EdgeParameters> edgeParameters;   // array of edges
+	std::vector<Node> nodes;  // array of nodes (e.g. atoms) making up this Molecule
+	size_t leftLead, rightLead;  // the position of the nodes connected to the left FM and right FM, respectively.
+
+ public:
+	Molecule();
+	Molecule(const MSD *msd);
+	Molecule(const MSD &msd);
+
+	void serialize(unsigned char *buffer) const;
+	void deserialize(const unsigned char *buffer);
+	size_t serializationSize() const;
+
+	unsigned int createNode();
+	void connectNodes();
+
+	// TODO: ... setLocalM and other methods ...
+};
 
 /**
  * An abstract Molecular Spintronic Device.
@@ -263,7 +332,11 @@ class MSD {
 	Iterator end() const;
 };
 
+ostream& operator <<(ostream &out, const MSD::Parameters &p);
+ostream& operator <<(ostream &out, const MSD::Results &r);
 
+
+//--------------------------------------------------------------------------------
 ostream& operator <<(ostream &out, const MSD::Parameters &p) {
 	return out
 		<< "kT = " << p.kT << '\n' << "B = " << p.B << "\n\n"
@@ -300,7 +373,132 @@ ostream& operator <<(ostream &out, const MSD::Results &r) {
 }
 
 
-//--------------------------------------------------------------------------------
+Molecule::Edge::Edge(size_t eIdx, size_t nIdx, size_t sIdx, EdgeParameters *eParam, Node *node, Node *self)
+: edgeIndex(eIdx), nodeIndex(nIdx), selfIndex(sIdx), parameters(eParam), node(node), self(self)
+{}
+
+Molecule::Edge::Edge(Molecule &mol, size_t eIdx, size_t nIdx, size_t sIdx)
+: edgeIndex(eIdx), nodeIndex(nIdx), selfIndex(sIdx)
+{
+	parameters = &(mol.edgeParameters.at(eIdx));
+	node = & mol.nodes.at(nIdx);
+	self = & mol.nodes.at(sIdx);
+}
+
+Molecule::Molecule() : msd(NULL), leftLead(0), rightLead(0) {
+}
+
+Molecule::Molecule(const MSD *msd) : msd(msd), leftLead(0), rightLead(0) {
+}
+
+Molecule::Molecule(const MSD &msd) : msd(&msd), leftLead(0), rightLead(0) {
+}
+
+void Molecule::serialize(unsigned char *buffer) const {
+	// First write the edge-parameters section
+	bwrite(edgeParameters.size(), buffer);
+	for (const EdgeParameters &eParam : edgeParameters) {
+		bwrite(eParam.Jm, buffer);  // order must be correct (must match Molecule::deserialize)
+		bwrite(eParam.Je1m, buffer);
+		bwrite(eParam.Jeem, buffer);
+		bwrite(eParam.bm, buffer);
+		bwrite(eParam.Dm.x, buffer);
+		bwrite(eParam.Dm.y, buffer);
+		bwrite(eParam.Dm.z, buffer);
+	}
+
+	// Second, write the node-parameters section
+	bwrite(nodes.size(), buffer);
+	for (const Node &node : nodes) {
+		bwrite(node.parameters.Sm, buffer);  // Order must be correct (must match Molecule::deserialize)
+		bwrite(node.parameters.Fm, buffer);
+		bwrite(node.parameters.Je0, buffer);
+		bwrite(node.parameters.Am.x, buffer);
+		bwrite(node.parameters.Am.y, buffer);
+		bwrite(node.parameters.Am.z, buffer);
+	}
+
+	// Thridly, write the adjacency section
+	for (const Node &node : nodes) {
+		bwrite(node.neighbors.size(), buffer);
+		for (const Edge &edge : node.neighbors) {
+			bwrite(edge.edgeIndex, buffer);
+			bwrite(edge.nodeIndex, buffer);
+		}
+	}
+
+	// Lastly write "extra stuff"
+	bwrite(leftLead, buffer);
+	bwrite(rightLead, buffer);
+}
+
+void Molecule::deserialize(const unsigned char *buffer) {
+	// First read edges
+	size_t edgeCount;
+	bread(edgeCount, buffer);  // First the number of edges is read.
+	edgeParameters.reserve(edgeCount);
+	for (size_t i = 0; i < edgeCount; i++) {
+		EdgeParameters eParam;
+		bread(eParam.Jm, buffer);    // Then each edge's parameters are read.
+		bread(eParam.Je1m, buffer);  // (Take careful note of the order in which the fields are stored.)
+		bread(eParam.Jeem, buffer);
+		bread(eParam.bm, buffer);
+		bread(eParam.Dm.x, buffer);
+		bread(eParam.Dm.y, buffer);
+		bread(eParam.Dm.z, buffer);
+		edgeParameters.push_back(eParam);
+	}
+
+	// Then read nodes (in two "sweeps")
+	size_t nodeCount;
+	udc::bread(nodeCount, buffer);  // Next the number of nodes is read.
+	for (size_t i = 0; i < nodeCount; i++) {
+		Node node;
+		bread(node.parameters.Sm, buffer);  // For each node, we read its (local) parameter fields.
+		bread(node.parameters.Fm, buffer);  // (Take careful note of the order in which the fields are stored.)
+		bread(node.parameters.Je0, buffer);
+		bread(node.parameters.Am.x, buffer);
+		bread(node.parameters.Am.y, buffer);
+		bread(node.parameters.Am.z, buffer);
+		nodes.push_back(node);
+	}
+	for (size_t i = 0; i < nodeCount; i++) {
+		Node &node = nodes[i];
+		size_t neighborCount;
+		bread(neighborCount, buffer);  // ("Spweep" 2) Again for each node, get the number of neighbors this time.
+		node.neighbors.reserve(neighborCount);
+		for (size_t j = 0; j < neighborCount; j++) {
+			int eIndex, nIndex;
+			bread(eIndex, buffer);  // Finally we read each (edge index, node index) pair for this node.
+			bread(nIndex, buffer);
+			Edge edge(eIndex, nIndex, i, & edgeParameters[eIndex], & nodes[nIndex], & node);
+			node.neighbors.push_back(edge);
+		}
+	}
+
+	// Lastly, we read the leads' positions
+	bread(leftLead, buffer);  // (Left lead first, then right lead.)
+	bread(rightLead, buffer);
+}
+
+size_t Molecule::serializationSize() const {
+	// compile-time constants
+	const size_t EDGE_PARAMETERS_SERIALIZATION_SIZE = 7 * sizeof(double);
+	const size_t NODE_PARAMETERS_SERIALIZATION_SIZE = 6 * sizeof(double);
+	const size_t EDGE_SERIALIZATION_SIZE = 2 * sizeof(size_t);
+	const size_t LEADS_SERIALIZATION_SIZE = 2 * sizeof(size_t);
+	
+	// calculate at runtime
+	size_t eBlock = sizeof(size_t) + edgeParameters.size() * EDGE_PARAMETERS_SERIALIZATION_SIZE;
+	size_t nBlock = sizeof(size_t) + nodes.size() * NODE_PARAMETERS_SERIALIZATION_SIZE;
+
+	size_t adjBlock = sizeof(size_t) * nodes.size();  // headers for each sub-block adjacency list
+	for (const Node & node : nodes)
+		adjBlock += node.neighbors.size() * EDGE_SERIALIZATION_SIZE;
+	
+	// total
+	return eBlock + nBlock + adjBlock + LEADS_SERIALIZATION_SIZE;
+}
 
 
 MSD::Parameters::Parameters()
@@ -2102,6 +2300,7 @@ MSD::Iterator MSD::begin() const {
 MSD::Iterator MSD::end() const {
 	return Iterator(*this, indices.size());
 }
+
 
 } //end of namespace
 
