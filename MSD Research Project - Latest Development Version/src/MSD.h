@@ -52,6 +52,8 @@ class Molecule;
 
 /**
  * An abstract molecule. Used in MSD.
+ * A "Molecule" object only represents a prototype for a molecule design.
+ * Use the instantiate() method to create a Molecule::Instance which has a unique spin state.
  */
 class Molecule {
  public:
@@ -79,7 +81,7 @@ class Molecule {
 	struct Edge;
 
 	struct Edge {
-		size_t edgeIndex, nodeIndex, selfIndex;
+		size_t edgeIndex, nodeIndex, selfIndex;  // the indices in the Molecule's EdgeParameter or Node array
 		EdgeParameters *parameters;
 		Node *node, *self;  // "node" is the neighbor. "self" is the node this Edge is attached to.
 
@@ -88,30 +90,114 @@ class Molecule {
 	};
 
 	struct Node {
-		Vector spin, flux;
 		NodeParameters parameters;
 		std::vector<Edge> neighbors;
 	};
 
+ // ----- Molecule (prototype) fields and methods -----
+ private:
 	const MSD *msd;  // a reference to the MSD that this mol is attached to.
 	std::vector<EdgeParameters> edgeParameters;   // array of edges
 	std::vector<Node> nodes;  // array of nodes (e.g. atoms) making up this Molecule
 	size_t leftLead, rightLead;  // the position of the nodes connected to the left FM and right FM, respectively.
 
  public:
+	static const unsigned int NOT_FOUND = -1;  // -1 will be the maximum unsigned int
+
+ public:
 	Molecule();
 	Molecule(const MSD *msd);
 	Molecule(const MSD &msd);
 
-	void serialize(unsigned char *buffer) const;
-	void deserialize(const unsigned char *buffer);
-	size_t serializationSize() const;
+ public:
+	void serialize(unsigned char *buffer) const;  // store this Molecule object into the given buffer 
+	void deserialize(const unsigned char *buffer);  // reconstruct this Molecule object using the given buffer
+	size_t serializationSize() const;  // the size needed (in bytes) to serialize this Molecule object
 
-	unsigned int createNode();
-	void connectNodes();
+	/**
+	 * Returns the new node's index.
+	 */
+	unsigned int createNode(const NodeParameters &parameters = NodeParameters());
 
-	// TODO: ... setLocalM and other methods ...
+	/**
+	 * (i.e. "n_m") 
+	 * Returns the number of nodes/atoms in this molecule.
+	 */
+	unsigned int nodeCount() const;
+
+	/**
+	 * Creates a connection (Edge) between the two given nodes, and
+	 * returns the new Edge's index.
+	 * 
+	 * Note: this method does not check if the two nodes are already connected.
+	 * It is possible to creates more then one edge connecting the same two nodes.
+	 */
+	unsigned int connectNodes(unsigned int nodeA, unsigned int nodeB, const EdgeParameters &parameters = EdgeParameters());
+
+	/**
+	 * Search for and return the index of the edge connecting the given nodes if one exists,
+	 * or MOLECULE::NOT_FOUND if one doesn't.
+	 */
+	unsigned int edgeIndex(unsigned int nodeA, unsigned int nodeB) const;
+
+	EdgeParameters getEdgeParameters(unsigned int index) const;
+	void setEdgeParameters(unsigned int index, const EdgeParameters &p);
+	NodeParameters getNodeParameters(unsigned int index) const;
+	void setNodeParameters(unsigned int index, const NodeParameters &p);
+
+	// TODO? Add methods for getting adjacency list for each node?
+
+	void setLeftLead(unsigned int node);
+	void setRightLead(unsigned int node);
+	void setLeads(unsigned int left, unsigned int right);
+	unsigned int getLeftLead() const;
+	unsigned int getRightLead() const;
+	void getLeads(unsigned int &left, unsigned int &right) const;
+
+ // ----- Molecule::Instance stuff -----
+ public:
+	/**
+	 * Represents an actuallized instance of the prototype Molecule,
+	 * and contains state information for each part/atom of the molecule.
+	 */
+	class Instance {
+		friend class Molecule;
+	
+	 private:
+		const Molecule &prototype;  // contains a reference to the the Molecular structure and parameters
+		std::vector<Vector> spins;  // states of each "Node"
+		std::vector<Vector> fluxes;
+
+		Instance(const Molecule &prototype);
+		// Instance(const Instance &other);  // default copy constructor works
+
+		Instance& operator=(const Instance &other);  // copies the spin/flux states
+	
+	 public:
+		void setLocalM(unsigned int a, const Vector &spin, const Vector &flux);
+		void setSpin(unsigned int a, const Vector &spin);
+		void setFlux(unsigned int a, const Vector &flux);
+		Vector getSpin(unsigned int a) const;
+		Vector getFlux(unsigned int a) const;
+		void getLocalM(unsigned int a, Vector &spin, Vector &flux) const;
+
+		// TODO: ... setParameters and implement U (energy) ...
+	};
+
+	/**
+	 * Instances should be created after the Molecule (prototype) has been configured.
+	 * If the parent Molecule (prototype) object is modified after this method is called,
+	 * the previously existing Instance objects returned by those calls may be invalid;
+	 * they should be discarded and new Instance objects should be created.
+	 * 
+	 * TL;DR modifying the Molecule object after invoking instantiate leads to undefined behavior.
+	 */
+	Instance instantiate() const;
 };
+
+typedef Molecule MolProto;
+typedef Molecule::Instance Mol;
+
 
 /**
  * An abstract Molecular Spintronic Device.
@@ -394,6 +480,13 @@ Molecule::Molecule(const MSD *msd) : msd(msd), leftLead(0), rightLead(0) {
 Molecule::Molecule(const MSD &msd) : msd(&msd), leftLead(0), rightLead(0) {
 }
 
+void Molecule::checkNodeIndexBounds(unsigned int index) const {
+
+}
+void Molecule::checkEdgeIndexBounds(unsigned int index) const {
+
+}
+
 void Molecule::serialize(unsigned char *buffer) const {
 	// First write the edge-parameters section
 	bwrite(edgeParameters.size(), buffer);
@@ -498,6 +591,134 @@ size_t Molecule::serializationSize() const {
 	
 	// total
 	return eBlock + nBlock + adjBlock + LEADS_SERIALIZATION_SIZE;
+}
+
+unsigned int Molecule::createNode(const NodeParameters &parameters) {
+	if (nodes.size() >= NOT_FOUND)
+		throw out_of_range("Molecule::createNode: Can not create node because the maximum number of nodes has been reached");
+
+	Node node;
+	node.parameters = parameters;
+	nodes.push_back(node);
+	return nodes.size() - 1;
+}
+
+unsigned int Molecule::nodeCount() const {
+	return nodes.size();
+}
+
+unsigned int Molecule::connectNodes(unsigned int a, unsigned int b, const EdgeParameters &parameters) {
+	if (edgeParameters.size() == NOT_FOUND)
+		throw out_of_range("Molecule::connectNodes: Can not create edge because the maximum number of edges has been reached");
+	if (a >= nodes.size() || b >= nodes.size())
+		throw out_of_range("Molecule::connectNodes: Invalid node index");
+	
+	edgeParameters.push_back(parameters);
+	size_t index = edgeParameters.size() - 1;
+
+	Edge edgeA(*this, index, b, a);
+	nodes[a].neighbors.push_back(edgeA);
+
+	Edge edgeB(*this, index, a, b);
+	nodes[b].neighbors.push_back(edgeB);
+
+	return index;
+}
+
+unsigned int Molecule::edgeIndex(unsigned int a, unsigned int b) const {
+	if (a >= nodes.size() || b >= nodes.size())
+		throw out_of_range("Molecule::edgeIndex: Invalid node index");
+
+	for (const Edge &edge : nodes[a].neighbors)
+		if (edge.nodeIndex == b)
+			return edge.edgeIndex;
+	return NOT_FOUND;
+}
+
+Molecule::EdgeParameters Molecule::getEdgeParameters(unsigned int index) const {
+	return edgeParameters.at(index);
+}
+
+void Molecule::setEdgeParameters(unsigned int index, const Molecule::EdgeParameters &p) {
+	edgeParameters.at(index) = p;
+}
+
+Molecule::NodeParameters Molecule::getNodeParameters(unsigned int index) const {
+	return nodes.at(index).parameters;
+}
+
+void Molecule::setNodeParameters(unsigned int index, const Molecule::NodeParameters &p) {
+	nodes.at(index).parameters = p;
+}
+
+void Molecule::setLeftLead(unsigned int node) {
+	leftLead = node;
+}
+
+void Molecule::setRightLead(unsigned int node) {
+	rightLead = node;
+}
+
+void Molecule::setLeads(unsigned int left, unsigned int right) {
+	leftLead = left;
+	rightLead = right;
+}
+
+unsigned int Molecule::getLeftLead() const {
+	return leftLead;
+}
+
+unsigned int Molecule::getRightLead() const {
+	return rightLead;
+}
+
+void Molecule::getLeads(unsigned int &left, unsigned int &right) const {
+	left = leftLead;
+	right = rightLead;
+}
+
+Molecule::Instance::Instance(const Molecule &prototype) : prototype(prototype) {
+	const size_t n_m = prototype.nodes.size();
+	spins.reserve(n_m);
+	for (size_t i = 0; i < n_m; i++)
+		spins.push_back(Vector::I * prototype.nodes[i].parameters.Sm);
+	fluxes.assign(prototype.nodes.size(), Vector::ZERO);
+}
+
+Molecule::Instance& Molecule::Instance::operator=(const Molecule::Instance &other) {
+	this->spins = other.spins;
+	this->fluxes = other.fluxes;
+}
+
+void Molecule::Instance::setLocalM(unsigned int a, const Vector &spin, const Vector &flux) {
+	spins.at(a) = spin;
+	fluxes.at(a) = flux;
+	// TODO: update energy
+}
+
+void Molecule::Instance::setSpin(unsigned int a, const Vector &spin) {
+	setLocalM(a, spin, getFlux(a));
+}
+
+void Molecule::Instance::setFlux(unsigned int a, const Vector &flux) {
+	setLocalM(a, getSpin(a), flux);
+}
+
+Vector Molecule::Instance::getSpin(unsigned int a) const {
+	return spins.at(a);
+}
+
+Vector Molecule::Instance::getFlux(unsigned int a) const {
+	return fluxes.at(a);
+}
+
+void Molecule::Instance::getLocalM(unsigned int a, Vector &spin, Vector &flux) const {
+	spin = spins.at(a);
+	flux = fluxes.at(a);
+}
+
+Molecule::Instance Molecule::instantiate() const {
+	return Instance(*this);
 }
 
 
