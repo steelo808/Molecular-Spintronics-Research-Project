@@ -40,6 +40,7 @@ template <typename T> class SparseArray {
 
 	// does NO bounds checking
 	T& operator[](unsigned int index) { return values[index].create(); }  // creates an element at index if it has not yet been created
+	const T& operator[](unsigned int index) const { return values[index].value; }  // Undefined behaviour if index has not been set, or if out of bounds.
 	void clear(unsigned int index) { values[index].clear(); }  // has no effect if the element was not yet created
 
 	// DOES bounds checking:

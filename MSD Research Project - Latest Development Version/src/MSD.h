@@ -3,6 +3,8 @@
  *
  *  Last Edited: August 20, 2021
  *       Author: Christopher D'Angelo
+ * 
+ * TODO: update MSD::init, MSD fields, MSD::setLocalM, MSD::setParameters, and etc. to utilize new graph-based Mol.
  */
 
 #ifndef UDC_MSD
@@ -47,15 +49,14 @@ using udc::bread;
 using udc::bwrite;
 
 
-class MSD;
-class Molecule;
-
 /**
  * An abstract molecule. Used in MSD.
  * A "Molecule" object only represents a prototype for a molecule design.
  * Use the instantiate() method to create a Molecule::Instance which has a unique spin state.
  */
 class Molecule {
+	friend class MSD;
+
  public:
 	/**
 	 * Information about an edge between two Nodes. 
@@ -67,13 +68,17 @@ class Molecule {
 		double Jeem;  // flux * flux
 		double bm;    // Biquadratic Coupling
 		Vector Dm;    // Dzyaloshinskii-Moriya interaction (i.e. Skyrmions)
+
+		EdgeParameters();
 	};
 
 	/** local parameters */
 	struct NodeParameters {
 		double Sm, Fm;  // spin and spin fluctuation magnetude scalars
-		double Je0;     // spin * flux (local)
+		double Je0m;     // spin * flux (local)
 		Vector Am;      // Anisotropy
+
+		NodeParameters();
 	};
 
  private:
@@ -96,7 +101,6 @@ class Molecule {
 
  // ----- Molecule (prototype) fields and methods -----
  private:
-	const MSD *msd;  // a reference to the MSD that this mol is attached to.
 	std::vector<EdgeParameters> edgeParameters;   // array of edges
 	std::vector<Node> nodes;  // array of nodes (e.g. atoms) making up this Molecule
 	size_t leftLead, rightLead;  // the position of the nodes connected to the left FM and right FM, respectively.
@@ -105,9 +109,20 @@ class Molecule {
 	static const unsigned int NOT_FOUND = -1;  // -1 will be the maximum unsigned int
 
  public:
+	/**
+	 * Create a default molecule with no nodes or edges.
+	 * Both the left and right leads are initalize to 0.
+	 */
 	Molecule();
-	Molecule(const MSD *msd);
-	Molecule(const MSD &msd);
+
+	/**
+	 * Create a molecule with the given number of nodes, but no edges.
+	 * Both the left and right leads are initalized to 0.
+	 * 
+	 * May also supply a set of parameters to use for each node.
+	 * By default, the default node parameters are used.
+	 */
+	Molecule(size_t n_m, const NodeParameters &nodeParams = NodeParameters());
 
  public:
 	void serialize(unsigned char *buffer) const;  // store this Molecule object into the given buffer 
@@ -155,7 +170,7 @@ class Molecule {
 	void getLeads(unsigned int &left, unsigned int &right) const;
 
  // ----- Molecule::Instance stuff -----
- public:
+ private:
 	/**
 	 * Represents an actuallized instance of the prototype Molecule,
 	 * and contains state information for each part/atom of the molecule.
@@ -165,11 +180,13 @@ class Molecule {
 	
 	 private:
 		const Molecule &prototype;  // contains a reference to the the Molecular structure and parameters
+		MSD &msd;  // a reference to the MSD this Molecule::Instace is attached to
+		unsigned int y, z;  // the (x,y,z) position of this Molecule::Instance. Note: the mol's x position is determined by msd.molPosL, msd.molPosR.  
 		std::vector<Vector> spins;  // states of each "Node"
 		std::vector<Vector> fluxes;
 
-		Instance(const Molecule &prototype);
-		// Instance(const Instance &other);  // default copy constructor works
+		Instance(const Molecule &prototype, MSD &msd, unsigned int y, unsigned int z);
+		Instance(const Instance &other);
 
 		Instance& operator=(const Instance &other);  // copies the spin/flux states
 	
@@ -180,23 +197,24 @@ class Molecule {
 		Vector getSpin(unsigned int a) const;
 		Vector getFlux(unsigned int a) const;
 		void getLocalM(unsigned int a, Vector &spin, Vector &flux) const;
-
-		// TODO: ... setParameters and implement U (energy) ...
 	};
 
 	/**
+	 * All spins start up (Sm * Vector::I), and all fluxes start at 0 (Vector::ZERO).
+	 * 
 	 * Instances should be created after the Molecule (prototype) has been configured.
 	 * If the parent Molecule (prototype) object is modified after this method is called,
 	 * the previously existing Instance objects returned by those calls may be invalid;
 	 * they should be discarded and new Instance objects should be created.
 	 * 
 	 * TL;DR modifying the Molecule object after invoking instantiate leads to undefined behavior.
+	 * 
+	 * @param msd: The MSD which this Mol is attached.
+	 * @param y: The y-cordinate for this Mol within the MSD.
+	 * @param z: The z-cordinate for this Mol within the MSD.
 	 */
-	Instance instantiate() const;
+	Instance instantiate(MSD &msd, unsigned int y, unsigned int z) const;
 };
-
-typedef Molecule MolProto;
-typedef Molecule::Instance Mol;
 
 
 /**
@@ -205,7 +223,14 @@ typedef Molecule::Instance Mol;
 class MSD {
  public:
 	typedef function<Vector(const Vector &, function<double()>)> FlippingAlgorithm;
-	
+	typedef Molecule MolProto;
+	typedef Molecule::Instance Mol;
+
+	// needed so these methods can update energy and magnetization of the MSD
+	friend void Mol::setLocalM(unsigned int a, const Vector &spin, const Vector &flux);
+	friend void Mol::setSpin(unsigned int a, const Vector &spin);
+	friend void Mol::setFlux(unsigned int a, const Vector &flux);
+
 	struct Parameters {
 		double kT;  // Temperature
 		Vector B;  // Magnetic field
@@ -459,6 +484,14 @@ ostream& operator <<(ostream &out, const MSD::Results &r) {
 }
 
 
+Molecule::EdgeParameters::EdgeParameters()
+: Jm(0), Je1m(0), Jeem(0), bm(0), Dm(Vector::ZERO)
+{}
+
+Molecule::NodeParameters::NodeParameters()
+: Sm(1), Fm(0), Je0m(0), Am(Vector::ZERO)
+{}
+
 Molecule::Edge::Edge(size_t eIdx, size_t nIdx, size_t sIdx, EdgeParameters *eParam, Node *node, Node *self)
 : edgeIndex(eIdx), nodeIndex(nIdx), selfIndex(sIdx), parameters(eParam), node(node), self(self)
 {}
@@ -471,20 +504,14 @@ Molecule::Edge::Edge(Molecule &mol, size_t eIdx, size_t nIdx, size_t sIdx)
 	self = & mol.nodes.at(sIdx);
 }
 
-Molecule::Molecule() : msd(NULL), leftLead(0), rightLead(0) {
+Molecule::Molecule() : leftLead(0), rightLead(0) {
 }
 
-Molecule::Molecule(const MSD *msd) : msd(msd), leftLead(0), rightLead(0) {
-}
-
-Molecule::Molecule(const MSD &msd) : msd(&msd), leftLead(0), rightLead(0) {
-}
-
-void Molecule::checkNodeIndexBounds(unsigned int index) const {
-
-}
-void Molecule::checkEdgeIndexBounds(unsigned int index) const {
-
+Molecule::Molecule(size_t n_m, const NodeParameters &nodeParams)
+: nodes(n_m), leftLead(0), rightLead(0)
+{
+	for (Node &node : nodes)
+		node.parameters = nodeParams;
 }
 
 void Molecule::serialize(unsigned char *buffer) const {
@@ -505,7 +532,7 @@ void Molecule::serialize(unsigned char *buffer) const {
 	for (const Node &node : nodes) {
 		bwrite(node.parameters.Sm, buffer);  // Order must be correct (must match Molecule::deserialize)
 		bwrite(node.parameters.Fm, buffer);
-		bwrite(node.parameters.Je0, buffer);
+		bwrite(node.parameters.Je0m, buffer);
 		bwrite(node.parameters.Am.x, buffer);
 		bwrite(node.parameters.Am.y, buffer);
 		bwrite(node.parameters.Am.z, buffer);
@@ -549,7 +576,7 @@ void Molecule::deserialize(const unsigned char *buffer) {
 		Node node;
 		bread(node.parameters.Sm, buffer);  // For each node, we read its (local) parameter fields.
 		bread(node.parameters.Fm, buffer);  // (Take careful note of the order in which the fields are stored.)
-		bread(node.parameters.Je0, buffer);
+		bread(node.parameters.Je0m, buffer);
 		bread(node.parameters.Am.x, buffer);
 		bread(node.parameters.Am.y, buffer);
 		bread(node.parameters.Am.z, buffer);
@@ -677,7 +704,9 @@ void Molecule::getLeads(unsigned int &left, unsigned int &right) const {
 	right = rightLead;
 }
 
-Molecule::Instance::Instance(const Molecule &prototype) : prototype(prototype) {
+Molecule::Instance::Instance(const Molecule &prototype, MSD &msd, unsigned int y, unsigned int z)
+: prototype(prototype), msd(msd), y(y), z(z)
+{
 	const size_t n_m = prototype.nodes.size();
 	spins.reserve(n_m);
 	for (size_t i = 0; i < n_m; i++)
@@ -685,15 +714,108 @@ Molecule::Instance::Instance(const Molecule &prototype) : prototype(prototype) {
 	fluxes.assign(prototype.nodes.size(), Vector::ZERO);
 }
 
+Molecule::Instance::Instance(const Instance &other)
+: prototype(other.prototype), msd(other.msd), y(y), z(z), spins(other.spins), fluxes(other.fluxes)
+{}
+
 Molecule::Instance& Molecule::Instance::operator=(const Molecule::Instance &other) {
 	this->spins = other.spins;
 	this->fluxes = other.fluxes;
 }
 
 void Molecule::Instance::setLocalM(unsigned int a, const Vector &spin, const Vector &flux) {
-	spins.at(a) = spin;
-	fluxes.at(a) = flux;
-	// TODO: update energy
+	Vector &s = spins.at(a);   // previous spin
+	Vector &f = fluxes.at(a);  // previous flux
+
+	Vector m = s + f;          // previous local mag.
+	Vector mag = spin + flux;  // new local mag.
+
+	Vector deltaS = spin - s;
+	Vector deltaF = flux - f;
+	Vector deltaM = mag - m;
+
+	const Node &node = prototype.nodes[a];
+	const MSD::Parameters &msdParams = msd.parameters;
+	const NodeParameters &nodeParams = node.parameters;
+
+	MSD::Results &results = msd.results;
+
+	// ---- update magnetization, M ----
+	results.M += deltaM;
+	results.MS += deltaS;
+	results.MF += deltaF;
+
+	results.Mm += deltaM;
+	results.MSm += deltaS;
+	results.MFm += deltaF;
+
+	// ---- update energy, U ----
+	// local energy
+	{	double deltaU = msdParams.B * deltaM
+		              + nodeParams.Am * ( Vector(sq(mag.x), sq(mag.y), sq(mag.z)) - Vector(sq(m.x), sq(m.y), sq(m.z)) )
+		              + nodeParams.Je0m * ( spin * flux - s * f );
+		results.U -= deltaU;
+		results.Um -= deltaU;
+	}
+
+	// energy from edges (i.e. bonds)
+	for (const Edge &edge : node.neighbors) {
+		unsigned int a1 = edge.nodeIndex;  // index of neighbor
+		Vector neighbor_s = spins[a1];
+		Vector neighbor_f = fluxes[a1];
+		Vector neighbor_m = neighbor_s + neighbor_f;
+		EdgeParameters edgeParams = *edge.parameters;
+		double deltaU = edgeParams.Jm * ( neighbor_s * deltaS )
+		              + edgeParams.Je1m * ( neighbor_f * deltaS + neighbor_s * deltaF )
+		              + edgeParams.Jeem * ( neighbor_f * deltaF )
+		              + edgeParams.bm * ( sq(neighbor_m * mag) - sq(neighbor_m * m) )
+		              + edgeParams.Dm * neighbor_m.crossProduct(deltaM);
+		results.U -= deltaU;
+		results.Um -= deltaU;
+	}
+
+	// energy from leads
+	unsigned int molPosL = msd.molPosL;
+	unsigned int molPosR = msd.molPosR;
+	if (molPosL <= molPosR) {
+		const auto &msdSpins = msd.spins;
+		const auto &msdFluxes = msd.fluxes;
+
+		// left lead
+		if (a == prototype.leftLead && molPosL != 0) {
+			unsigned int a1 = msd.index(molPosL - 1, y, z);
+			Vector neighbor_s = msdSpins[a1];
+			Vector neighbor_f = msdFluxes[a1];
+			Vector neighbor_m = neighbor_s + neighbor_f;
+			double deltaU = msdParams.JmL * ( neighbor_s * deltaS )
+			              + msdParams.Je1mL * ( neighbor_f * deltaS + neighbor_s * deltaF )
+			              + msdParams.JeemL * ( neighbor_f * deltaF )
+			              + msdParams.bmL * ( sq(neighbor_m * mag) - sq(neighbor_m * m) )
+			              + msdParams.DmL * neighbor_m.crossProduct(deltaM);
+			results.U -= deltaU;
+			results.UmL -= deltaU;
+		}
+
+		// right lead
+		unsigned int x2 = molPosR + 1;
+		if (a == prototype.rightLead && x2 != msd.width) {
+			unsigned int a1 = msd.index(x2, y, z);
+			Vector neighbor_s = msdSpins[a1];
+			Vector neighbor_f = msdFluxes[a1];
+			Vector neighbor_m = neighbor_s + neighbor_f;
+			double deltaU = msdParams.JmR * ( neighbor_s * deltaS )
+			              + msdParams.Je1mR * ( neighbor_f * deltaS + neighbor_s * deltaF )
+			              + msdParams.JeemR * ( neighbor_f * deltaF )
+			              + msdParams.bmR * ( sq(neighbor_m * mag) - sq(neighbor_m * m) )
+			              + msdParams.DmR * neighbor_m.crossProduct(deltaM);
+			results.U -= deltaU;
+			results.UmR -= deltaU;
+		}
+	}
+
+	// ---- Done: update spin and flux values ----
+	s = spin;
+	f = flux;
 }
 
 void Molecule::Instance::setSpin(unsigned int a, const Vector &spin) {
@@ -717,8 +839,8 @@ void Molecule::Instance::getLocalM(unsigned int a, Vector &spin, Vector &flux) c
 	flux = fluxes.at(a);
 }
 
-Molecule::Instance Molecule::instantiate() const {
-	return Instance(*this);
+Molecule::Instance Molecule::instantiate(MSD &msd, unsigned int y, unsigned int z) const {
+	return Instance(*this, msd, y, z);
 }
 
 
@@ -1449,6 +1571,7 @@ void MSD::setLocalM(unsigned int a, const Vector &spin, const Vector &flux) {
 	Vector &s = spins.at(a); //previous spin
 	Vector &f = fluxes.at(a); //previous spin fluctuation
 	
+	// TODO: remove this "optimization" ???
 	if( s == spin && f == flux )
 		return;
 	
