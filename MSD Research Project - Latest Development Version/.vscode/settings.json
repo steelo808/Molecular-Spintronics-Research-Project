@@ -5,6 +5,12 @@
 		"xtree": "cpp",
 		"utility": "cpp",
 		"ostream": "cpp",
-		"cmath": "cpp"
+		"cmath": "cpp",
+		"charconv": "cpp",
+		"ios": "cpp",
+		"istream": "cpp",
+		"xstring": "cpp",
+		"xutility": "cpp",
+		"memory": "cpp"
 	}
 }

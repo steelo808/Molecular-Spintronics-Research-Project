@@ -8,6 +8,9 @@
 #ifndef UDC_H
 #define UDC_H
 
+#include <cstring>
+#include <exception>
+
 namespace udc {
 
 /** Mathematical constant: Euler's Number */
@@ -51,7 +54,7 @@ template <typename T> inline void bread(T &destination, const unsigned char * &b
  * Writes the given number of bytes from the source and stores it into the buffer,
  * advancing the buffer pointer in the process.
  */
-void bwrite(const void * source, size_t sSize, unsigned char * &buffer) {
+inline void bwrite(const void * source, size_t sSize, unsigned char * &buffer) {
 	memcpy(buffer, source, sSize);
 	buffer += sSize;
 }
@@ -62,6 +65,17 @@ void bwrite(const void * source, size_t sSize, unsigned char * &buffer) {
 template <typename T> inline void bwrite(const T &source, unsigned char * &buffer) {
 	bwrite(&source, sizeof(T), buffer);
 }
+
+
+class UDCException : public exception {
+ private:
+	const char *message;
+
+ public:
+	UDCException(const char *message) : message(message) {}
+	
+	virtual const char * what() const noexcept { return message; }
+};
 
 
 } //end of namespace
