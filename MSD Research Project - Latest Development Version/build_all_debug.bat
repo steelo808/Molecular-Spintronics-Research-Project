@@ -2,7 +2,7 @@
 @rem of each MSD program using "cl" (Visual Studio C/C++ compiler)
 
 @rem Specify install directoy and version of Visual Studio
-@set VS_DIR="C:\Program Files (x86)\Microsoft Visual Studio\2017\Community"
+@set VS_DIR="C:\Program Files (x86)\Microsoft Visual Studio\2019\Community"
 
 
 @rem Compile 64-bit versions

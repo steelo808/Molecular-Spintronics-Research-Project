@@ -1,35 +1,38 @@
 width  = 11
-height = 25
-depth  = 25
+height = 50
+depth  = 50
 
 molPosL   = 5
 molPosR   = 5
-topL    = 10
-bottomL = 15
-frontR  = 10
-backR   = 15
+topL    = 23
+bottomL = 27
+frontR  = 23
+backR   = 27
 
-kT = 0.25
+simCount = 500000000
+freq = 100000
 
-B = 0.01 0 0
+kT = 0.1
+
+B = 0 0 0
 
 sL = 1
 sR = 1
 sm = 1
-FL = 0.5
-FR = 0.5
-Fm = 0.5
+FL = 0
+FR = 0
+Fm = 0
 
 JL = 1
 JR = 1
 Jm = 0
-JmL = 0.5
-JmR = -0.5
+JmL = -1
+JmR = 1
 JLR = 0
 
-AL = 0 0 0
-AR = 0 0 0
-Am = 0 0 0
+AL = 0  0.5  0
+AR = 0  0  0
+Am = 0  0  0
 
 bL = 0
 bR = 0
@@ -39,13 +42,11 @@ bmR = 0
 bLR = 0
 
 # turn off front edge of mol.
-[5 11 10] = 0
-[5 12 10] = 0
-[5 13 10] = 0
-[5 14 10] = 0
+# [5 24 23] = 0
+# [5 25 23] = 0
+# [5 26 23] = 0
 
 #turn off back edge of mol.
-[5 11 15] = 0
-[5 12 15] = 0
-[5 13 15] = 0
-[5 14 15] = 0
+# [5 24 27] = 0
+# [5 25 27] = 0
+# [5 26 27] = 0

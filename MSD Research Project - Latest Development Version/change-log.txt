@@ -121,3 +121,8 @@ Second bug fix. In MSD::setParameters()
 5.5.2:
 (7-18-2021) Replaced usage of std::map in MSD.h with a much simplier custom built data structure SparseArray.h
 	which is optimized for speed given our program's specific requirments.
+
+6.0.0:
+(10-18-2021) Fixed bug in MSD::Parameters::operator== which wasn't checking new Je parameters correctly.
+
+TODO: Added graph-based mol. to MSD.

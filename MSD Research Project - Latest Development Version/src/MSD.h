@@ -1,10 +1,8 @@
 /*
  * MSD.h
  *
- *  Last Edited: August 20, 2021
+ *  Last Edited: October 18, 2021
  *       Author: Christopher D'Angelo
- * 
- * TODO: update MSD::init, MSD fields, MSD::setLocalM, MSD::setParameters, and etc. to utilize new graph-based Mol.
  */
 
 #ifndef UDC_MSD
@@ -86,6 +84,7 @@ class Molecule {
 	struct Node;
 	struct Edge;
 
+
 	struct Edge {
 		/**
 		 * The indices in the Molecule's EdgeParameter or Node array.
@@ -94,6 +93,7 @@ class Molecule {
 		 * "selfIndex" is the source node (i.e. the node this edge is attached to).
 		 */
 		size_t edgeIndex, nodeIndex, selfIndex;
+		// TODO: add a direction for Dm (Dzyaloshinskii-Moriya interaction (i.e. Skyrmions))
 
 		Edge(size_t edgeIndex, size_t nodeIndex, size_t selfIndex);
 	};
@@ -135,7 +135,7 @@ class Molecule {
 	// bool operator=(const Molecule &other);  // use default assignment operator
 
  public:
-	void serialize(unsigned char *buffer) const;  // store this Molecule object into the given buffer 
+	void serialize(unsigned char *buffer) const;  // store this Molecule object into the given buffer
 	void deserialize(const unsigned char *buffer);  // reconstruct this Molecule object using the given buffer
 	size_t serializationSize() const;  // the size needed (in bytes) to serialize this Molecule object
 
@@ -204,10 +204,10 @@ class Molecule {
 		 * the previously existing Instance objects returned by those calls may be invalid;
 		 * they should be discarded and new Instance objects should be created.
 		 * 
-		 * Changed to NodeParameters or EdgeParameters are okay; however,
+		 * Changs to NodeParameters or EdgeParameters are okay; however,
 		 * the energy of the attached MSD will need to be recalculated externally.
 		 * 
-		 * TL;DR modifying the Molecule object after invoking instantiate leads to undefined behavior.
+		 * (TL;DR modifying the Molecule object after invoking instantiate leads to undefined behavior.)
 		 * 
 		 * @param prototype: the Molecule prototype for which this object is an instance of.
 		 * @param msd: The MSD which this Mol is attached.
@@ -381,17 +381,18 @@ class MSD {
 	FlippingAlgorithm flippingAlgorithm; //algorithm used to "flip" an atom in metropolis
 	
 	MSD(unsigned int width, unsigned int height, unsigned int depth,
+			const MolProto &molProto, unsigned int molPosL,
+			unsigned int topL, unsigned int bottomL, unsigned int frontR, unsigned int backR);
+	MSD(unsigned int width, unsigned int height, unsigned int depth,
+			const MolProtoFactory &molType, unsigned int molPosL, unsigned int molPosR,
+			unsigned int topL, unsigned int bottomL, unsigned int frontR, unsigned int backR);
+	MSD(unsigned int width, unsigned int height, unsigned int depth,
 			unsigned int molPosL, unsigned int molPosR,
 			unsigned int topL, unsigned int bottomL, unsigned int frontR, unsigned int backR);
 	MSD(unsigned int width, unsigned int height, unsigned int depth,
 			unsigned int heightL, unsigned depthR);
 	MSD(unsigned int width, unsigned int height, unsigned int depth);
-	MSD(unsigned int width, unsigned int height, unsigned int depth,
-			const MolProtoFactory &molType, unsigned int molPosL, unsigned int molPosR,
-			unsigned int topL, unsigned int bottomL, unsigned int frontR, unsigned int backR);
-	MSD(unsigned int width, unsigned int height, unsigned int depth,
-			const MolProto &molProto, unsigned int molPosL,
-			unsigned int topL, unsigned int bottomL, unsigned int frontR, unsigned int backR);
+	
 	
 	Parameters getParameters() const;
 	void setParameters(const Parameters &);
@@ -492,24 +493,24 @@ ostream& operator <<(ostream &out, const MSD::Parameters &p) {
 	return out
 		<< "kT = " << p.kT << '\n' << "B = " << p.B << "\n\n"
 
-		<< "SL = " << p.SL << '\n' << "SR = " << p.SR << '\n' << "Sm = " << p.Sm  << '\n'
-		<< "FL = " << p.FL << '\n' << "FR = " << p.FR << '\n' << "Fm = " << p.Fm  << "\n\n"
+		<< "SL = " << p.SL << '\n' << "SR = " << p.SR << '\n'
+		<< "FL = " << p.FL << '\n' << "FR = " << p.FR << "\n\n"
 		
-		<< "JL  = " << p.JL  << '\n' << "JR  = " << p.JR  << '\n' << "Jm  = " << p.Jm  << '\n'
+		<< "JL  = " << p.JL  << '\n' << "JR  = " << p.JR  << '\n'
 		<< "JmL = " << p.JmL << '\n' << "JmR = " << p.JmR << '\n' << "JLR = " << p.JLR << "\n\n"
 		
-		<< "Je0L  = " << p.Je0L  << '\n' << "Je0R  = " << p.Je0R  << '\n' << "Je0m  = " << p.Je0m  << '\n'
-		<< "Je1L  = " << p.Je1L  << '\n' << "Je1R  = " << p.Je1R  << '\n' << "Je1m  = " << p.Je1m  << '\n'
+		<< "Je0L  = " << p.Je0L  << '\n' << "Je0R  = " << p.Je0R  << '\n'
+		<< "Je1L  = " << p.Je1L  << '\n' << "Je1R  = " << p.Je1R  << '\n'
 		<< "Je1mL = " << p.Je1mL << '\n' << "Je1mR = " << p.Je1mR << '\n' << "Je1LR = " << p.Je1LR << "\n"
-		<< "JeeL  = " << p.JeeL  << '\n' << "JeeR  = " << p.JeeR  << '\n' << "Jeem  = " << p.Jeem  << '\n'
+		<< "JeeL  = " << p.JeeL  << '\n' << "JeeR  = " << p.JeeR  << '\n'
 		<< "JeemL = " << p.JeemL << '\n' << "JeemR = " << p.JeemR << '\n' << "JeeLR = " << p.JeeLR << "\n\n"
 		
-		<< "bL  = " << p.bL  << '\n' << "bR  = " << p.bR  << '\n' << "bm  = " << p.bm  << '\n'
+		<< "bL  = " << p.bL  << '\n' << "bR  = " << p.bR  << '\n'
 		<< "bmL = " << p.bmL << '\n' << "bmR = " << p.bmR << '\n' << "bLR = " << p.bLR << "\n\n"
 		
-		<< "AL = " << p.AL << '\n' << "AR = " << p.AR << '\n' << "Am = " << p.Am  << "\n\n"
+		<< "AL = " << p.AL << '\n' << "AR = " << p.AR << "\n\n"
 		
-		<< "DL  = " << p.DL  << '\n' << "DR  = " << p.DR  << '\n' << "Dm  = " << p.Dm  << '\n'
+		<< "DL  = " << p.DL  << '\n' << "DR  = " << p.DR  << '\n'
 		<< "DmL = " << p.DmL << '\n' << "DmR = " << p.DmR << '\n' << "DLR = " << p.DLR << '\n';
 }
 
@@ -641,10 +642,11 @@ size_t Molecule::serializationSize() const {
 }
 
 unsigned int Molecule::createNode(const NodeParameters &parameters) {
-	if (nodes.size() >= NOT_FOUND)
+	unsigned int index = nodes.size();
+
+	if (index >= NOT_FOUND)
 		throw out_of_range("Molecule::createNode: Can not create node because the maximum number of nodes has been reached");
 	
-	unsigned int index = nodes.size();
 	Node node(parameters);
 	nodes.push_back(node);
 
@@ -660,12 +662,17 @@ unsigned int Molecule::nodeCount() const {
 }
 
 unsigned int Molecule::connectNodes(unsigned int a, unsigned int b, const EdgeParameters &parameters) {
-	if (edgeParameters.size() == NOT_FOUND)
-		throw out_of_range("Molecule::connectNodes: Can not create edge because the maximum number of edges has been reached");
-	if (a >= nodes.size() || b >= nodes.size())
-		throw out_of_range("Molecule::connectNodes: Invalid node index");
-	
 	size_t index = edgeParameters.size();
+
+	{
+		if (index == NOT_FOUND)
+			throw out_of_range("Molecule::connectNodes: Can not create edge because the maximum number of edges has been reached");
+		
+		size_t nodeCount = nodes.size();
+		if (a >= nodeCount || b >= nodeCount)
+			throw out_of_range("Molecule::connectNodes: Invalid node index");
+	}
+
 	edgeParameters.push_back(parameters);
 
 	Edge edgeA(index, b, a);
@@ -793,12 +800,12 @@ void Molecule::Instance::setLocalM(unsigned int a, const Vector &spin, const Vec
 		Vector neighbor_s = spins[a1];
 		Vector neighbor_f = fluxes[a1];
 		Vector neighbor_m = neighbor_s + neighbor_f;
-		EdgeParameters edgeParams = *edge.parameters;
+		const EdgeParameters &edgeParams = prototype.edgeParameters[edge.edgeIndex];
 		double deltaU = edgeParams.Jm * ( neighbor_s * deltaS )
 		              + edgeParams.Je1m * ( neighbor_f * deltaS + neighbor_s * deltaF )
 		              + edgeParams.Jeem * ( neighbor_f * deltaF )
 		              + edgeParams.bm * ( sq(neighbor_m * mag) - sq(neighbor_m * m) )
-		              + edgeParams.Dm * neighbor_m.crossProduct(deltaM);
+		              + edgeParams.Dm * neighbor_m.crossProduct(deltaM);  // TODO: crossProduct is not communative!!!
 		results.U -= deltaU;
 		results.Um -= deltaU;
 	}
@@ -818,7 +825,7 @@ void Molecule::Instance::setLocalM(unsigned int a, const Vector &spin, const Vec
 			              + msdParams.Je1mL * ( neighbor_f * deltaS + neighbor_s * deltaF )
 			              + msdParams.JeemL * ( neighbor_f * deltaF )
 			              + msdParams.bmL * ( sq(neighbor_m * mag) - sq(neighbor_m * m) )
-			              + msdParams.DmL * neighbor_m.crossProduct(deltaM);
+			              + msdParams.DmL * neighbor_m.crossProduct(deltaM);  // TODO: crossProduct is not communative!!!
 			results.U -= deltaU;
 			results.UmL -= deltaU;
 		}
@@ -833,7 +840,7 @@ void Molecule::Instance::setLocalM(unsigned int a, const Vector &spin, const Vec
 			              + msdParams.Je1mR * ( neighbor_f * deltaS + neighbor_s * deltaF )
 			              + msdParams.JeemR * ( neighbor_f * deltaF )
 			              + msdParams.bmR * ( sq(neighbor_m * mag) - sq(neighbor_m * m) )
-			              + msdParams.DmR * neighbor_m.crossProduct(deltaM);
+			              + msdParams.DmR * neighbor_m.crossProduct(deltaM);  // TODO: crossProduct is not communative!!!
 			results.U -= deltaU;
 			results.UmR -= deltaU;
 		}
@@ -872,32 +879,29 @@ Molecule::Instance Molecule::instantiate(MSD &msd, unsigned int y, unsigned int 
 
 MSD::Parameters::Parameters()
 : kT(0.25), B(Vector::ZERO),
-  SL(1), SR(1), Sm(1), FL(0), FR(0), Fm(0),
-  JL(1), JR(1), Jm(0), JmL(1), JmR(-1), JLR(0),
-  Je0L(0), Je0R(0), Je0m(0),
-  Je1L(0), Je1R(0), Je1m(0), Je1mL(0), Je1mR(0), Je1LR(0),
-  JeeL(0), JeeR(0), Jeem(0), JeemL(0), JeemR(0), JeeLR(0),
-  bL(0), bR(0), bm(0), bmL(0), bmR(0), bLR(0),
-  AL(Vector::ZERO), AR(Vector::ZERO), Am(Vector::ZERO),
-  DL(Vector::ZERO), DR(Vector::ZERO), Dm(Vector::ZERO), DmL(Vector::ZERO), DmR(Vector::ZERO), DLR(Vector::ZERO) {
+  SL(1), SR(1), FL(0), FR(0),
+  JL(1), JR(1), JmL(1), JmR(-1), JLR(0),
+  Je0L(0), Je0R(0),
+  Je1L(0), Je1R(0), Je1mL(0), Je1mR(0), Je1LR(0),
+  JeeL(0), JeeR(0), JeemL(0), JeemR(0), JeeLR(0),
+  bL(0), bR(0), bmL(0), bmR(0), bLR(0),
+  AL(Vector::ZERO), AR(Vector::ZERO),
+  DL(Vector::ZERO), DR(Vector::ZERO), DmL(Vector::ZERO), DmR(Vector::ZERO), DLR(Vector::ZERO) {
 }
 
 bool MSD::Parameters::operator==(const Parameters &p) const {
-	return kT  == p.kT  && B   == p.B
-	    && SL  == p.SL  && SR  == p.SR  && Sm  == p.Sm
-	    && FL  == p.FL  && FR  == p.FR  && Fm  == p.Fm
-	    && JL  == p.JL  && JR  == p.JR  && Jm  == p.Jm
-	    && JmL == p.JmL && JmR == p.JmR && JLR == p.JLR
-		&& Je0L  == p.Je0L && Je0R  == p.Je0R && Je0m == p.Je0m
-		&& Je1L  == p.Je1L && Je1R  == p.Je1R && Je1m == p.Je1m
-		&& Je1mL == p.Je1L && Je1mR == p.Je1R && Je1m == p.Je1LR
-		&& JeeL  == p.JeeL && JeeR  == p.JeeR && Jeem == p.Jeem
-		&& JeemL == p.JeeL && JeemR == p.JeeR && Jeem == p.JeeLR
-	    && bL  == p.bL  && bR  == p.bR  && bm  == p.bm
-	    && bmL == p.bmL && bmR == p.bmR && bLR == p.bLR
-	    && AL  == p.AL  && AR  == p.AR  && Am  == p.Am
-	    && DL  == p.DL  && DR  == p.DR  && Dm  == p.Dm
-	    && DmL == p.DmL && DmR == p.DmR && DLR == p.DLR;
+	return  kT == p.kT
+		&&  B  == p.B
+
+	    &&  SL    == p.SL    &&  SR    == p.SR
+	    &&  FL    == p.FL    &&  FR    == p.FR
+	    &&  JL    == p.JL    &&  JR    == p.JR    &&  JmL   == p.JmL    &&  JmR  == p.JmR     &&  JLR   == p.JLR
+		&&  Je0L  == p.Je0L  &&  Je0R  == p.Je0R
+		&&  Je1L  == p.Je1L  &&  Je1R  == p.Je1R  &&  Je1mL == p.Je1mL  &&  Je1mR == p.Je1mR  &&  Je1LR == p.Je1LR
+		&&  JeeL  == p.JeeL  &&  JeeR  == p.JeeR  &&  JeemL == p.JeemL  &&  JeemR == p.JeemR  &&  JeeLR == p.JeeLR
+	    &&  bL    == p.bL    &&  bR    == p.bR    &&  bmL   == p.bmL    &&  bmR   == p.bmR    &&  bLR   == p.bLR
+	    &&  AL    == p.AL    &&  AR    == p.AR
+	    &&  DL    == p.DL    &&  DR    == p.DR    &&  DmL   == p.DmL    &&  DmR   == p.DmR    &&  DLR   == p.DLR;
 }
 
 bool MSD::Parameters::operator!=(const Parameters &p) const {
@@ -913,12 +917,12 @@ MSD::Results::Results()
 }
 
 bool MSD::Results::operator==(const Results &r) const {
-	return t   == r.t
-	    && M   == r.M   && ML  == r.ML  && MR  == r.MR  && Mm  == r.Mm
-		&& MS  == r.MS  && MSL == r.MSL && MSR == r.MSR && MSm == r.MSm
-		&& MF  == r.MF  && MFL == r.MFL && MFR == r.MFR && MFm == r.MFm
-	    && U   == r.U   && UL  == r.UL  && UR  == r.UR  && Um == r.Um
-		&& UmL == r.UmL && UmR == r.UmR && ULR == r.ULR;
+	return t == r.t
+
+	    &&  M   == r.M    &&  ML  == r.ML   &&  MR  == r.MR   &&  Mm  == r.Mm
+		&&  MS  == r.MS   &&  MSL == r.MSL  &&  MSR == r.MSR  &&  MSm == r.MSm
+		&&  MF  == r.MF   &&  MFL == r.MFL  &&  MFR == r.MFR  &&  MFm == r.MFm
+	    &&  U   == r.U    &&  UL  == r.UL   &&  UR  == r.UR   &&  Um  == r.Um  &&  UmL == r.UmL  &&  UmR == r.UmR  &&  ULR == r.ULR;
 }
 
 bool MSD::Results::operator!=(const Results &r) const {
@@ -1114,6 +1118,7 @@ unsigned long MSD::genSeed() {
 }
 
 
+// Note: "molProtoFactory" is a pointer so that it can be NULL
 void MSD::init(const MolProtoFactory *molProtoFactory) {
 	// preconditions:
 	if (width == 0)         width = 1;
@@ -1166,8 +1171,8 @@ void MSD::init(const MolProtoFactory *molProtoFactory) {
 					}
 				}
 			// mol
-			if( mol_exists && ((y == topL || y == bottomL) && frontR <= z && z <= backR) || ((z == frontR || z == backR) && topL <= y && y <= bottomL) ) {
-				shared_ptr<Mol> mol = make_shared<Mol>(molProto, *this, y, z);
+			if( mol_exists && (((y == topL || y == bottomL) && (frontR <= z && z <= backR)) || ((z == frontR || z == backR) && (topL <= y && y <= bottomL))) ) {
+				shared_ptr<Mol> mol = make_shared<Mol>(molProto, *this, y, z);  // calls "new Mol" constructor, but returns a "shared_pointer"
 				for( unsigned int x = molPosL; x <= molPosR; x++ ) {
 					a = index(x, y, z);
 					indices.push_back(a);
@@ -1198,10 +1203,28 @@ void MSD::init(const MolProtoFactory *molProtoFactory) {
 				}
 		}
 	
-	setParameters(parameters); //calculate initial state (results)
-	flippingAlgorithm = CONTINUOUS_SPIN_MODEL; //set default "flipping" algorithm
+	flippingAlgorithm = CONTINUOUS_SPIN_MODEL; // set default "flipping" algorithm
+	setParameters(parameters); // calculate initial state ("Results") for FM sections
+	setMolProto(molProto);     // calculate initial state ("Results") for mol. section
 }
 
+MSD::MSD(unsigned int width, unsigned int height, unsigned int depth,
+		const MolProto &molProto, unsigned int molPosL,
+		unsigned int topL, unsigned int bottomL, unsigned int frontR, unsigned int backR)
+: width(width), height(height), depth(depth), molPosL(molPosL), molPosR(molProto.nodeCount() - 1),
+		topL(topL), bottomL(bottomL), frontR(frontR), backR(backR), molProto(molProto)
+{
+	init();
+}
+
+MSD::MSD(unsigned int width, unsigned int height, unsigned int depth,
+			const MolProtoFactory &molType, unsigned int molPosL, unsigned int molPosR,
+			unsigned int topL, unsigned int bottomL, unsigned int frontR, unsigned int backR)
+: width(width), height(height), depth(depth), molPosL(molPosL), molPosR(molPosR),
+		topL(topL), bottomL(bottomL), frontR(frontR), backR(backR)
+{
+	init(&molType);
+}
 
 MSD::MSD(unsigned int width, unsigned int height, unsigned int depth,
 		unsigned int molPosL, unsigned int molPosR,
@@ -1232,25 +1255,6 @@ MSD::MSD(unsigned int width, unsigned int height, unsigned int depth)
 	init(&LINEAR_MOL);
 }
 
-MSD::MSD(unsigned int width, unsigned int height, unsigned int depth,
-			const MolProtoFactory &molType, unsigned int molPosL, unsigned int molPosR,
-			unsigned int topL, unsigned int bottomL, unsigned int frontR, unsigned int backR)
-: width(width), height(height), depth(depth), molPosL(molPosL), molPosR(molPosR),
-		topL(topL), bottomL(bottomL), frontR(frontR), backR(backR)
-{
-	init(&molType);
-}
-
-MSD::MSD(unsigned int width, unsigned int height, unsigned int depth,
-		const MolProto &molProto, unsigned int molPosL,
-		unsigned int topL, unsigned int bottomL, unsigned int frontR, unsigned int backR)
-: width(width), height(height), depth(depth), molPosL(molPosL), molPosR(molProto.nodeCount() - 1),
-		topL(topL), bottomL(bottomL), frontR(frontR), backR(backR), molProto(molProto)
-{
-	init();
-}
-
-
 MSD::Parameters MSD::getParameters() const {
 	return parameters;
 }
@@ -1261,7 +1265,7 @@ void MSD::setParameters(const MSD::Parameters &p) {
 	MSD::Parameters p0 = parameters;  // old parameters
 	parameters = p;  // update to new parameters
 	
-	//Spin and Spin Flux Magnitudes
+	// ----- Spin and Spin Flux Magnitudes -----
 	for( auto iter = begin(); iter != end(); ++iter ) {
 		unsigned int i = iter.getIndex();
 		unsigned int x = iter.getX();
@@ -1271,10 +1275,10 @@ void MSD::setParameters(const MSD::Parameters &p) {
 		} else if( x > molPosR ) {
 			spins[i].normalize() *= parameters.SR;
 			fluxes[i] *= p0.FR != 0 ? parameters.FR / p0.FR : 0;
-		} // else, mol: do nothing
+		} // else, mol: do nothing (see: MSD::setMolProto)
 	}
 	
-	// Magnetization, Anisotropy, and other local phenomenon
+	// ----- Magnetization, Anisotropy, and other local phenomenon -----
 	results.MSL = results.MSR = results.MFL = results.MFR = Vector::ZERO;
 	Vector anisotropy_L = Vector::ZERO, anisotropy_R = Vector::ZERO;
 	double couple_e0_L = 0, couple_e0_R = 0;  // sum(s_i * f_i)
@@ -1297,7 +1301,7 @@ void MSD::setParameters(const MSD::Parameters &p) {
 			anisotropy_R.y += sq( localM.y );
 			anisotropy_R.z += sq( localM.z );
 			couple_e0_R += s * f;
-		} // else, mol: do nothing
+		} // else, mol: do nothing (see: MSD::setMolProto)
 	}
 	results.MS = results.MSL + results.MSR + results.MSm;  // aggregate spins
 	results.MF = results.MFL + results.MFR + results.MFm;  // aggregate fluxes
@@ -1306,7 +1310,8 @@ void MSD::setParameters(const MSD::Parameters &p) {
 	results.M = results.ML + results.MR + results.Mm;  // aggregate total
 	
 
-	//Internal Energy
+	// ----- Internal Energy -----
+	// left section (FM_L)
 	double couple_ss_L = 0;  // sum(s_i * s_j)
 	double couple_e1_L = 0;  // sum(s_i * f_j)
 	double couple_ee_L = 0;  // sum(f_i * f_j)
@@ -1366,6 +1371,7 @@ void MSD::setParameters(const MSD::Parameters &p) {
 	results.UL -= parameters.bL * biquad_L;
 	results.UL -= parameters.DL * dmi_L;
 	
+	// right section (FM_R)
 	double couple_ss_R = 0;  // sum(s_i * s_j)
 	double couple_e1_R = 0;  // sum(s_i * f_j)
 	double couple_ee_R = 0;  // sum(f_i * f_j)
@@ -1425,15 +1431,16 @@ void MSD::setParameters(const MSD::Parameters &p) {
 	results.UR -= parameters.bR * biquad_R;
 	results.UR -= parameters.DR * dmi_R;
 
-	// no need to re-compute results.Um
+	// no need to re-compute results.Um (see: MSD::setMolProto)
 	
+	// "mL" secttion (coupling between FM_L and mol.)
 	double couple_ss_mL = 0;  // sum(s_i * s_j)
 	double couple_e1_mL = 0;  // sum(s_i * f_j)
 	double couple_ee_mL = 0;  // sum(f_i * f_j)
 	double biquad_mL = 0;
 	Vector dmi_mL = Vector::ZERO;  // sum(m_i x m_j);  where x is cross product, and i < j
-	const unsigned int x1 = molPosL - 1; //only useful if( molPosL != 0 )
-	if( molPosL != 0 && molPosL <= molPosR )
+	const unsigned int x1 = molPosL - 1; // only useful if( molPosL != 0 ); i.e. FM_L_exists
+	if( FM_L_exists && mol_exists )
 		for( unsigned int y = topL; y <= bottomL; y++ )
 			for( unsigned int z = frontR; z <= backR; z++ )
 				if( y == topL || z == frontR || y == bottomL || z == backR ) {
@@ -1450,7 +1457,7 @@ void MSD::setParameters(const MSD::Parameters &p) {
 					couple_e1_mL += f * spin;
 					couple_ee_mL += f * flux;
 					biquad_mL += sq(m * mag);
-					dmi_mL += m.crossProduct(mag);  // location(m)=x1 in "L" < location(mag)=molPosL in "m"
+					dmi_mL += m.crossProduct(mag);  // location(m)=x1 in FM_L < location(mag)=molPosL + leftLead in mol.
 				}
 	results.UmL = 0;
 	results.UmL -= parameters.JmL * couple_ss_mL;
@@ -1459,17 +1466,18 @@ void MSD::setParameters(const MSD::Parameters &p) {
 	results.UmL -= parameters.bmL * biquad_mL;
 	results.UmL -= parameters.DmL * dmi_mL;
 	
+	// "mR" section (coupling between mol. and FM_R)
 	double couple_ss_mR = 0;  // sum(s_i * s_j)
 	double couple_e1_mR = 0;  // sum(s_i * f_j)
 	double couple_ee_mR = 0;  // sum(f_i * f_j)
 	double biquad_mR = 0;
 	Vector dmi_mR = Vector::ZERO;  // sum(m_i x m_j);  where x is cross product, and i < j
-	const unsigned int x2 = molPosR + 1; //only useful if( molPosR != width - 1 )
-	if( x2 != width && molPosR >= molPosL )
+	const unsigned int x2 = molPosR + 1; // only useful if( molPosR != width - 1 ); i.e. FM_R_exists
+	if( FM_R_exists && mol_exists )
 		for( unsigned int y = topL; y <= bottomL; y++ )
 			for( unsigned int z = frontR; z <= backR; z++ )
 				if( y == topL || z == frontR || y == bottomL || z == backR ) {
-					unsigned int a = index(molPosR + molProto.rightLead, y, z);
+					unsigned int a = index(molPosL + molProto.rightLead, y, z);
 					Vector s = getSpin(a);
 					Vector f = getFlux(a);
 					Vector m = s + f;
@@ -1482,7 +1490,7 @@ void MSD::setParameters(const MSD::Parameters &p) {
 					couple_e1_mR += f * spin;
 					couple_ee_mR += f * flux;
 					biquad_mR += sq(m * mag);
-					dmi_mR += m.crossProduct(mag); // location(m)=molPosR in "m" < location(mag)=x2 in "R"
+					dmi_mR += m.crossProduct(mag); // location(m)=molPosL + rightLead in mol. < location(mag)=x2 in FM_R
 				}
 	results.UmR = 0;
 	results.UmR -= parameters.JmR * couple_ss_mR;
@@ -1491,12 +1499,13 @@ void MSD::setParameters(const MSD::Parameters &p) {
 	results.UmR -= parameters.bmR * biquad_mR;
 	results.UmR -= parameters.DmR * dmi_mR;
 	
+	// "LR" section (coupling between FM_L and FM_R)
 	double couple_ss_LR = 0;  // sum(s_i * s_j)
 	double couple_e1_LR = 0;  // sum(s_i * f_j)
 	double couple_ee_LR = 0;  // sum(f_i * f_j)
 	double biquad_LR = 0;
 	Vector dmi_LR = Vector::ZERO;  // sum(m_i x m_j);  where x is cross product, and i < j
-	if( molPosL != 0 && x2 != width )
+	if( FM_L_exists && FM_R_exists )
 		for( unsigned int z = frontR; z <= backR; z++ )
 			for( unsigned int y = topL; y <= bottomL; y++ ) {
 				unsigned int a = index(x1, y, z);
@@ -1512,7 +1521,7 @@ void MSD::setParameters(const MSD::Parameters &p) {
 				couple_e1_LR += f * spin;
 				couple_ee_LR += f * flux;
 				biquad_LR += sq(m * mag);
-				dmi_LR += m.crossProduct(mag); // location(m) = x1 in "L" < location(mag) = x2 in "R"
+				dmi_LR += m.crossProduct(mag); // location(m) = x1 in FM_L < location(mag) = x2 in FM_R
 			}
 	results.ULR = 0;
 	results.ULR -= parameters.JLR * couple_ss_LR;
@@ -1608,20 +1617,23 @@ void MSD::setFlux(unsigned int x, unsigned int y, unsigned int z, const Vector &
 
 void MSD::setLocalM(unsigned int a, const Vector &spin, const Vector &flux) {
 	try {
-
-	Vector &s = spins.at(a); //previous spin
-	Vector &f = fluxes.at(a); //previous spin fluctuation
-	
-	// TODO: remove this "optimization" ???
-	if( s == spin && f == flux )
-		return;
-	
-	Vector m = s + f; // previous local magnetization
-	Vector mag = spin + flux; // new local magnetization
 	
 	unsigned int x = MSD::x(a);
 	unsigned int y = MSD::y(a);
 	unsigned int z = MSD::z(a);
+
+	// if position "a" is within the mol., bybass this function and call Mol::setLocalM instead. 
+	if (molPosL <= x && x <= molPosR) {
+		mols.at(a)->setLocalM(x - molPosL, spin, flux);
+		return;
+	}
+	// else, we are definately in one of the FMs
+
+	Vector &s = spins.at(a); //previous spin
+	Vector &f = fluxes.at(a); //previous spin fluctuation
+	
+	Vector m = s + f; // previous local magnetization
+	Vector mag = spin + flux; // new local magnetization
 	
 	Vector deltaS = spin - s;
 	Vector deltaF = flux - f;
@@ -1634,6 +1646,7 @@ void MSD::setLocalM(unsigned int a, const Vector &spin, const Vector &flux) {
 	double deltaU_B = parameters.B * deltaM;
 	results.U -= deltaU_B;
 	
+	// ----- left section (FM_L) -----
 	if( x < molPosL ) {
 	
 		results.ML += deltaM;
@@ -1647,8 +1660,9 @@ void MSD::setLocalM(unsigned int a, const Vector &spin, const Vector &flux) {
 			results.UL -= deltaU;
 		}
 		
+		// [5 neighbors stay only within FM_L: left, above, below, front, back]
 		if( x != 0 ) {
-			unsigned int a1 = index(x - 1, y, z);
+			unsigned int a1 = index(x - 1, y, z);  // left neighbor
 			Vector neighbor_s = getSpin(a1);
 			Vector neighbor_f = getFlux(a1);
 			Vector neighbor_m = neighbor_s + neighbor_f;
@@ -1661,7 +1675,7 @@ void MSD::setLocalM(unsigned int a, const Vector &spin, const Vector &flux) {
 			results.UL -= deltaU;
 		} // else, x - 1 neighbor doesn't exist
 		if( y != topL ) {
-			unsigned int a1 = index(x, y - 1, z);
+			unsigned int a1 = index(x, y - 1, z);  // above neighbor
 			Vector neighbor_s = getSpin(a1);
 			Vector neighbor_f = getFlux(a1);
 			Vector neighbor_m = neighbor_s + neighbor_f;
@@ -1674,7 +1688,7 @@ void MSD::setLocalM(unsigned int a, const Vector &spin, const Vector &flux) {
 			results.UL -= deltaU;
 		} // else, y - 1 neighbor doesn't exist
 		if( y != bottomL ) {
-			unsigned int a1 = index(x, y + 1, z);
+			unsigned int a1 = index(x, y + 1, z);  // below neighbor
 			Vector neighbor_s = getSpin(a1);
 			Vector neighbor_f = getFlux(a1);
 			Vector neighbor_m = neighbor_s + neighbor_f;
@@ -1687,7 +1701,7 @@ void MSD::setLocalM(unsigned int a, const Vector &spin, const Vector &flux) {
 			results.UL -= deltaU;
 		} // else, y + 1 neighbor doesn't exist
 		if( z != 0 ) {
-			unsigned int a1 = index(x, y, z - 1);
+			unsigned int a1 = index(x, y, z - 1);  // front neighbor
 			Vector neighbor_s = getSpin(a1);
 			Vector neighbor_f = getFlux(a1);
 			Vector neighbor_m = neighbor_s + neighbor_f;
@@ -1700,7 +1714,7 @@ void MSD::setLocalM(unsigned int a, const Vector &spin, const Vector &flux) {
 			results.UL -= deltaU;
 		} // else, z - 1 neighbor doesn't exist
 		if( z + 1 != depth ) {
-			unsigned int a1 = index(x, y, z + 1);
+			unsigned int a1 = index(x, y, z + 1);  // back neighbor
 			Vector neighbor_s = getSpin(a1);
 			Vector neighbor_f = getFlux(a1);
 			Vector neighbor_m = neighbor_s + neighbor_f;
@@ -1713,11 +1727,12 @@ void MSD::setLocalM(unsigned int a, const Vector &spin, const Vector &flux) {
 			results.UL -= deltaU;
 		} // else, z + 1 neighbor doesn't exist
 		
-		if( x + 1 != width )
-			if( x + 1 == molPosL ) {
-				if( molPosR >= molPosL )
+		// [2 neighbors may leave FM_L: right, LR (direct coupling)]
+		if( x + 1 != width )  // do these neighbors exist?
+			if( x + 1 == molPosL ) {  // are we next to the mol.?
+				if( mol_exists )
 					try {
-						unsigned int a1 = index(x + 1, y, z);
+						unsigned int a1 = index(molPosL + molProto.leftLead, y, z);  // right neighbor (in mol.)
 						Vector neighbor_s = getSpin(a1);
 						Vector neighbor_f = getFlux(a1);
 						Vector neighbor_m = neighbor_s + neighbor_f;
@@ -1729,11 +1744,10 @@ void MSD::setLocalM(unsigned int a, const Vector &spin, const Vector &flux) {
 						results.U -= deltaU;
 						results.UmL -= deltaU;
 					} catch(const out_of_range &e) {} // x + 1 neighbor doesn't exist because it's in the buffer zone
-				// else, the molecule doesn't exist
 				
-				if( molPosR + 1 != width ) {
+				if( FM_R_exists )
 					try {
-						unsigned int a1 = index(molPosR + 1, y, z);
+						unsigned int a1 = index(molPosR + 1, y, z);  // LR (direct coupling) neighbor
 						Vector neighbor_s = getSpin(a1);
 						Vector neighbor_f = getFlux(a1);
 						Vector neighbor_m = neighbor_s + neighbor_f;
@@ -1745,9 +1759,9 @@ void MSD::setLocalM(unsigned int a, const Vector &spin, const Vector &flux) {
 						results.U -= deltaU;
 						results.ULR -= deltaU;
 					} catch(const out_of_range &e) {} // molPosR + 1 atom doesn't exist because we're not in the center
-				} // else, the right ferromagnet doesn't exist
-			} else {
-				unsigned int a1 = index(x + 1, y, z);
+				
+			} else {  // we are not next to the mol.
+				unsigned int a1 = index(x + 1, y, z);  // right neighbor (also in FM_L)
 				Vector neighbor_s = getSpin(a1);
 				Vector neighbor_f = getFlux(a1);
 				Vector neighbor_m = neighbor_s + neighbor_f;
@@ -1760,8 +1774,9 @@ void MSD::setLocalM(unsigned int a, const Vector &spin, const Vector &flux) {
 				results.UL -= deltaU;
 			}
 		// else, x + 1 neighbor doesn't exist (because molPosL == width)
-		
-	} else if( x > molPosR ) {
+	
+	// ----- right section (FM_R) -----
+	} else {  // x > molPosR
 	
 		results.MR += deltaM;
 		results.MSR += deltaS;
@@ -1774,8 +1789,9 @@ void MSD::setLocalM(unsigned int a, const Vector &spin, const Vector &flux) {
 			results.UR -= deltaU;
 		}
 		
+		// [5 neighbors stay only within FM_R: right, above, below, front, back]
 		if( x + 1 != width ) {
-			unsigned int a1 = index(x + 1, y, z);
+			unsigned int a1 = index(x + 1, y, z);  // right neighbor
 			Vector neighbor_s = getSpin(a1);
 			Vector neighbor_f = getFlux(a1);
 			Vector neighbor_m = neighbor_s + neighbor_f;
@@ -1788,7 +1804,7 @@ void MSD::setLocalM(unsigned int a, const Vector &spin, const Vector &flux) {
 			results.UR -= deltaU;
 		} // else, x + 1 neighbor doesn't exist
 		if( y != 0 ) {
-			unsigned int a1 = index(x, y - 1, z);
+			unsigned int a1 = index(x, y - 1, z);  // above neighbor
 			Vector neighbor_s = getSpin(a1);
 			Vector neighbor_f = getFlux(a1);
 			Vector neighbor_m = neighbor_s + neighbor_f;
@@ -1801,7 +1817,7 @@ void MSD::setLocalM(unsigned int a, const Vector &spin, const Vector &flux) {
 			results.UR -= deltaU;
 		} // else, y - 1 neighbor doesn't exist
 		if( y + 1 != height ) {
-			unsigned int a1 = index(x, y + 1, z);
+			unsigned int a1 = index(x, y + 1, z);  // below neighbor
 			Vector neighbor_s = getSpin(a1);
 			Vector neighbor_f = getFlux(a1);
 			Vector neighbor_m = neighbor_s + neighbor_f;
@@ -1814,7 +1830,7 @@ void MSD::setLocalM(unsigned int a, const Vector &spin, const Vector &flux) {
 			results.UR -= deltaU;
 		} // else, y + 1 neighbor doesn't exist
 		if( z != frontR ) {
-			unsigned int a1 = index(x, y, z - 1);
+			unsigned int a1 = index(x, y, z - 1);  // front neighbor
 			Vector neighbor_s = getSpin(a1);
 			Vector neighbor_f = getFlux(a1);
 			Vector neighbor_m = neighbor_s + neighbor_f;
@@ -1827,7 +1843,7 @@ void MSD::setLocalM(unsigned int a, const Vector &spin, const Vector &flux) {
 			results.UR -= deltaU;
 		} // else, z - 1 neighbor doesn't exist
 		if( z != backR ) {
-			unsigned int a1 = index(x, y, z + 1);
+			unsigned int a1 = index(x, y, z + 1);  // back neighbor
 			Vector neighbor_s = getSpin(a1);
 			Vector neighbor_f = getFlux(a1);
 			Vector neighbor_m = neighbor_s + neighbor_f;
@@ -1840,11 +1856,12 @@ void MSD::setLocalM(unsigned int a, const Vector &spin, const Vector &flux) {
 			results.UR -= deltaU;
 		} // else, z + 1 neighbor doesn't exist
 		
+		// [2 neighbors may leave FM_L: left, LR (direct coupling)]
 		// x != 0, because x > (unsigned molPosR) >= 0
-		if( x - 1 == molPosR ) {
-			if( molPosR >= molPosL )
+		if( x - 1 == molPosR ) {  // are we next to the mol.?
+			if( mol_exists )
 				try {
-					unsigned int a1 = index(x - 1, y, z);
+					unsigned int a1 = index(x - 1, y, z);  // left neighbor (in mol.)
 					Vector neighbor_s = getSpin(a1);
 					Vector neighbor_f = getFlux(a1);
 					Vector neighbor_m = neighbor_s + neighbor_f;
@@ -1856,11 +1873,10 @@ void MSD::setLocalM(unsigned int a, const Vector &spin, const Vector &flux) {
 					results.U -= deltaU;
 					results.UmR -= deltaU;
 				} catch(const out_of_range &e) {} // x - 1 neighbor doesn't exist because it's in the buffer zone
-			// else, the molecule doesn't exist
 			
-			if( molPosL != 0 ) {
+			if( FM_L_exists )
 				try {
-					unsigned int a1 = index(molPosL - 1, y, z);
+					unsigned int a1 = index(molPosL - 1, y, z);  // LR (direct coupling) neighbor
 					Vector neighbor_s = getSpin(a1);
 					Vector neighbor_f = getFlux(a1);
 					Vector neighbor_m = neighbor_s + neighbor_f;
@@ -1872,9 +1888,9 @@ void MSD::setLocalM(unsigned int a, const Vector &spin, const Vector &flux) {
 					results.U -= deltaU;
 					results.ULR -= deltaU;
 				} catch(const out_of_range &e) {} // molPos - 1 atom doesn't exist because we're not in the center
-			} // else, the left ferromagnet doesn't exist
-		} else {
-			unsigned int a1 = index(x - 1, y, z);
+
+		} else {  // we are not next to the mol.
+			unsigned int a1 = index(x - 1, y, z);  // left neighbor (also in FM_R)
 			Vector neighbor_s = getSpin(a1);
 			Vector neighbor_f = getFlux(a1);
 			Vector neighbor_m = neighbor_s + neighbor_f;
@@ -1886,73 +1902,12 @@ void MSD::setLocalM(unsigned int a, const Vector &spin, const Vector &flux) {
 			results.U -= deltaU;
 			results.UR -= deltaU;
 		}
-		
-	} else { // molPosL <= x <= molPosR
 	
-		results.Mm += deltaM;
-		results.MSm += deltaS;
-		results.MFm += deltaF;
-		results.Um -= deltaU_B;
-		
-		{	double deltaU = parameters.Am * ( Vector(sq(mag.x), sq(mag.y), sq(mag.z)) - Vector(sq(m.x), sq(m.y), sq(m.z)) )
-			              + parameters.Je0m * ( spin * flux - s * f );
-			results.U -= deltaU;
-			results.Um -= deltaU;
-		}
-		
-		if( x != 0 ) {
-			unsigned int a1 = index(x - 1, y, z);
-			Vector neighbor_s = getSpin(a1);
-			Vector neighbor_f = getFlux(a1);
-			Vector neighbor_m = neighbor_s + neighbor_f;
-			if( x == molPosL ) {
-				double deltaU = parameters.JmL * ( neighbor_s * deltaS )
-				              + parameters.Je1mL * ( neighbor_f * deltaS + neighbor_s * deltaF )
-				              + parameters.JeemL * ( neighbor_f * deltaF )
-				              + parameters.bmL * ( sq(neighbor_m * mag) - sq(neighbor_m * m) )
-							  + parameters.DmL * neighbor_m.crossProduct(deltaM);  // (a1 < a): right vector changed
-				results.U -= deltaU;
-				results.UmL -= deltaU;
-			} else {
-				double deltaU = parameters.Jm * ( neighbor_s * deltaS )
-				              + parameters.Je1m * ( neighbor_f * deltaS + neighbor_s * deltaF )
-				              + parameters.Jeem * ( neighbor_f * deltaF )
-				              + parameters.bm * ( sq(neighbor_m * mag) - sq(neighbor_m * m) )
-							  + parameters.Dm * neighbor_m.crossProduct(deltaM);  // (a1 < a): right vector changed
-				results.U -= deltaU;
-				results.Um -= deltaU;
-			}
-		}
-		
-		if( x + 1 != width ) {
-			unsigned int a1 = index(x + 1, y, z);
-			Vector neighbor_s = getSpin(a1);
-			Vector neighbor_f = getFlux(a1);
-			Vector neighbor_m = neighbor_s + neighbor_f;
-			if( x == molPosR ) {
-				double deltaU = parameters.JmR * ( neighbor_s * deltaS )
-				              + parameters.Je1mR * ( neighbor_f * deltaS + neighbor_s * deltaF )
-				              + parameters.JeemR * ( neighbor_f * deltaF )
-				              + parameters.bmR * ( sq(neighbor_m * mag) - sq(neighbor_m * m) )
-							  + parameters.DmR * deltaM.crossProduct(neighbor_m);  // (a < a1): left vector changed
-				results.U -= deltaU;
-				results.UmR -= deltaU;
-			} else {
-				double deltaU = parameters.Jm * ( neighbor_s * deltaS )
-				              + parameters.Je1m * ( neighbor_f * deltaS + neighbor_s * deltaF )
-				              + parameters.Jeem * ( neighbor_f * deltaF )
-				              + parameters.bm * ( sq(neighbor_m * mag) - sq(neighbor_m * m) )
-							  + parameters.Dm * deltaM.crossProduct(neighbor_m);  // (a < a1): left vector changed
-				results.U -= deltaU;
-				results.Um -= deltaU;
-			}
-		}
-		
 	}
 	
+	// ----- update vectors -----
 	s = spin;
 	f = flux;
-	// setParameters(parameters); //recalculate results (the long way!!!)
 
 	} catch(const out_of_range &ex) {
 		// For debugging. This exception should not happen in production!
@@ -2092,7 +2047,7 @@ void MSD::reinitialize(bool reseed) {
 	for( auto i = begin(); i != end(); i++ )
 		setLocalM( i, initSpin, initFlux );
 	record.clear();
-	setParameters(parameters);
+	setParameters(parameters);  // TODO: do we need this?
 	results.t = 0;
 }
 
@@ -2100,19 +2055,12 @@ void MSD::randomize(bool reseed) {
 	if( reseed )
 		seed = genSeed();
 	prng.seed(seed);
-
-	// so that setParameters scales the flux magnitudes correctly
-	Parameters p0 = getParameters();
-	Parameters pTemp = p0;
-	pTemp.FL = pTemp.FR = pTemp.Fm = 1;
-	setParameters(pTemp);
-
 	for( auto i = begin(); i != end(); i++ )
 		setLocalM( i,
 				Vector::sphericalForm(1, 2 * PI * rand(prng), asin(2 * rand(prng) - 1)),
 				Vector::sphericalForm(rand(prng), 2 * PI * rand(prng), asin(2 * rand(prng) - 1)) );
 	record.clear();
-	setParameters(p0);
+	setParameters(parameters);  // TODO: do we still need this?
 	results.t = 0;
 }
 
@@ -2122,12 +2070,18 @@ void MSD::metropolis(unsigned long long N) {
 	//start loop (will iterate N times)
 	for( unsigned long long i = 0; i < N; i++ ) {
 		unsigned int a = indices[static_cast<unsigned int>( random() * indices.size() )]; //pick an atom (pseudo) randomly
-		Vector s = getSpin(a);
-		Vector f = getFlux(a);
+		Vector s = getSpin(a);  // TODO: do we need the bounds checking?
+		Vector f = getFlux(a);  // TODO: do we need the bounds checking?
 
 		// pick the correct F coeficient to determine new flux magnitude
 		unsigned int x = this->x(a);
-		double F = (x < molPosL ? parameters.FL : x > molPosR ? parameters.FR : parameters.Fm);
+		double F;
+		if (x < molPosL)
+			F = parameters.FL;
+		else if (x > molPosR)
+			F = parameters.FR;
+		else
+			F = molProto.getNodeParameters(x - molPosL).Fm;  // TODO: do we need the bounds checking?
 
 		//"flip" that atom
 		setLocalM( a, flippingAlgorithm(s, random),

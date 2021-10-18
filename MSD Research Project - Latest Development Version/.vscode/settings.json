@@ -11,6 +11,7 @@
 		"istream": "cpp",
 		"xstring": "cpp",
 		"xutility": "cpp",
-		"memory": "cpp"
+		"memory": "cpp",
+		"stdexcept": "cpp"
 	}
 }
