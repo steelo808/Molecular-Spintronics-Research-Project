@@ -123,6 +123,9 @@ Second bug fix. In MSD::setParameters()
 	which is optimized for speed given our program's specific requirments.
 
 6.0.0:
+(Unknown date) Changed MSD::Parameters::sL, sR, sm -> SL, SR, Sm. Capitalized the 'S' to make consitant with MSD::Parameters::FL, FR, Fm. 
 (10-18-2021) Fixed bug in MSD::Parameters::operator== which wasn't checking new Je parameters correctly.
-
+(10-26-2021) Fixed alignment issue in iterate.csv output files where the "snapshot" was misaligned if the data wasn't long enough.
+	Changed default Jm=1 instead of 0 (zero) in MSD.h.
+TODO: Fix flux != 0 on mol. that are "turned off"
 TODO: Added graph-based mol. to MSD.

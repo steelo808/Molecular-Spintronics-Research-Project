@@ -1,6 +1,6 @@
 /*
  * Christopher D'Angelo
- * 7-11-2021
+ * 10-26-2021
  */
 
 #include <cstdlib>
@@ -99,19 +99,22 @@ int main(int argc, char *argv[]) {
 	// create model and randomize parameters
 	MSD msd(12, 21, 21, 5, 6, 8, 12, 8, 12);
 	MSD::Parameters p = msd.getParameters();
+	Molecule::NodeParameters pn;
+	Molecule::EdgeParameters pe;
 	p.kT = rand();
 	p.B = randV();
-	p.FL = rand();  p.FR = rand();  p.Fm = rand();
-	p.sL = rand();  p.sR = rand();  p.sm = rand();
-	p.JL = rand();  p.JR = rand();  p.Jm = rand();  p.JmL = rand();  p.JmR = rand();  p.JLR = rand();
-	p.Je0L = rand();  p.Je0R = rand();  p.Je0m = rand();
-	p.Je1L = rand();  p.Je1R = rand();  p.Je1m = rand();  p.Je1mL = rand();  p.Je1mR = rand();  p.Je1LR = rand();
-	p.JeeL = rand();  p.JeeR = rand();  p.Jeem = rand();  p.JeemL = rand();  p.JeemR = rand();  p.JeeLR = rand();
-	p.bL = rand();  p.bR = rand();  p.bm = rand();  p.bmL = rand();  p.bmR = rand();  p.bLR = rand();
-	p.AL = randV();  p.AR = randV();  p.Am = randV();
-	p.DL = randV(); p.DR = randV(); p.Dm = randV(); p.DmL = randV(); p.DmR = randV(); p.DLR = randV();
+	p.FL = rand();  p.FR = rand();  pn.Fm = rand();
+	p.SL = rand();  p.SR = rand();  pn.Sm = rand();
+	p.JL = rand();  p.JR = rand();  pe.Jm = rand();  p.JmL = rand();  p.JmR = rand();  p.JLR = rand();
+	p.Je0L = rand();  p.Je0R = rand();  pn.Je0m = rand();
+	p.Je1L = rand();  p.Je1R = rand();  pe.Je1m = rand();  p.Je1mL = rand();  p.Je1mR = rand();  p.Je1LR = rand();
+	p.JeeL = rand();  p.JeeR = rand();  pe.Jeem = rand();  p.JeemL = rand();  p.JeemR = rand();  p.JeeLR = rand();
+	p.bL = rand();  p.bR = rand();  pe.bm = rand();  p.bmL = rand();  p.bmR = rand();  p.bLR = rand();
+	p.AL = randV();  p.AR = randV();  pn.Am = randV();
+	p.DL = randV(); p.DR = randV(); pe.Dm = randV(); p.DmL = randV(); p.DmR = randV(); p.DLR = randV();
 	cout << p;
 	msd.setParameters(p);
+	msd.setMolParameters(pn, pe);
 	cout << msd.getResults();
 
 	// test that MSD::setLocalM agrees with MSD::setParameters when updating energy, MSD::Results::U
@@ -121,7 +124,7 @@ int main(int argc, char *argv[]) {
 	for (unsigned int i = 0; i < n; ++i) {
 		for (auto iter = msd.begin(); iter != msd.end(); ++iter) {
 			Vector s = Vector::sphericalForm(iter.getSpin().norm(), 2 * PI * rand(), asin(2 * rand() - 1) );
-			double F = (iter.getX() < msd.getMolPosL() ? p.FL : iter.getX() > msd.getMolPosR() ? p.FR : p.Fm);
+			double F = (iter.getX() < msd.getMolPosL() ? p.FL : iter.getX() > msd.getMolPosR() ? p.FR : pn.Fm);
 			Vector f = Vector::sphericalForm(F * rand(), 2 * PI * rand(), asin(2 * rand() - 1) );
 			cout << "1:" << i << " [" << iter.getX() << ' ' << iter.getY() << ' ' << iter.getZ() << "] = "
 			     << "s=" << s << "; f=" << f << '\n';
@@ -129,6 +132,7 @@ int main(int argc, char *argv[]) {
 			msd.setLocalM(iter.getIndex(), s, f);
 			MSD::Results r1 = msd.getResults();
 			msd.setParameters(p);
+			msd.setMolParameters(pn, pe);
 			MSD::Results r2 = msd.getResults();
 			max_error = max(max_error, cmpResults(r1, r2, error_margin));
 			if (max_error > error_margin) {
@@ -152,7 +156,7 @@ int main(int argc, char *argv[]) {
 			unsigned int z = (unsigned int) (rand() * msd.getWidth());
 			try {
 				Vector s = Vector::sphericalForm(msd.getSpin(x, y, z).norm(), 2 * PI * rand(), asin(2 * rand() - 1) );
-				double F = (x < msd.getMolPosL() ? p.FL : x > msd.getMolPosR() ? p.FR : p.Fm);
+				double F = (x < msd.getMolPosL() ? p.FL : x > msd.getMolPosR() ? p.FR : pn.Fm);
 				Vector f = Vector::sphericalForm(F * rand(), 2 * PI * rand(), asin(2 * rand() - 1) );
 				cout << "2:" << i << " [" << x << ' ' << y << ' ' << z << "] = "
 				     << "s=" << s << "; f=" << f << '\n';
@@ -160,6 +164,7 @@ int main(int argc, char *argv[]) {
 				msd.setLocalM(x, y, z, s, f);
 				MSD::Results r1 = msd.getResults();
 				msd.setParameters(p);
+				msd.setMolParameters(pn, pe);
 				MSD::Results r2 = msd.getResults();
 				max_error = max(max_error, cmpResults(r1, r2, error_margin));
 				if (max_error > error_margin) {

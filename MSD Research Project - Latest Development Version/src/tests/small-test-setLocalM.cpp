@@ -1,0 +1,90 @@
+/**
+ * @author Christopher D'Angelo
+ * @date Oct 26, 2021
+ */
+
+#include <cmath>
+#include <iostream>
+#include "../MSD.h"
+
+using namespace std;
+using namespace udc;
+
+void initParams(MSD::Parameters &, Molecule::NodeParameters &, Molecule::EdgeParameters &);
+
+int main() {
+    MSD::Parameters p;
+    Molecule::NodeParameters n;
+    Molecule::EdgeParameters e;
+    initParams(p, n, e);
+
+    MSD msd(6, 1, 1, MSD::LINEAR_MOL, 2, 3, 0, 0, 0, 0);
+    msd.setParameters(p);
+    msd.setMolParameters(n, e);
+
+    msd.setLocalM(2, 0, 0, Vector::I, Vector::I);
+    msd.setLocalM(3, 0, 0, Vector(sqrt(3.0) / 2.0, 0.5, 0), Vector::ZERO);
+
+    cout << "[" << __FILE__ << ":" << __LINE__ << "]\n";
+    cout << "(Results)\n\n";
+    cout << msd.getResults() << '\n';
+
+    return 0;
+}
+
+void initParams(MSD::Parameters &p, Molecule::NodeParameters &n, Molecule::EdgeParameters &e) {
+    p.kT = 0.2;
+    
+    p.B = Vector::ZERO;
+
+    p.SL = 1;
+    n.Sm = 1;
+    p.SR = 1;
+
+    p.FL = 1;
+    n.Fm = 1;
+    p.FR = 1;
+
+    p.JL  = 1;
+    p.JmL = 1;
+    e.Jm  = 1;
+    p.JmR = 1;
+    p.JR  = 1;
+    p.JLR = 0;
+    
+    p.Je0L = 1;
+    n.Je0m = 1;
+    p.Je0R = 1;
+
+    p.Je1L  = 0;
+    p.Je1mL = 0;
+    e.Je1m  = 0;
+    p.Je1mR = 0;
+    p.Je1R  = 0;
+    p.Je1LR = 0;
+
+    p.JeeL  = 0;
+    p.JeemL = 0;
+    e.Jeem  = 0;
+    p.JeemR = 0;
+    p.JeeR  = 0;
+    p.JeeLR = 0;
+
+    p.bL  = 0;
+    p.bmL = 0;
+    e.bm  = 0;
+    p.bmR = 0;
+    p.bR  = 0;
+    p.bLR = 0;
+
+    p.AL = Vector::ZERO;
+    n.Am = Vector::ZERO;
+    p.AR = Vector::ZERO;
+
+    p.DL  = Vector::ZERO;
+    p.DmL = Vector::ZERO;
+    e.Dm  = Vector::ZERO;
+    p.DmR = Vector::ZERO;
+    p.DR  = Vector::ZERO;
+    p.DLR = Vector::ZERO;
+}

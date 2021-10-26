@@ -208,7 +208,7 @@ class Molecule {
 		std::vector<Vector> fluxes;
 
 		/**
-		 * All spins start up (Sm * Vector::I), and all fluxes start at 0 (Vector::ZERO).
+		 * All spins start up (Sm * Vector::J), and all fluxes start at 0 (Vector::ZERO) by default.
 		 * 
 		 * Instances should be created after the Molecule (prototype) has been configured.
 		 * If the parent Molecule (prototype) object is modified after this method is called,
@@ -224,8 +224,14 @@ class Molecule {
 		 * @param msd: The MSD which this Mol is attached.
 		 * @param y: The y-cordinate for this Mol within the MSD.
 		 * @param z: The z-cordinate for this Mol within the MSD.
+		 * @param initSpin: (Default value: Vector::J) the initial spin of all of the nodes in this instance.
+		 * 	This vector will be scaled based on prototype.nodes[i].parameters.Sm (for all nodes, i).
+		 * @param initFlux: (Default value: Vector::ZERO) the inital flux of all the nodes in this instance.
+		 * 	This vector will be scaled based on prototype.nodes[i].parameters.Fm (for all nodes, i) if and only if
+		 * 	it's magnetude is too large.
 		 */
-		Instance(const Molecule &prototype, MSD &msd, unsigned int y, unsigned int z);
+		Instance(const Molecule &prototype, MSD &msd, unsigned int y, unsigned int z,
+				const Vector &initSpin = Vector::J, const Vector &initFlux = Vector::ZERO);
 		Instance(const Instance &other);
 
 		Instance& operator=(const Instance &other);  // copies the spin/flux states
@@ -539,7 +545,7 @@ ostream& operator <<(ostream &out, const MSD::Results &r) {
 
 
 Molecule::EdgeParameters::EdgeParameters()
-: Jm(0), Je1m(0), Jeem(0), bm(0), Dm(Vector::ZERO)
+: Jm(1), Je1m(0), Jeem(0), bm(0), Dm(Vector::ZERO)
 {}
 
 Molecule::NodeParameters::NodeParameters()
@@ -782,14 +788,29 @@ void Molecule::getLeads(unsigned int &left, unsigned int &right) const {
 	right = rightLead;
 }
 
-Molecule::Instance::Instance(const Molecule &prototype, MSD &msd, unsigned int y, unsigned int z)
+Molecule::Instance::Instance(const Molecule &prototype, MSD &msd, unsigned int y, unsigned int z,
+		const Vector &initSpin, const Vector &initFlux)
 : prototype(prototype), msd(msd), y(y), z(z)
 {
 	const size_t N = prototype.nodes.size();
+
+	Vector s = initSpin;
+	s.normalize();
 	spins.reserve(N);
 	for (size_t i = 0; i < N; i++)
-		spins.push_back(Vector::I * prototype.nodes[i].parameters.Sm);
-	fluxes.assign(prototype.nodes.size(), Vector::ZERO);
+		spins.push_back(s * prototype.nodes[i].parameters.Sm);
+	
+	if (initFlux == Vector::ZERO) {
+		fluxes.assign(N, Vector::ZERO);
+	} else {
+		Vector f = initFlux;
+		f.normalize();
+		fluxes.reserve(N);
+		for (size_t i = 0; i < N; i++) {
+			const double Fm = prototype.nodes[i].parameters.Fm;
+			fluxes.push_back(initFlux.normSq() <= sq(Fm) ? initFlux : f * Fm);
+		}
+	}
 }
 
 Molecule::Instance::Instance(const Instance &other)
@@ -1215,7 +1236,7 @@ void MSD::init(const MolProtoFactory *molProtoFactory) {
 				}
 			// mol
 			if( mol_exists && (((y == topL || y == bottomL) && (frontR <= z && z <= backR)) || ((z == frontR || z == backR) && (topL <= y && y <= bottomL))) ) {
-				shared_ptr<Mol> mol = shared_ptr<Mol>(new Mol(molProto, *this, y, z));
+				shared_ptr<Mol> mol = shared_ptr<Mol>(new Mol(molProto, *this, y, z, initSpin, initFlux));
 				unique_mol_indices.push_back(index(molPosL, y, z));  // store the indices for all unique Mol (Molecule::Instance) objects
 				for( unsigned int x = molPosL; x <= molPosR; x++ ) {
 					a = index(x, y, z);
@@ -1248,6 +1269,7 @@ void MSD::init(const MolProtoFactory *molProtoFactory) {
 		}
 	
 	flippingAlgorithm = CONTINUOUS_SPIN_MODEL; // set default "flipping" algorithm
+
 	setParameters(parameters); // calculate initial state ("Results") for FM sections
 	setMolProto(molProto);     // calculate initial state ("Results") for mol. section
 }
@@ -1604,51 +1626,12 @@ void MSD::setMolProto(const MolProto &molProto) {
 	if (molProto.nodeCount() != nodeCount)
 		throw MSD::MoleculeException("Can not change the number of nodes in the molecule after MSD creation. Must create a new MSD.");
 
+	// ----- remove energy caused by previous mol. and leads from aggregate: U -----
+	results.U -= results.Um + results.UmL + results.UmR;
+
 	// ----- reset some Results -----
 	results.MSm = results.MFm = Vector::ZERO;
-	results.Um = 0;
-
-	// ----- remove energy from leads -----
-	for (unsigned int a : unique_mol_indices) {
-		unsigned int y = this->y(a);
-		unsigned int z = this->z(a);
-
-		if (FM_L_exists) {
-			unsigned int FML_idx = index(molPosL - 1, y, z);
-			unsigned int mol_idx = index(molPosL, y, z);
-			Vector s_i = getSpin(FML_idx);
-			Vector f_i = getFlux(FML_idx);
-			Vector m_i = s_i + f_i;
-			Vector s_j = getSpin(mol_idx);
-			Vector f_j = getFlux(mol_idx);
-			Vector m_j = s_j + f_j;
-
-			// adding to U (+=) because we are removing energy
-			results.UmL += parameters.JmL * (s_i * s_j);
-			results.UmL += parameters.Je1mL * (s_i * f_j + f_i * s_j);
-			results.UmL += parameters.JeemL * (f_i * f_j);
-			results.UmL += parameters.bmL * sq(m_i * m_j);
-			results.UmL += parameters.DmL * m_i.crossProduct(m_j);
-		}
-
-		if (FM_R_exists) {
-			unsigned int FMR_idx = index(molPosR + 1, y, z);
-			unsigned int mol_idx = index(molPosR, y, z);
-			Vector s_i = getSpin(mol_idx);
-			Vector f_i = getFlux(mol_idx);
-			Vector m_i = s_i + f_i;
-			Vector s_j = getSpin(FMR_idx);
-			Vector f_j = getSpin(FMR_idx);
-			Vector m_j = s_j + f_j;
-
-			// adding to U (+=) because we are removing energy
-			results.UmR += parameters.JmR * (s_i * s_j);
-			results.UmR += parameters.Je1mR * (s_i * f_j + f_i * s_j);
-			results.UmR += parameters.JeemR * (f_i * f_j);
-			results.UmR += parameters.bmR * sq(m_i * m_j);
-			results.UmR += parameters.DmR * m_i.crossProduct(m_j);
-		}
-	}
+	results.Um = results.UmL = results.UmR = 0;
 
 	// NodeParameters: Sm, Fm, Je0m, Am
 	// ----- Update spin and flux Vectors (Sm, Fm), and Calculate local Energy and Magnetization (B, Je0m, Am) -----
@@ -1689,10 +1672,6 @@ void MSD::setMolProto(const MolProto &molProto) {
 
 		// delete oldMol;  // not needed because of shared_ptr
 	}
-	results.Mm = results.MSm + results.MFm;
-	results.MS = results.MSL + results.MSR + results.MSm;
-	results.MF = results.MFL + results.MFR + results.MFm;
-	results.M = results.MS + results.MF;
 
 	// EdgeParameters: Jm, Je1m, Jeem, bm, Dm
 	// ----- Calculate bond energy (Jm, Je1m, Jeem, bm, Dm) -----
@@ -1766,7 +1745,14 @@ void MSD::setMolProto(const MolProto &molProto) {
 			results.UmR -= parameters.DmR * m_i.crossProduct(m_j);
 		}
 	}
-		
+
+	// ----- update aggregate energy (U) and magnetizations (Mm, MS, MF, M) -----
+	results.Mm = results.MSm + results.MFm;
+	results.MS = results.MSL + results.MSR + results.MSm;
+	results.MF = results.MFL + results.MFR + results.MFm;
+	results.M = results.MS + results.MF;
+	results.U += results.Um + results.UmR + results.UmL;
+	
 	// Done: copy new mol. prototype to MSD::molProto field
 	this->molProto = molProto;
 }
@@ -2076,7 +2062,7 @@ void MSD::setLocalM(unsigned int a, const Vector &spin, const Vector &flux) {
 		if( x - 1 == molPosR ) {  // are we next to the mol.?
 			if( mol_exists )
 				try {
-					unsigned int a1 = index(x - 1, y, z);  // left neighbor (in mol.)
+					unsigned int a1 = index(molPosL + molProto.rightLead, y, z);  // left neighbor (in mol.)
 					Vector neighbor_s = getSpin(a1);
 					Vector neighbor_f = getFlux(a1);
 					Vector neighbor_m = neighbor_s + neighbor_f;
@@ -2289,29 +2275,45 @@ void MSD::metropolis(unsigned long long N) {
 		unsigned int a = indices[static_cast<unsigned int>( random() * indices.size() )]; //pick an atom (pseudo) randomly
 		Vector s = getSpin(a);  // TODO: do we need the bounds checking?
 		Vector f = getFlux(a);  // TODO: do we need the bounds checking?
+		
+		// remeber if we are in a mol. in case we need to revert state
+		bool inMol = false;
+		unsigned int n;  // only defined if isMol==true
 
 		// pick the correct F coeficient to determine new flux magnitude
 		unsigned int x = this->x(a);
 		double F;
-		if (x < molPosL)
+		if (x < molPosL) {
 			F = parameters.FL;
-		else if (x > molPosR)
+		} else if (x > molPosR) {
 			F = parameters.FR;
-		else
-			F = molProto.getNodeParameters(x - molPosL).Fm;  // TODO: do we need the bounds checking?
+		} else {
+			n = x - molPosL;
+			F = molProto.getNodeParameters(n).Fm;  // TODO: do we need the bounds checking?
+			inMol = true;
+		}
 
 		//"flip" that atom
 		setLocalM( a, flippingAlgorithm(s, random),
 				Vector::sphericalForm(F * random(), 2 * PI * random(), asin(2 * random() - 1)) );
 		
 		Results r2 = getResults(); //get the energy of the system (for the new state)
-		if( r2.U <= r.U || random() < pow( E, (r.U - r2.U) / parameters.kT ) ) {
+		double w = random(); // DEBUG
+		double dU = r2.U - r.U;  // delta-U (change in energy)
+		std::printf("%12llu: w= %23.10f, -dU= %23.10f, p= %23.10f\n", results.t + i, w, -dU, pow( E, (-dU) / parameters.kT ));
+		if( dU <= 0 || w < pow( E, -dU / parameters.kT ) ) {
 			//either the new system requires less energy or external energy (kT) is disrupting it
 			r = r2; //in either case we keep the new system
 		} else {
 			//neither thing (above) happened so we revert the system
-			spins[a] = s; //revert the system by flipping the atom back
-			fluxes[a] = f;
+			if (inMol) {
+				shared_ptr<Mol> mol = mols[a];
+				mol->spins[n] = s;
+				mol->fluxes[n] = f;
+			} else {
+				spins[a] = s; //revert the system by flipping the atom back
+				fluxes[a] = f;
+			}
 			results = r;
 		}
 	}

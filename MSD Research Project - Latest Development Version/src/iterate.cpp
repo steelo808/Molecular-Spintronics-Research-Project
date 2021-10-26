@@ -416,7 +416,7 @@ int main(int argc, char *argv[]) {
 		}
 		for( ; msdIter != msd.end(); ++msdIter ) {
 			Vector m = msdIter.getLocalM(), s = msdIter.getSpin(), f = msdIter.getFlux();
-			file << ",, ,,,,,,, ,,,,,,, ,,,,,,, ,,,,,,, ,,,,,,,,,"
+			file << ",, ,,,,,,, ,,,,,,, ,,,,,,, ,,,,,,, ,,,,,,, ,,,,,,, ,,,,,,, ,,,,,,, ,,,,,,, ,,,,,,, ,,,,,,, ,,,,,,, ,,,,,,,,,"
 			     << msdIter.getX() << ',' << msdIter.getY() << ',' << msdIter.getZ() << ','
 			     << m.x << ',' << m.y << ',' << m.z << ','
 			     << s.x << ',' << s.y << ',' << s.z << ','
