@@ -13,6 +13,9 @@
 
 namespace udc {
 
+using std::exception;
+
+
 /** Mathematical constant: Euler's Number */
 const double E = 2.71828182845904523536;
 

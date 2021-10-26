@@ -1,3 +1,6 @@
+simCount = 100000
+freq = 5000
+
 # dimensions of bounding box
 width  = 11
 height = 25
@@ -31,9 +34,9 @@ kT = 0.25
 B = 0.00 0 0
 
 # Magnetude of spin vectors
-sL = 1
-sR = 1
-sm = 1
+SL = 1
+SR = 1
+Sm = 1
 
 # Maximum Magnetude of spin fluctuation ("flux") vectors
 FL = 0.5

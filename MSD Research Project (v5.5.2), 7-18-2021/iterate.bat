@@ -1,6 +1,6 @@
 @set model=CONTINUOUS_SPIN_MODEL
-@set randomize=1
-@set seed=unique
+@set randomize=0
+@set seed=0
 @set input_file=parameters-iterate.txt
 
 

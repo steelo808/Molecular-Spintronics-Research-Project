@@ -1,0 +1,191 @@
+Fri 10/22/2021 
+02:07 PM
+----------------------------------------
+
+C:\Users\mathh\GitHub\Molecular-Spintronics-Research-Project\MSD Research Project - Latest Development Version>bin\iterate "out\iteration, 10-22-2021, 6.csv" CONTINUOUS_SPIN_MODEL CIRCULAR 1 unique parameters-iterate.txt 
+simCount = 100000
+freq = 5000
+width = 11
+height = 25
+depth = 25
+molPosL = 5
+molPosR = 5
+topL = 10
+bottomL = 15
+frontR = 10
+backR = 15
+kT = 0.25
+B = 0.00 0 0
+SL = 1
+SR = 1
+Sm = 1
+FL = 0.5
+FR = 0.5
+Fm = 0.5
+JL = 1
+JR = 1
+Jm = 0
+JmL = 1
+JmR = -1
+JLR = 0
+Je0L = 0.25
+Je0R = 0.25
+Je0m = 0.25
+Je1L = 0
+Je1R = 0
+Je1m = 0
+Je1mL = 0
+Je1mR = 0
+Je1LR = 0
+JeeL = 0
+JeeR = 0
+Jeem = 0
+JeemL = 0
+JeemR = 0
+JeeLR = 0
+AL = 0 0 0
+AR = 0 0 0
+Am = 0 0 0
+bL = 0
+bR = 0
+bm = 0
+bmL = 0
+bmR = 0
+bLR = 0
+DL = 0 0 0
+DR = 0 0 0
+Dm = 0 0 0
+DmL = 0 0 0
+DmR = 0 0 0
+DLR = 0 0 0
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+nodes.size() = 0
+nodes.size() = 1
+node: (Sm=1)
+C:\Users\mathh\GitHub\Molecular-Spintronics-Research-Project\MSD Research Project - Latest Development Version\src\MSD.h:792> : 1
+C:\Users\mathh\GitHub\Molecular-Spintronics-Research-Project\MSD Research Project - Latest Development Version\src\MSD.h:1246> a=2865, size=1, &=00B30638
+C:\Users\mathh\GitHub\Molecular-Spintronics-Research-Project\MSD Research Project - Latest Development Version\src\MSD.h:792> : 1
+C:\Users\mathh\GitHub\Molecular-Spintronics-Research-Project\MSD Research Project - Latest Development Version\src\MSD.h:1246> a=2876, size=1, &=00B30488
+C:\Users\mathh\GitHub\Molecular-Spintronics-Research-Project\MSD Research Project - Latest Development Version\src\MSD.h:792> : 1
+C:\Users\mathh\GitHub\Molecular-Spintronics-Research-Project\MSD Research Project - Latest Development Version\src\MSD.h:1246> a=2887, size=1, &=00B30398
+C:\Users\mathh\GitHub\Molecular-Spintronics-Research-Project\MSD Research Project - Latest Development Version\src\MSD.h:792> : 1
+C:\Users\mathh\GitHub\Molecular-Spintronics-Research-Project\MSD Research Project - Latest Development Version\src\MSD.h:1246> a=2898, size=1, &=00B302D8
+C:\Users\mathh\GitHub\Molecular-Spintronics-Research-Project\MSD Research Project - Latest Development Version\src\MSD.h:792> : 1
+C:\Users\mathh\GitHub\Molecular-Spintronics-Research-Project\MSD Research Project - Latest Development Version\src\MSD.h:1246> a=2909, size=1, &=00B30578
+C:\Users\mathh\GitHub\Molecular-Spintronics-Research-Project\MSD Research Project - Latest Development Version\src\MSD.h:792> : 1
+C:\Users\mathh\GitHub\Molecular-Spintronics-Research-Project\MSD Research Project - Latest Development Version\src\MSD.h:1246> a=2920, size=1, &=00B30458
+C:\Users\mathh\GitHub\Molecular-Spintronics-Research-Project\MSD Research Project - Latest Development Version\src\MSD.h:792> : 1
+C:\Users\mathh\GitHub\Molecular-Spintronics-Research-Project\MSD Research Project - Latest Development Version\src\MSD.h:1246> a=3140, size=1, &=00B30608
+C:\Users\mathh\GitHub\Molecular-Spintronics-Research-Project\MSD Research Project - Latest Development Version\src\MSD.h:792> : 1
+C:\Users\mathh\GitHub\Molecular-Spintronics-Research-Project\MSD Research Project - Latest Development Version\src\MSD.h:1246> a=3195, size=1, &=00B302A8
+C:\Users\mathh\GitHub\Molecular-Spintronics-Research-Project\MSD Research Project - Latest Development Version\src\MSD.h:792> : 1
+C:\Users\mathh\GitHub\Molecular-Spintronics-Research-Project\MSD Research Project - Latest Development Version\src\MSD.h:1246> a=3415, size=1, &=00B305A8
+C:\Users\mathh\GitHub\Molecular-Spintronics-Research-Project\MSD Research Project - Latest Development Version\src\MSD.h:792> : 1
+C:\Users\mathh\GitHub\Molecular-Spintronics-Research-Project\MSD Research Project - Latest Development Version\src\MSD.h:1246> a=3470, size=1, &=00B30308
+C:\Users\mathh\GitHub\Molecular-Spintronics-Research-Project\MSD Research Project - Latest Development Version\src\MSD.h:792> : 1
+C:\Users\mathh\GitHub\Molecular-Spintronics-Research-Project\MSD Research Project - Latest Development Version\src\MSD.h:1246> a=3690, size=1, &=00B30518
+C:\Users\mathh\GitHub\Molecular-Spintronics-Research-Project\MSD Research Project - Latest Development Version\src\MSD.h:792> : 1
+C:\Users\mathh\GitHub\Molecular-Spintronics-Research-Project\MSD Research Project - Latest Development Version\src\MSD.h:1246> a=3745, size=1, &=00B305D8
+C:\Users\mathh\GitHub\Molecular-Spintronics-Research-Project\MSD Research Project - Latest Development Version\src\MSD.h:792> : 1
+C:\Users\mathh\GitHub\Molecular-Spintronics-Research-Project\MSD Research Project - Latest Development Version\src\MSD.h:1246> a=3965, size=1, &=00B30338
+C:\Users\mathh\GitHub\Molecular-Spintronics-Research-Project\MSD Research Project - Latest Development Version\src\MSD.h:792> : 1
+C:\Users\mathh\GitHub\Molecular-Spintronics-Research-Project\MSD Research Project - Latest Development Version\src\MSD.h:1246> a=4020, size=1, &=00B30368
+C:\Users\mathh\GitHub\Molecular-Spintronics-Research-Project\MSD Research Project - Latest Development Version\src\MSD.h:792> : 1
+C:\Users\mathh\GitHub\Molecular-Spintronics-Research-Project\MSD Research Project - Latest Development Version\src\MSD.h:1246> a=4240, size=1, &=00B303C8
+C:\Users\mathh\GitHub\Molecular-Spintronics-Research-Project\MSD Research Project - Latest Development Version\src\MSD.h:792> : 1
+C:\Users\mathh\GitHub\Molecular-Spintronics-Research-Project\MSD Research Project - Latest Development Version\src\MSD.h:1246> a=4251, size=1, &=00B30548
+C:\Users\mathh\GitHub\Molecular-Spintronics-Research-Project\MSD Research Project - Latest Development Version\src\MSD.h:792> : 1
+C:\Users\mathh\GitHub\Molecular-Spintronics-Research-Project\MSD Research Project - Latest Development Version\src\MSD.h:1246> a=4262, size=1, &=00B303F8
+C:\Users\mathh\GitHub\Molecular-Spintronics-Research-Project\MSD Research Project - Latest Development Version\src\MSD.h:792> : 1
+C:\Users\mathh\GitHub\Molecular-Spintronics-Research-Project\MSD Research Project - Latest Development Version\src\MSD.h:1246> a=4273, size=1, &=00B30428
+C:\Users\mathh\GitHub\Molecular-Spintronics-Research-Project\MSD Research Project - Latest Development Version\src\MSD.h:792> : 1
+C:\Users\mathh\GitHub\Molecular-Spintronics-Research-Project\MSD Research Project - Latest Development Version\src\MSD.h:1246> a=4284, size=1, &=00B304B8
+C:\Users\mathh\GitHub\Molecular-Spintronics-Research-Project\MSD Research Project - Latest Development Version\src\MSD.h:792> : 1
+C:\Users\mathh\GitHub\Molecular-Spintronics-Research-Project\MSD Research Project - Latest Development Version\src\MSD.h:1246> a=4295, size=1, &=00B304E8
+C:\Users\mathh\GitHub\Molecular-Spintronics-Research-Project\MSD Research Project - Latest Development Version\src\MSD.h:1631> nodeCount=1
+C:\Users\mathh\GitHub\Molecular-Spintronics-Research-Project\MSD Research Project - Latest Development Version\src\MSD.h:792> : 1
+C:\Users\mathh\GitHub\Molecular-Spintronics-Research-Project\MSD Research Project - Latest Development Version\src\MSD.h:1687> a=2865, mol.size=1, &=00B335B8
+C:\Users\mathh\GitHub\Molecular-Spintronics-Research-Project\MSD Research Project - Latest Development Version\src\MSD.h:792> : 1
+C:\Users\mathh\GitHub\Molecular-Spintronics-Research-Project\MSD Research Project - Latest Development Version\src\MSD.h:1687> a=2876, mol.size=1, &=00B335E8
+C:\Users\mathh\GitHub\Molecular-Spintronics-Research-Project\MSD Research Project - Latest Development Version\src\MSD.h:792> : 1
+C:\Users\mathh\GitHub\Molecular-Spintronics-Research-Project\MSD Research Project - Latest Development Version\src\MSD.h:1687> a=2887, mol.size=1, &=00B33108
+C:\Users\mathh\GitHub\Molecular-Spintronics-Research-Project\MSD Research Project - Latest Development Version\src\MSD.h:792> : 1
+C:\Users\mathh\GitHub\Molecular-Spintronics-Research-Project\MSD Research Project - Latest Development Version\src\MSD.h:1687> a=2898, mol.size=1, &=00B33558
+C:\Users\mathh\GitHub\Molecular-Spintronics-Research-Project\MSD Research Project - Latest Development Version\src\MSD.h:792> : 1
+C:\Users\mathh\GitHub\Molecular-Spintronics-Research-Project\MSD Research Project - Latest Development Version\src\MSD.h:1687> a=2909, mol.size=1, &=00B33378
+C:\Users\mathh\GitHub\Molecular-Spintronics-Research-Project\MSD Research Project - Latest Development Version\src\MSD.h:792> : 1
+C:\Users\mathh\GitHub\Molecular-Spintronics-Research-Project\MSD Research Project - Latest Development Version\src\MSD.h:1687> a=2920, mol.size=1, &=00B331C8
+C:\Users\mathh\GitHub\Molecular-Spintronics-Research-Project\MSD Research Project - Latest Development Version\src\MSD.h:792> : 1
+C:\Users\mathh\GitHub\Molecular-Spintronics-Research-Project\MSD Research Project - Latest Development Version\src\MSD.h:1687> a=3140, mol.size=1, &=00B33258
+C:\Users\mathh\GitHub\Molecular-Spintronics-Research-Project\MSD Research Project - Latest Development Version\src\MSD.h:792> : 1
+C:\Users\mathh\GitHub\Molecular-Spintronics-Research-Project\MSD Research Project - Latest Development Version\src\MSD.h:1687> a=3195, mol.size=1, &=00B331F8
+C:\Users\mathh\GitHub\Molecular-Spintronics-Research-Project\MSD Research Project - Latest Development Version\src\MSD.h:792> : 1
+C:\Users\mathh\GitHub\Molecular-Spintronics-Research-Project\MSD Research Project - Latest Development Version\src\MSD.h:1687> a=3415, mol.size=1, &=00B33438
+C:\Users\mathh\GitHub\Molecular-Spintronics-Research-Project\MSD Research Project - Latest Development Version\src\MSD.h:792> : 1
+C:\Users\mathh\GitHub\Molecular-Spintronics-Research-Project\MSD Research Project - Latest Development Version\src\MSD.h:1687> a=3470, mol.size=1, &=00B33138
+C:\Users\mathh\GitHub\Molecular-Spintronics-Research-Project\MSD Research Project - Latest Development Version\src\MSD.h:792> : 1
+C:\Users\mathh\GitHub\Molecular-Spintronics-Research-Project\MSD Research Project - Latest Development Version\src\MSD.h:1687> a=3690, mol.size=1, &=00B333D8
+C:\Users\mathh\GitHub\Molecular-Spintronics-Research-Project\MSD Research Project - Latest Development Version\src\MSD.h:792> : 1
+C:\Users\mathh\GitHub\Molecular-Spintronics-Research-Project\MSD Research Project - Latest Development Version\src\MSD.h:1687> a=3745, mol.size=1, &=00B33468
+C:\Users\mathh\GitHub\Molecular-Spintronics-Research-Project\MSD Research Project - Latest Development Version\src\MSD.h:792> : 1
+C:\Users\mathh\GitHub\Molecular-Spintronics-Research-Project\MSD Research Project - Latest Development Version\src\MSD.h:1687> a=3965, mol.size=1, &=00B33588
+C:\Users\mathh\GitHub\Molecular-Spintronics-Research-Project\MSD Research Project - Latest Development Version\src\MSD.h:792> : 1
+C:\Users\mathh\GitHub\Molecular-Spintronics-Research-Project\MSD Research Project - Latest Development Version\src\MSD.h:1687> a=4020, mol.size=1, &=00B332B8
+C:\Users\mathh\GitHub\Molecular-Spintronics-Research-Project\MSD Research Project - Latest Development Version\src\MSD.h:792> : 1
+C:\Users\mathh\GitHub\Molecular-Spintronics-Research-Project\MSD Research Project - Latest Development Version\src\MSD.h:1687> a=4240, mol.size=1, &=00B334C8
+C:\Users\mathh\GitHub\Molecular-Spintronics-Research-Project\MSD Research Project - Latest Development Version\src\MSD.h:792> : 1
+C:\Users\mathh\GitHub\Molecular-Spintronics-Research-Project\MSD Research Project - Latest Development Version\src\MSD.h:1687> a=4251, mol.size=1, &=00B33228
+C:\Users\mathh\GitHub\Molecular-Spintronics-Research-Project\MSD Research Project - Latest Development Version\src\MSD.h:792> : 1
+C:\Users\mathh\GitHub\Molecular-Spintronics-Research-Project\MSD Research Project - Latest Development Version\src\MSD.h:1687> a=4262, mol.size=1, &=00B33168
+C:\Users\mathh\GitHub\Molecular-Spintronics-Research-Project\MSD Research Project - Latest Development Version\src\MSD.h:792> : 1
+C:\Users\mathh\GitHub\Molecular-Spintronics-Research-Project\MSD Research Project - Latest Development Version\src\MSD.h:1687> a=4273, mol.size=1, &=00B33018
+C:\Users\mathh\GitHub\Molecular-Spintronics-Research-Project\MSD Research Project - Latest Development Version\src\MSD.h:792> : 1
+C:\Users\mathh\GitHub\Molecular-Spintronics-Research-Project\MSD Research Project - Latest Development Version\src\MSD.h:1687> a=4284, mol.size=1, &=00B33498
+C:\Users\mathh\GitHub\Molecular-Spintronics-Research-Project\MSD Research Project - Latest Development Version\src\MSD.h:792> : 1
+C:\Users\mathh\GitHub\Molecular-Spintronics-Research-Project\MSD Research Project - Latest Development Version\src\MSD.h:1687> a=4295, mol.size=1, &=00B33048
+C:\Users\mathh\GitHub\Molecular-Spintronics-Research-Project\MSD Research Project - Latest Development Version\src\MSD.h:1631> nodeCount=1
+C:\Users\mathh\GitHub\Molecular-Spintronics-Research-Project\MSD Research Project - Latest Development Version\src\MSD.h:792> : 1
+C:\Users\mathh\GitHub\Molecular-Spintronics-Research-Project\MSD Research Project - Latest Development Version\src\MSD.h:1687> a=2865, mol.size=1, &=00B33348
+C:\Users\mathh\GitHub\Molecular-Spintronics-Research-Project\MSD Research Project - Latest Development Version\src\MSD.h:792> : 1
+C:\Users\mathh\GitHub\Molecular-Spintronics-Research-Project\MSD Research Project - Latest Development Version\src\MSD.h:1687> a=2876, mol.size=1, &=00B334F8
+C:\Users\mathh\GitHub\Molecular-Spintronics-Research-Project\MSD Research Project - Latest Development Version\src\MSD.h:792> : 1
+C:\Users\mathh\GitHub\Molecular-Spintronics-Research-Project\MSD Research Project - Latest Development Version\src\MSD.h:1687> a=2887, mol.size=1, &=00B330A8
+C:\Users\mathh\GitHub\Molecular-Spintronics-Research-Project\MSD Research Project - Latest Development Version\src\MSD.h:792> : 1
+C:\Users\mathh\GitHub\Molecular-Spintronics-Research-Project\MSD Research Project - Latest Development Version\src\MSD.h:1687> a=2898, mol.size=1, &=00B33528
+C:\Users\mathh\GitHub\Molecular-Spintronics-Research-Project\MSD Research Project - Latest Development Version\src\MSD.h:792> : 1
+C:\Users\mathh\GitHub\Molecular-Spintronics-Research-Project\MSD Research Project - Latest Development Version\src\MSD.h:1687> a=2909, mol.size=1, &=00B33078
+C:\Users\mathh\GitHub\Molecular-Spintronics-Research-Project\MSD Research Project - Latest Development Version\src\MSD.h:792> : 1
+C:\Users\mathh\GitHub\Molecular-Spintronics-Research-Project\MSD Research Project - Latest Development Version\src\MSD.h:1687> a=2920, mol.size=1, &=00B33558
+C:\Users\mathh\GitHub\Molecular-Spintronics-Research-Project\MSD Research Project - Latest Development Version\src\MSD.h:792> : 1
+C:\Users\mathh\GitHub\Molecular-Spintronics-Research-Project\MSD Research Project - Latest Development Version\src\MSD.h:1687> a=3140, mol.size=1, &=00B330D8
+C:\Users\mathh\GitHub\Molecular-Spintronics-Research-Project\MSD Research Project - Latest Development Version\src\MSD.h:792> : 1
+C:\Users\mathh\GitHub\Molecular-Spintronics-Research-Project\MSD Research Project - Latest Development Version\src\MSD.h:1687> a=3195, mol.size=1, &=00B33198
+C:\Users\mathh\GitHub\Molecular-Spintronics-Research-Project\MSD Research Project - Latest Development Version\src\MSD.h:792> : 1
+C:\Users\mathh\GitHub\Molecular-Spintronics-Research-Project\MSD Research Project - Latest Development Version\src\MSD.h:1687> a=3415, mol.size=1, &=00B335B8
+C:\Users\mathh\GitHub\Molecular-Spintronics-Research-Project\MSD Research Project - Latest Development Version\src\MSD.h:792> : 1
+C:\Users\mathh\GitHub\Molecular-Spintronics-Research-Project\MSD Research Project - Latest Development Version\src\MSD.h:1687> a=3470, mol.size=1, &=00B33438
+C:\Users\mathh\GitHub\Molecular-Spintronics-Research-Project\MSD Research Project - Latest Development Version\src\MSD.h:792> : 1
+C:\Users\mathh\GitHub\Molecular-Spintronics-Research-Project\MSD Research Project - Latest Development Version\src\MSD.h:1687> a=3690, mol.size=1, &=00B33108
+C:\Users\mathh\GitHub\Molecular-Spintronics-Research-Project\MSD Research Project - Latest Development Version\src\MSD.h:792> : 1
+C:\Users\mathh\GitHub\Molecular-Spintronics-Research-Project\MSD Research Project - Latest Development Version\src\MSD.h:1687> a=3745, mol.size=1, &=00B33138
+C:\Users\mathh\GitHub\Molecular-Spintronics-Research-Project\MSD Research Project - Latest Development Version\src\MSD.h:792> : 1
+C:\Users\mathh\GitHub\Molecular-Spintronics-Research-Project\MSD Research Project - Latest Development Version\src\MSD.h:1687> a=3965, mol.size=1, &=00B33318
+C:\Users\mathh\GitHub\Molecular-Spintronics-Research-Project\MSD Research Project - Latest Development Version\src\MSD.h:792> : 1
+C:\Users\mathh\GitHub\Molecular-Spintronics-Research-Project\MSD Research Project - Latest Development Version\src\MSD.h:1687> a=4020, mol.size=1, &=00B33468
+C:\Users\mathh\GitHub\Mol----------------------------------------
+Fri 10/22/2021 
+02:07 PM
+Press any key to continue . . . 

@@ -1,7 +1,7 @@
 
 /*
  * Christopher D'Angelo
- * 7-11-2021
+ * 10-22-2021
  */
 
 #include <fstream>
@@ -63,11 +63,26 @@ struct Spin {
 	double norm;
 };
 
+// error codes
+const int
+	NO_OUT_FILE_ERR = 1,
+	INVALID_PARAM_ERR = 2,
+	OUT_FILE_ERR = 4,
+	INPUT_FILE_ERR = 5,
+	INVALID_SEED_ERR = 6;
 
 int main(int argc, char *argv[]) {
 	//get command line argument
-	if( argc > 1 ) {
-		ifstream file(argv[1]);
+	const size_t
+		OUT_FILE = 1,
+		MODEL = 2,
+		MOL_TYPE = 3,
+		RANDOMIZE = 4,
+		SEED = 5,
+		INPUT_FILE = 6;
+
+	if( argc > OUT_FILE ) {
+		ifstream file(argv[OUT_FILE]);
 		if( file.good() ) {
 			char ans;
 			cout << "File \"" << argv[1] << "\" already exists. Overwrite it (Y/N)? ";
@@ -80,12 +95,12 @@ int main(int argc, char *argv[]) {
 		}
 	} else {
 		cout << "Supply an output file as an argument.\n";
-		return 1;
+		return NO_OUT_FILE_ERR;
 	}
 	
 	MSD::FlippingAlgorithm arg2 = MSD::CONTINUOUS_SPIN_MODEL;
-	if( argc > 2 ) {
-		string s(argv[2]);
+	if( argc > MODEL ) {
+		string s(argv[MODEL]);
 		if( s == string("CONTINUOUS_SPIN_MODEL") )
 			arg2 = MSD::CONTINUOUS_SPIN_MODEL;
 		else if( s == string("UP_DOWN_MODEL") )
@@ -94,17 +109,30 @@ int main(int argc, char *argv[]) {
 			cout << "Unrecognized third argument! Defaulting to 'CONTINUOUS_SPIN_MODEL'.\n";
 	} else
 		cout << "Defaulting to 'CONTINUOUS_SPIN_MODEL'.\n";
+	
+	MSD::MolProtoFactory molType = MSD::LINEAR_MOL;
+	if (argc > MOL_TYPE) {
+		string s(argv[MOL_TYPE]);
+		if (s == string("LINEAR"))
+			molType = MSD::LINEAR_MOL;
+		else if (s == string("CIRCULAR"))
+			molType = MSD::CIRCULAR_MOL;
+		else {
+			cout << "Unrecognized MOL_TYPE! (Note: custom mol. are not supported yet. Only LINEAR or CIRCULAR.) Defaulting to 'LINEAR'.\n";
+		}
+	} else
+		cout << "Defaulting to 'MOL_TYPE=LINEAR'.\n";
 
 	map<string, string> params;
 	vector<Spin> spins;
-	if (argc > 5) {
+	if (argc > INPUT_FILE) {
 		ifstream paramsFile;
 		paramsFile.exceptions( ios::badbit | ios::failbit );
 		try {
-			paramsFile.open(argv[5]);
+			paramsFile.open(argv[INPUT_FILE]);
 		} catch(const ios::failure &e) {
-			cerr << "Error opening input file \"" << argv[5] << "\": " << e.what() << '\n';
-			return 5;
+			cerr << "Error opening input file \"" << argv[INPUT_FILE] << "\": " << e.what() << '\n';
+			return INPUT_FILE_ERR;
 		}
 
 		try {
@@ -143,8 +171,8 @@ int main(int argc, char *argv[]) {
 			}
 		} catch(const ios::failure &e) {
 			if (!paramsFile.eof()) {
-				cerr << "Error occured while reading from input file \"" << argv[5] << "\": " << e.what() << '\n';
-				return 5;
+				cerr << "Error occured while reading from input file \"" << argv[INPUT_FILE] << "\": " << e.what() << '\n';
+				return INPUT_FILE_ERR;
 			}
 		}
 	}
@@ -152,16 +180,18 @@ int main(int argc, char *argv[]) {
 	ofstream file;
 	file.exceptions( ios::badbit | ios::failbit );
 	try {
-		file.open(argv[1]);
+		file.open(argv[OUT_FILE]);
 	} catch(const ios::failure &e) {
 		cerr << "Couldn't open output file \"" << argv[1] << "\" for writing: " << e.what() << '\n';
-		return 4;
+		return OUT_FILE_ERR;
 	}
 	
 	//get parameters
 	unsigned int width, height, depth, molPosL, molPosR, topL, bottomL, frontR, backR;
 	unsigned long long simCount, freq;
 	MSD::Parameters p;
+	Molecule::NodeParameters p_node;
+	Molecule::EdgeParameters p_edge;
 	
 	cin.exceptions( ios::badbit | ios::failbit | ios::eofbit );
 	try {
@@ -184,59 +214,59 @@ int main(int argc, char *argv[]) {
 		cout << '\n';
 		getParam(params, "B", p.B);
 		cout << '\n';
-		getParam(params, "sL", p.sL);
-		getParam(params, "sR", p.sR);
-		getParam(params, "sm", p.sm);
+		getParam(params, "SL", p.SL);
+		getParam(params, "SR", p.SR);
+		getParam(params, "Sm", p_node.Sm);
 		getParam(params, "FL", p.FL);
 		getParam(params, "FR", p.FR);
-		getParam(params, "Fm", p.Fm);
+		getParam(params, "Fm", p_node.Fm);
 		cout << '\n';
 		getParam(params, "JL ", p.JL);
 		getParam(params, "JR ", p.JR);
-		getParam(params, "Jm ", p.Jm);
+		getParam(params, "Jm ", p_edge.Jm);
 		getParam(params, "JmL", p.JmL);
 		getParam(params, "JmR", p.JmR);
 		getParam(params, "JLR", p.JLR);
 		cout << '\n';
 		getParam(params, "Je0L ", p.Je0L);
 		getParam(params, "Je0R ", p.Je0R);
-		getParam(params, "Je0m ", p.Je0m);
+		getParam(params, "Je0m ", p_node.Je0m);
 		cout << '\n';
 		getParam(params, "Je1L ", p.Je1L);
 		getParam(params, "Je1R ", p.Je1R);
-		getParam(params, "Je1m ", p.Je1m);
+		getParam(params, "Je1m ", p_edge.Je1m);
 		getParam(params, "Je1mL", p.Je1mL);
 		getParam(params, "Je1mR", p.Je1mR);
 		getParam(params, "Je1LR", p.Je1LR);
 		cout << '\n';
 		getParam(params, "JeeL ", p.Je1L);
 		getParam(params, "JeeR ", p.Je1R);
-		getParam(params, "Jeem ", p.Je1m);
+		getParam(params, "Jeem ", p_edge.Je1m);
 		getParam(params, "JeemL", p.Je1mL);
 		getParam(params, "JeemR", p.Je1mR);
 		getParam(params, "JeeLR", p.Je1LR);
 		cout << '\n';
 		getParam(params, "AL", p.AL);
 		getParam(params, "AR", p.AR);
-		getParam(params, "Am", p.Am);
+		getParam(params, "Am", p_node.Am);
 		cout << '\n';
 		getParam(params, "bL ", p.bL);
 		getParam(params, "bR ", p.bR);
-		getParam(params, "bm ", p.bm);
+		getParam(params, "bm ", p_edge.bm);
 		getParam(params, "bmL", p.bmL);
 		getParam(params, "bmR", p.bmR);
 		getParam(params, "bLR", p.bLR);
 		cout << '\n';
 		getParam(params, "DL ", p.DL);
 		getParam(params, "DR ", p.DR);
-		getParam(params, "Dm ", p.Dm);
+		getParam(params, "Dm ", p_edge.Dm);
 		getParam(params, "DmL", p.DmL);
 		getParam(params, "DmR", p.DmR);
 		getParam(params, "DLR", p.DLR);
 		cout << '\n';
 	} catch(ios::failure &e) {
 		cerr << "Invalid parameter: " << e.what() << '\n';
-		return 2;
+		return INVALID_PARAM_ERR;
 	}
 	if (params.size() > 0) {
 		cerr << "Warning: the following parameters are being ignored:";
@@ -250,23 +280,24 @@ int main(int argc, char *argv[]) {
 	}
 	
 	//create MSD model
-	MSD msd(width, height, depth, molPosL, molPosR, topL, bottomL, frontR, backR);
+	MSD msd(width, height, depth, molType, molPosL, molPosR, topL, bottomL, frontR, backR);
 	msd.flippingAlgorithm = arg2;
 	msd.setParameters(p);
+	msd.setMolParameters(p_node, p_edge);
 
-	bool customSeed = argc > 4 && string(argv[4]) != string("unique");
+	bool customSeed = (argc > SEED && string(argv[SEED]) != string("unique"));
 	if (customSeed) {
 		unsigned long seed;
-		istringstream ss(argv[4]);
+		istringstream ss(argv[SEED]);
 		ss >> seed;
 		if (ss.bad()) {
-			cerr << "Invalid seed: " << argv[4] << '\n';
-			return 6;
+			cerr << "Invalid seed: " << argv[SEED] << '\n';
+			return INVALID_SEED_ERR;
 		}
 		msd.setSeed(seed);
 	}
 
-	if( argc > 3 && string(argv[3]) != string("0") )
+	if( argc > RANDOMIZE && string(argv[RANDOMIZE]) != string("0") )
 		msd.randomize(!customSeed);
 
 	try {
@@ -292,48 +323,50 @@ int main(int argc, char *argv[]) {
 			 << ",freq = " << freq
 			 << ",kT = " << p.kT
 			 << ",\"B = " << p.B << '"'
-			 << ",sL = " << p.sL
-			 << ",sR = " << p.sR
-			 << ",sm = " << p.sm
+			 << ",SL = " << p.SL
+			 << ",SR = " << p.SR
+			 << ",Sm = " << p_node.Sm
 			 << ",FL = " << p.FL
 			 << ",FR = " << p.FR
-			 << ",Fm = " << p.Fm
+			 << ",Fm = " << p_node.Fm
 			 << ",JL = " << p.JL
 			 << ",JR = " << p.JR
-			 << ",Jm = " << p.Jm
+			 << ",Jm = " << p_edge.Jm
 			 << ",JmL = " << p.JmL
 			 << ",JmR = " << p.JmR
 			 << ",JLR = " << p.JLR
 			 << ",Je0L = " << p.Je0L
 			 << ",Je0R = " << p.Je0R
-			 << ",Je0m = " << p.Je0m
+			 << ",Je0m = " << p_node.Je0m
 			 << ",Je1L = " << p.Je1L
 			 << ",Je1R = " << p.Je1R
-			 << ",Je1m = " << p.Je1m
+			 << ",Je1m = " << p_edge.Je1m
 			 << ",Je1mL = " << p.Je1mL
 			 << ",Je1mR = " << p.Je1mR
 			 << ",Je1LR = " << p.Je1LR
 			 << ",JeeL = " << p.JeeL
 			 << ",JeeR = " << p.JeeR
-			 << ",Jeem = " << p.Jeem
+			 << ",Jeem = " << p_edge.Jeem
 			 << ",JeemL = " << p.JeemL
 			 << ",JeemR = " << p.JeemR
 			 << ",JeeLR = " << p.JeeLR
 			 << ",\"AL = " << p.AL << '"'
 			 << ",\"AR = " << p.AR << '"'
-			 << ",\"Am = " << p.Am << '"'
+			 << ",\"Am = " << p_node.Am << '"'
 			 << ",bL = " << p.bL
 			 << ",bR = " << p.bR
-			 << ",bm = " << p.bm
+			 << ",bm = " << p_edge.bm
 			 << ",bmL = " << p.bmL
 			 << ",bmR = " << p.bmR
 			 << ",bLR = " << p.bLR
 			 << ",\"DL = " << p.DL << '"'
 			 << ",\"DR = " << p.DR << '"'
-			 << ",\"Dm = " << p.Dm << '"'
+			 << ",\"Dm = " << p_edge.Dm << '"'
 			 << ",\"DmL = " << p.DmL << '"'
 			 << ",\"DmR = " << p.DmR << '"'
 			 << ",\"DLR = " << p.DLR << '"'
+			 << ",molType = " << argv[MOL_TYPE]
+			 << ",randomize = " << argv[RANDOMIZE]
 			 << ",seed = " << msd.getSeed()
 			 << ",,msd_version = " << UDC_MSD_VERSION
 			 << '\n';

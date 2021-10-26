@@ -1,7 +1,7 @@
 /*
  * MSD.h
  *
- *  Last Edited: October 18, 2021
+ *  Last Edited: October 22, 2021
  *       Author: Christopher D'Angelo
  */
 
@@ -38,6 +38,7 @@ using std::ref;
 using std::string;
 using std::uniform_int_distribution;
 using std::uniform_real_distribution;
+using std::shared_ptr;
 
 using udc::E;
 using udc::PI;
@@ -93,9 +94,18 @@ class Molecule {
 		 * "selfIndex" is the source node (i.e. the node this edge is attached to).
 		 */
 		size_t edgeIndex, nodeIndex, selfIndex;
-		// TODO: add a direction for Dm (Dzyaloshinskii-Moriya interaction (i.e. Skyrmions))
+		
+		/**
+		 * Tracks the direction of this edge. Used for non-communative operations,
+		 * e.g. Dzyaloshinskii-Moriya interaction (i.e. Skyrmions)
+		 * 
+		 * +1 if edge is outgoing: direction of edge points from "selfIndex" towards "nodeIndex".
+		 * -1 if edge is incoming: pointing from "nodeIndex" towards "selfIndex".
+		 *  0 if edge is a loop: nodeIndex == selfIndex.
+		 */
+		double direction;
 
-		Edge(size_t edgeIndex, size_t nodeIndex, size_t selfIndex);
+		Edge(size_t edgeIndex, size_t nodeIndex, size_t selfIndex, double direction);
 	};
 
 	struct Node {
@@ -113,7 +123,7 @@ class Molecule {
 	size_t sSize;  // size of buffer (bytes) needed for serialization or deserizalization
 
  public:
-	static const unsigned int NOT_FOUND = -1;  // -1 will be the maximum unsigned int
+	static const unsigned int NOT_FOUND = (unsigned int) -1;  // -1 will be the maximum unsigned int
 
  public:
 	/**
@@ -169,6 +179,7 @@ class Molecule {
 	void setEdgeParameters(unsigned int index, const EdgeParameters &p);
 	NodeParameters getNodeParameters(unsigned int index) const;
 	void setNodeParameters(unsigned int index, const NodeParameters &p);
+	void setAllParameters(const Molecule::NodeParameters &nodeParams, const Molecule::EdgeParameters &edgeParams);
 
 	// TODO? Add methods for getting adjacency list for each node?
 
@@ -357,7 +368,8 @@ class MSD {
 	// flags for each region to remember if they exist based on given dimensions and inner bounds
 	bool FM_L_exists, FM_R_exists, mol_exists;
 	
-	std::vector<unsigned int> indices; //valid indices
+	std::vector<unsigned int> indices; // valid indices
+	std::vector<unsigned int> unique_mol_indices;  // valid indices for each unique mol. (x == molPosL)
 	
 	mt19937_64 prng; //pseudo random number generator
 	uniform_real_distribution<double> rand; //uniform probability density function on the interval [0, 1)
@@ -402,7 +414,8 @@ class MSD {
 
 	MolProto getMolProto() const;
 	void setMolProto(const MolProto &proto);  // Note: the new MolProto must have the same "size" (number of nodes) as the previous MolProto.
-	
+	void setMolParameters(const MolProto::NodeParameters &, const MolProto::EdgeParameters &);  // uniformally updates all mol. parameters
+
 	Vector getSpin(unsigned int a) const;
 	Vector getSpin(unsigned int x, unsigned int y, unsigned int z) const;
 	Vector getFlux(unsigned int a) const;
@@ -533,8 +546,9 @@ Molecule::NodeParameters::NodeParameters()
 : Sm(1), Fm(0), Je0m(0), Am(Vector::ZERO)
 {}
 
-Molecule::Edge::Edge(size_t eIdx, size_t nIdx, size_t sIdx) : edgeIndex(eIdx), nodeIndex(nIdx), selfIndex(sIdx) {
-}
+Molecule::Edge::Edge(size_t eIdx, size_t nIdx, size_t sIdx, double dir)
+: edgeIndex(eIdx), nodeIndex(nIdx), selfIndex(sIdx), direction(dir)
+{}
 
 Molecule::Node::Node(const NodeParameters &parameters) : parameters(parameters) {
 }
@@ -544,7 +558,8 @@ Molecule::Molecule() : leftLead(0), rightLead(0), sSize(4 * sizeof(size_t)) {
 }
 
 Molecule::Molecule(size_t nodeCount, const NodeParameters &nodeParams)
-: nodes(nodeCount), leftLead(0), rightLead(0)
+: nodes(nodeCount), leftLead(0), rightLead(0),
+  sSize(4 * sizeof(size_t) + nodeCount * (6 * sizeof(double) + sizeof(size_t)))
 {
 	for (Node &node : nodes)
 		node.parameters = nodeParams;
@@ -580,6 +595,7 @@ void Molecule::serialize(unsigned char *buffer) const {
 		for (const Edge &edge : node.neighbors) {
 			bwrite(edge.edgeIndex, buffer);
 			bwrite(edge.nodeIndex, buffer);
+			bwrite(edge.direction, buffer);
 		}
 	}
 
@@ -589,9 +605,12 @@ void Molecule::serialize(unsigned char *buffer) const {
 }
 
 void Molecule::deserialize(const unsigned char *buffer) {
+	const unsigned char *buffer_start = buffer;
+
 	// First read edges
 	size_t edgeCount;
 	bread(edgeCount, buffer);  // First the number of edges is read.
+	edgeParameters.erase(edgeParameters.begin(), edgeParameters.end());
 	edgeParameters.reserve(edgeCount);
 	for (size_t i = 0; i < edgeCount; i++) {
 		EdgeParameters eParam;
@@ -608,6 +627,8 @@ void Molecule::deserialize(const unsigned char *buffer) {
 	// Then read nodes (in two "sweeps")
 	size_t nodeCount;
 	udc::bread(nodeCount, buffer);  // Next the number of nodes is read.
+	nodes.erase(nodes.begin(), nodes.end());
+	nodes.reserve(nodeCount);
 	for (size_t i = 0; i < nodeCount; i++) {
 		Node node;
 		bread(node.parameters.Sm, buffer);  // For each node, we read its (local) parameter fields.
@@ -624,10 +645,12 @@ void Molecule::deserialize(const unsigned char *buffer) {
 		bread(neighborCount, buffer);  // ("Spweep" 2) Again for each node, get the number of neighbors this time.
 		node.neighbors.reserve(neighborCount);
 		for (size_t j = 0; j < neighborCount; j++) {
-			int eIndex, nIndex;
-			bread(eIndex, buffer);  // Finally we read each (edge index, node index) pair for this node.
+			size_t eIndex, nIndex;
+			double direction;
+			bread(eIndex, buffer);  // Finally we read each (edge index, node index, direction) triplet for this node.
 			bread(nIndex, buffer);
-			Edge edge(eIndex, nIndex, i);
+			bread(direction, buffer);
+			Edge edge(eIndex, nIndex, i, direction);
 			node.neighbors.push_back(edge);
 		}
 	}
@@ -635,6 +658,8 @@ void Molecule::deserialize(const unsigned char *buffer) {
 	// Lastly, we read the leads' positions
 	bread(leftLead, buffer);  // (Left lead first, then right lead.)
 	bread(rightLead, buffer);
+
+	sSize = buffer - buffer_start;
 }
 
 size_t Molecule::serializationSize() const {
@@ -675,15 +700,25 @@ unsigned int Molecule::connectNodes(unsigned int a, unsigned int b, const EdgePa
 
 	edgeParameters.push_back(parameters);
 
-	Edge edgeA(index, b, a);
+	bool isLoop = (a == b);
+	double dir = (isLoop ? 0 : +1);
+
+	// attach edge: a -> b
+	Edge edgeA(index, b, a, dir);
 	nodes[a].neighbors.push_back(edgeA);
 
-	Edge edgeB(index, a, b);
-	nodes[b].neighbors.push_back(edgeB);
-
 	// 7 double's for EdgeParameters,
-	// and two pairs of size_t's for the two entrees in the adjacency lists
-	sSize += 7 * sizeof(double) + 4 * sizeof(size_t);
+	// and a triplet of (size_t, size_t, double) for the the first entree in the adjacency lists
+	sSize += 7 * sizeof(double) + 2 * sizeof(size_t) + sizeof(double);
+
+	if (isLoop) {  // only duplicate edge if it's not a self connected edge
+		// attach edge: b -> a
+		Edge edgeB(index, a, b, -dir);
+		nodes[b].neighbors.push_back(edgeB);
+
+		// a second triplet of (size_t, size_t, double) for the second entree in the adjacency lists
+		sSize += 2 * sizeof(size_t) + sizeof(double);
+	}
 
 	return index;
 }
@@ -712,6 +747,13 @@ Molecule::NodeParameters Molecule::getNodeParameters(unsigned int index) const {
 
 void Molecule::setNodeParameters(unsigned int index, const Molecule::NodeParameters &p) {
 	nodes.at(index).parameters = p;
+}
+
+void Molecule::setAllParameters(const Molecule::NodeParameters &nodeParams, const Molecule::EdgeParameters &edgeParams) {
+	for (size_t i = 0; i < edgeParameters.size(); i++)
+		edgeParameters[i] = edgeParams;
+	for (size_t i = 0; i < nodes.size(); i++)
+		nodes[i].parameters = nodeParams;
 }
 
 void Molecule::setLeftLead(unsigned int node) {
@@ -743,9 +785,9 @@ void Molecule::getLeads(unsigned int &left, unsigned int &right) const {
 Molecule::Instance::Instance(const Molecule &prototype, MSD &msd, unsigned int y, unsigned int z)
 : prototype(prototype), msd(msd), y(y), z(z)
 {
-	const size_t n_m = prototype.nodes.size();
-	spins.reserve(n_m);
-	for (size_t i = 0; i < n_m; i++)
+	const size_t N = prototype.nodes.size();
+	spins.reserve(N);
+	for (size_t i = 0; i < N; i++)
 		spins.push_back(Vector::I * prototype.nodes[i].parameters.Sm);
 	fluxes.assign(prototype.nodes.size(), Vector::ZERO);
 }
@@ -757,6 +799,7 @@ Molecule::Instance::Instance(const Instance &other)
 Molecule::Instance& Molecule::Instance::operator=(const Molecule::Instance &other) {
 	this->spins = other.spins;
 	this->fluxes = other.fluxes;
+	return *this;
 }
 
 void Molecule::Instance::setLocalM(unsigned int a, const Vector &spin, const Vector &flux) {
@@ -805,7 +848,7 @@ void Molecule::Instance::setLocalM(unsigned int a, const Vector &spin, const Vec
 		              + edgeParams.Je1m * ( neighbor_f * deltaS + neighbor_s * deltaF )
 		              + edgeParams.Jeem * ( neighbor_f * deltaF )
 		              + edgeParams.bm * ( sq(neighbor_m * mag) - sq(neighbor_m * m) )
-		              + edgeParams.Dm * neighbor_m.crossProduct(deltaM);  // TODO: crossProduct is not communative!!!
+		              + edgeParams.Dm * (edge.direction * deltaM.crossProduct(neighbor_m));  // uses edge.direction to solve anti-communative property of crossProduct
 		results.U -= deltaU;
 		results.Um -= deltaU;
 	}
@@ -825,7 +868,7 @@ void Molecule::Instance::setLocalM(unsigned int a, const Vector &spin, const Vec
 			              + msdParams.Je1mL * ( neighbor_f * deltaS + neighbor_s * deltaF )
 			              + msdParams.JeemL * ( neighbor_f * deltaF )
 			              + msdParams.bmL * ( sq(neighbor_m * mag) - sq(neighbor_m * m) )
-			              + msdParams.DmL * neighbor_m.crossProduct(deltaM);  // TODO: crossProduct is not communative!!!
+			              + msdParams.DmL * neighbor_m.crossProduct(deltaM);  // pos(neighbor_m) < pos(deltaM)
 			results.U -= deltaU;
 			results.UmL -= deltaU;
 		}
@@ -840,7 +883,7 @@ void Molecule::Instance::setLocalM(unsigned int a, const Vector &spin, const Vec
 			              + msdParams.Je1mR * ( neighbor_f * deltaS + neighbor_s * deltaF )
 			              + msdParams.JeemR * ( neighbor_f * deltaF )
 			              + msdParams.bmR * ( sq(neighbor_m * mag) - sq(neighbor_m * m) )
-			              + msdParams.DmR * neighbor_m.crossProduct(deltaM);  // TODO: crossProduct is not communative!!!
+			              + msdParams.DmR * deltaM.crossProduct(neighbor_m);  // pos(deltaM) < pos(neighbor_m)
 			results.U -= deltaU;
 			results.UmR -= deltaU;
 		}
@@ -1172,7 +1215,8 @@ void MSD::init(const MolProtoFactory *molProtoFactory) {
 				}
 			// mol
 			if( mol_exists && (((y == topL || y == bottomL) && (frontR <= z && z <= backR)) || ((z == frontR || z == backR) && (topL <= y && y <= bottomL))) ) {
-				shared_ptr<Mol> mol = make_shared<Mol>(molProto, *this, y, z);  // calls "new Mol" constructor, but returns a "shared_pointer"
+				shared_ptr<Mol> mol = shared_ptr<Mol>(new Mol(molProto, *this, y, z));
+				unique_mol_indices.push_back(index(molPosL, y, z));  // store the indices for all unique Mol (Molecule::Instance) objects
 				for( unsigned int x = molPosL; x <= molPosR; x++ ) {
 					a = index(x, y, z);
 					indices.push_back(a);
@@ -1556,10 +1600,181 @@ MSD::MolProto MSD::getMolProto() const {
 }
 
 void MSD::setMolProto(const MolProto &molProto) {
-	if (this->molProto.nodeCount() != molProto.nodeCount())
+	const unsigned int nodeCount = this->molProto.nodeCount();
+	if (molProto.nodeCount() != nodeCount)
 		throw MSD::MoleculeException("Can not change the number of nodes in the molecule after MSD creation. Must create a new MSD.");
-	
-	// TODO: How is energy changed by the mol. structure or parameters changing ?
+
+	// ----- reset some Results -----
+	results.MSm = results.MFm = Vector::ZERO;
+	results.Um = 0;
+
+	// ----- remove energy from leads -----
+	for (unsigned int a : unique_mol_indices) {
+		unsigned int y = this->y(a);
+		unsigned int z = this->z(a);
+
+		if (FM_L_exists) {
+			unsigned int FML_idx = index(molPosL - 1, y, z);
+			unsigned int mol_idx = index(molPosL, y, z);
+			Vector s_i = getSpin(FML_idx);
+			Vector f_i = getFlux(FML_idx);
+			Vector m_i = s_i + f_i;
+			Vector s_j = getSpin(mol_idx);
+			Vector f_j = getFlux(mol_idx);
+			Vector m_j = s_j + f_j;
+
+			// adding to U (+=) because we are removing energy
+			results.UmL += parameters.JmL * (s_i * s_j);
+			results.UmL += parameters.Je1mL * (s_i * f_j + f_i * s_j);
+			results.UmL += parameters.JeemL * (f_i * f_j);
+			results.UmL += parameters.bmL * sq(m_i * m_j);
+			results.UmL += parameters.DmL * m_i.crossProduct(m_j);
+		}
+
+		if (FM_R_exists) {
+			unsigned int FMR_idx = index(molPosR + 1, y, z);
+			unsigned int mol_idx = index(molPosR, y, z);
+			Vector s_i = getSpin(mol_idx);
+			Vector f_i = getFlux(mol_idx);
+			Vector m_i = s_i + f_i;
+			Vector s_j = getSpin(FMR_idx);
+			Vector f_j = getSpin(FMR_idx);
+			Vector m_j = s_j + f_j;
+
+			// adding to U (+=) because we are removing energy
+			results.UmR += parameters.JmR * (s_i * s_j);
+			results.UmR += parameters.Je1mR * (s_i * f_j + f_i * s_j);
+			results.UmR += parameters.JeemR * (f_i * f_j);
+			results.UmR += parameters.bmR * sq(m_i * m_j);
+			results.UmR += parameters.DmR * m_i.crossProduct(m_j);
+		}
+	}
+
+	// NodeParameters: Sm, Fm, Je0m, Am
+	// ----- Update spin and flux Vectors (Sm, Fm), and Calculate local Energy and Magnetization (B, Je0m, Am) -----
+	for (unsigned int a : unique_mol_indices) {
+		unsigned int y = this->y(a);
+		unsigned int z = this->z(a);
+
+		// Note: because Mol::prototype is a reference, it must refer to the global field: this->molProto
+		// This field will be updated to the new molProto before this function returns
+		shared_ptr<Mol> oldMol = mols[a];
+		shared_ptr<Mol> mol = shared_ptr<Mol>(new Mol(this->molProto, *this, y, z));
+		
+		for (unsigned int n = 0; n < nodeCount; n++) {
+			Vector &s = mol->spins[n];
+			Vector &f = mol->fluxes[n];
+
+			Vector m = s + f;
+			const auto &parameters = molProto.nodes[n].parameters;
+
+			// scale spin Vector
+			s = oldMol->spins[n].normalize() * parameters.Sm;
+			
+			// scale flux Vector
+			{	double oldFm = this->molProto.nodes[n].parameters.Fm;
+				f = oldFm != 0 ? oldMol->fluxes[n] * (parameters.Fm / oldFm) : Vector::ZERO;
+			}
+
+			// store new Mol (Molecule::Instance) over old one. old pointer should be destructed!
+			mols[index(molPosL + n, y, z)] = mol;
+
+			// calculate "Results"
+			results.MSm += s;
+			results.MFm += f;
+
+			results.Um -= parameters.Am * Vector(sq(m.x), sq(m.y), sq(m.z));
+			results.Um -= parameters.Je0m * (s * f);
+		}
+
+		// delete oldMol;  // not needed because of shared_ptr
+	}
+	results.Mm = results.MSm + results.MFm;
+	results.MS = results.MSL + results.MSR + results.MSm;
+	results.MF = results.MFL + results.MFR + results.MFm;
+	results.M = results.MS + results.MF;
+
+	// EdgeParameters: Jm, Je1m, Jeem, bm, Dm
+	// ----- Calculate bond energy (Jm, Je1m, Jeem, bm, Dm) -----
+	for (unsigned int a : unique_mol_indices) {
+		const Mol &mol = *mols[a];
+
+		for (unsigned int n = 0; n < nodeCount; n++) {  // for each node
+			Vector s_i = mol.spins[n];
+			Vector f_i = mol.fluxes[n];
+			Vector m_i = s_i + f_i;
+
+			for (auto &edge : molProto.nodes[n].neighbors) {  // for each edge of node
+				// skip if(selfIndex > nodeIndex) to avoid duplicating calculations
+				// since each edge exists twice: once in each direction.
+				// Also, ignore "loops" (edges which connect to themselves).
+				if (edge.selfIndex >= edge.nodeIndex)
+					continue;
+				
+				auto parameters = molProto.edgeParameters[edge.edgeIndex];
+
+				Vector s_j = mol.spins[edge.nodeIndex];
+				Vector f_j = mol.fluxes[edge.nodeIndex];
+				Vector m_j = s_j + f_j;
+
+				// calculate "Results"
+				results.Um -= parameters.Jm * (s_i * s_j);
+				results.Um -= parameters.Je1m * (s_i * f_j + f_i * s_j);
+				results.Um -= parameters.Jeem * (f_i * f_j);
+				results.Um -= parameters.bm * sq(m_i * m_j);
+				results.Um -= parameters.Dm * (edge.direction * m_i.crossProduct(m_j));
+			}
+		}
+	}
+
+	// ----- Calculate energy at leads (*mL, *mR) -----
+	for (unsigned int a : unique_mol_indices) {
+		unsigned int y = this->y(a);
+		unsigned int z = this->z(a);
+
+		if (FM_L_exists) {
+			unsigned int FML_idx = index(molPosL - 1, y, z);
+			unsigned int mol_idx = index(molPosL, y, z);
+			Vector s_i = getSpin(FML_idx);
+			Vector f_i = getFlux(FML_idx);
+			Vector m_i = s_i + f_i;
+			Vector s_j = getSpin(mol_idx);
+			Vector f_j = getFlux(mol_idx);
+			Vector m_j = s_j + f_j;
+
+			results.UmL -= parameters.JmL * (s_i * s_j);
+			results.UmL -= parameters.Je1mL * (s_i * f_j + f_i * s_j);
+			results.UmL -= parameters.JeemL * (f_i * f_j);
+			results.UmL -= parameters.bmL * sq(m_i * m_j);
+			results.UmL -= parameters.DmL * m_i.crossProduct(m_j);
+		}
+
+		if (FM_R_exists) {
+			unsigned int FMR_idx = index(molPosR + 1, y, z);
+			unsigned int mol_idx = index(molPosR, y, z);
+			Vector s_i = getSpin(mol_idx);
+			Vector f_i = getFlux(mol_idx);
+			Vector m_i = s_i + f_i;
+			Vector s_j = getSpin(FMR_idx);
+			Vector f_j = getSpin(FMR_idx);
+			Vector m_j = s_j + f_j;
+
+			results.UmR -= parameters.JmR * (s_i * s_j);
+			results.UmR -= parameters.Je1mR * (s_i * f_j + f_i * s_j);
+			results.UmR -= parameters.JeemR * (f_i * f_j);
+			results.UmR -= parameters.bmR * sq(m_i * m_j);
+			results.UmR -= parameters.DmR * m_i.crossProduct(m_j);
+		}
+	}
+		
+	// Done: copy new mol. prototype to MSD::molProto field
+	this->molProto = molProto;
+}
+
+void MSD::setMolParameters(const MolProto::NodeParameters &nodeParams, const MolProto::EdgeParameters &edgeParams) {
+	MolProto molProto = this->molProto;
+	molProto.setAllParameters(nodeParams, edgeParams);
+	setMolProto(molProto);  // update Results (i.e. energy and magnetization)
 }
 
 
@@ -1618,9 +1833,9 @@ void MSD::setFlux(unsigned int x, unsigned int y, unsigned int z, const Vector &
 void MSD::setLocalM(unsigned int a, const Vector &spin, const Vector &flux) {
 	try {
 	
-	unsigned int x = MSD::x(a);
-	unsigned int y = MSD::y(a);
-	unsigned int z = MSD::z(a);
+	unsigned int x = this->x(a);
+	unsigned int y = this->y(a);
+	unsigned int z = this->z(a);
 
 	// if position "a" is within the mol., bybass this function and call Mol::setLocalM instead. 
 	if (molPosL <= x && x <= molPosR) {
@@ -2048,6 +2263,7 @@ void MSD::reinitialize(bool reseed) {
 		setLocalM( i, initSpin, initFlux );
 	record.clear();
 	setParameters(parameters);  // TODO: do we need this?
+	setMolProto(molProto);
 	results.t = 0;
 }
 
@@ -2061,6 +2277,7 @@ void MSD::randomize(bool reseed) {
 				Vector::sphericalForm(rand(prng), 2 * PI * rand(prng), asin(2 * rand(prng) - 1)) );
 	record.clear();
 	setParameters(parameters);  // TODO: do we still need this?
+	setMolProto(molProto);
 	results.t = 0;
 }
 
