@@ -717,7 +717,7 @@ unsigned int Molecule::connectNodes(unsigned int a, unsigned int b, const EdgePa
 	// and a triplet of (size_t, size_t, double) for the the first entree in the adjacency lists
 	sSize += 7 * sizeof(double) + 2 * sizeof(size_t) + sizeof(double);
 
-	if (isLoop) {  // only duplicate edge if it's not a self connected edge
+	if (!isLoop) {  // only duplicate edge if it's not a self connected edge
 		// attach edge: b -> a
 		Edge edgeB(index, a, b, -dir);
 		nodes[b].neighbors.push_back(edgeB);
@@ -856,9 +856,11 @@ void Molecule::Instance::setLocalM(unsigned int a, const Vector &spin, const Vec
 		              + nodeParams.Je0m * ( spin * flux - s * f );
 		results.U -= deltaU;
 		results.Um -= deltaU;
+		std::cout << __LINE__ << ": deltaU= " << deltaU << '\n';
 	}
 
 	// energy from edges (i.e. bonds)
+	std::cout << __LINE__ << ": #neighbors= " << node.neighbors.size() << '\n';
 	for (const Edge &edge : node.neighbors) {
 		unsigned int a1 = edge.nodeIndex;  // index of neighbor
 		Vector neighbor_s = spins[a1];
@@ -872,6 +874,7 @@ void Molecule::Instance::setLocalM(unsigned int a, const Vector &spin, const Vec
 		              + edgeParams.Dm * (edge.direction * deltaM.crossProduct(neighbor_m));  // uses edge.direction to solve anti-communative property of crossProduct
 		results.U -= deltaU;
 		results.Um -= deltaU;
+		std::cout << __LINE__ << ": deltaU= " << deltaU << '\n';
 	}
 
 	// energy from leads
@@ -1713,7 +1716,7 @@ void MSD::setMolProto(const MolProto &molProto) {
 
 		if (FM_L_exists) {
 			unsigned int FML_idx = index(molPosL - 1, y, z);
-			unsigned int mol_idx = index(molPosL, y, z);
+			unsigned int mol_idx = index(molPosL + molProto.leftLead, y, z);
 			Vector s_i = getSpin(FML_idx);
 			Vector f_i = getFlux(FML_idx);
 			Vector m_i = s_i + f_i;
@@ -1730,12 +1733,12 @@ void MSD::setMolProto(const MolProto &molProto) {
 
 		if (FM_R_exists) {
 			unsigned int FMR_idx = index(molPosR + 1, y, z);
-			unsigned int mol_idx = index(molPosR, y, z);
+			unsigned int mol_idx = index(molPosL + molProto.rightLead, y, z);
 			Vector s_i = getSpin(mol_idx);
 			Vector f_i = getFlux(mol_idx);
 			Vector m_i = s_i + f_i;
 			Vector s_j = getSpin(FMR_idx);
-			Vector f_j = getSpin(FMR_idx);
+			Vector f_j = getFlux(FMR_idx);
 			Vector m_j = s_j + f_j;
 
 			results.UmR -= parameters.JmR * (s_i * s_j);
