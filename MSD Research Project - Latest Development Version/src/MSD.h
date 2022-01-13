@@ -1642,16 +1642,15 @@ void MSD::setMolProto(const MolProto &molProto) {
 		unsigned int y = this->y(a);
 		unsigned int z = this->z(a);
 
-		// Note: because Mol::prototype is a reference, it must refer to the global field: this->molProto
+		// Note: because Mol::prototype is a reference (acting like a pointer), it must refer to the global field: this->molProto
 		// This field will be updated to the new molProto before this function returns
 		shared_ptr<Mol> oldMol = mols[a];
-		shared_ptr<Mol> mol = shared_ptr<Mol>(new Mol(this->molProto, *this, y, z));
+		shared_ptr<Mol> mol = shared_ptr<Mol>(new Mol(this->molProto, *this, y, z, initSpin, initFlux));
 		
 		for (unsigned int n = 0; n < nodeCount; n++) {
 			Vector &s = mol->spins[n];
 			Vector &f = mol->fluxes[n];
 
-			Vector m = s + f;
 			const auto &parameters = molProto.nodes[n].parameters;
 
 			// scale spin Vector
@@ -1669,6 +1668,8 @@ void MSD::setMolProto(const MolProto &molProto) {
 			results.MSm += s;
 			results.MFm += f;
 
+			Vector m = s + f;
+			results.Um -= this->parameters.B * m;
 			results.Um -= parameters.Am * Vector(sq(m.x), sq(m.y), sq(m.z));
 			results.Um -= parameters.Je0m * (s * f);
 		}

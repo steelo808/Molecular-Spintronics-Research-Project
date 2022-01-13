@@ -90,12 +90,12 @@ void initParams(MSD::Parameters &p, Molecule::NodeParameters &n, Molecule::EdgeP
 	p.Je1R  = 0;
 	p.Je1LR = 0;
 
-	p.JeeL  = 1;
-	p.JeemL = 1;
-	e.Jeem  = 1;
-	p.JeemR = 1;
-	p.JeeR  = 1;
-	p.JeeLR = 1;
+	p.JeeL  = 0;
+	p.JeemL = 0;
+	e.Jeem  = 0;
+	p.JeemR = 0;
+	p.JeeR  = 0;
+	p.JeeLR = 0;
 
 	p.bL  = 0;
 	p.bmL = 0;
@@ -108,10 +108,10 @@ void initParams(MSD::Parameters &p, Molecule::NodeParameters &n, Molecule::EdgeP
 	n.Am = Vector::ZERO;
 	p.AR = Vector::ZERO;
 
-	p.DL  = Vector::ZERO;
-	p.DmL = Vector::ZERO;
-	e.Dm  = Vector::ZERO;
-	p.DmR = Vector::ZERO;
-	p.DR  = Vector::ZERO;
-	p.DLR = Vector::ZERO;
+	p.DL  = Vector::K;
+	p.DmL = Vector::K;
+	e.Dm  = Vector::K;
+	p.DmR = Vector::K;
+	p.DR  = Vector::K;
+	p.DLR = Vector::K;
 }
