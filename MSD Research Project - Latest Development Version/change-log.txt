@@ -127,5 +127,6 @@ Second bug fix. In MSD::setParameters()
 (10-18-2021) Fixed bug in MSD::Parameters::operator== which wasn't checking new Je parameters correctly.
 (10-26-2021) Fixed alignment issue in iterate.csv output files where the "snapshot" was misaligned if the data wasn't long enough.
 	Changed default Jm=1 instead of 0 (zero) in MSD.h.
+(1-24-2022) Added MSD::set_kT() for optimization and used it in the "heat" app.
 TODO: Fix flux != 0 on mol. that are "turned off"
-TODO: Added graph-based mol. to MSD.
+TODO: Added graph-based mol. to MSD. (including ability to create them and input them into apps)

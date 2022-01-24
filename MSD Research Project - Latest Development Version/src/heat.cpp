@@ -1,7 +1,11 @@
 
-/*
- * Christopher D'Angelo
- * 7-11-2021
+/**
+ * @file heat.cpp
+ * @author Christopher D'Angelo
+ * @brief An app for simulating discrete changes in heat over time.
+ * @date 2022-01-24
+ * 
+ * @copyright Copyright (c) 2022
  */
 
 #include <fstream>
@@ -81,6 +85,8 @@ int main(int argc, char *argv[]) {
 	unsigned long long t_eq, simCount, freq;
 	double kT_min, kT_max, kT_inc;  // if (kT_inc > 0), kT will increase. if (kT_inc > 0), it will decrease instead.
 	MSD::Parameters p;
+	Molecule::NodeParameters p_node;
+	Molecule::EdgeParameters p_edge;
 	
 	cin.exceptions( ios::badbit | ios::failbit | ios::eofbit );
 	try {
@@ -106,52 +112,52 @@ int main(int argc, char *argv[]) {
 		cout << '\n';
 		ask("> B = ", p.B);
 		cout << '\n';
-		ask("> sL = ", p.sL);
-		ask("> sR = ", p.sR);
-		ask("> sm = ", p.sm);
+		ask("> sL = ", p.SL);
+		ask("> sR = ", p.SR);
+		ask("> sm = ", p_node.Sm);
 		ask("> FL = ", p.FL);
 		ask("> FR = ", p.FR);
-		ask("> Fm = ", p.Fm);
+		ask("> Fm = ", p_node.Fm);
 		cout << '\n';
 		ask("> JL  = ", p.JL);
 		ask("> JR  = ", p.JR);
-		ask("> Jm  = ", p.Jm);
+		ask("> Jm  = ", p_edge.Jm);
 		ask("> JmL = ", p.JmL);
 		ask("> JmR = ", p.JmR);
 		ask("> JLR = ", p.JLR);
 		cout << '\n';
 		ask("> Je0L  = ", p.Je0L);
 		ask("> Je0R  = ", p.Je0R);
-		ask("> Je0m  = ", p.Je0m);
+		ask("> Je0m  = ", p_node.Je0m);
 		cout << '\n';
 		ask("> Je1L  = ", p.Je1L);
 		ask("> Je1R  = ", p.Je1R);
-		ask("> Je1m  = ", p.Je1m);
+		ask("> Je1m  = ", p_edge.Je1m);
 		ask("> Je1mL = ", p.Je1mL);
 		ask("> Je1mR = ", p.Je1mR);
 		ask("> Je1LR = ", p.Je1LR);
 		cout << '\n';
 		ask("> JeeL  = ", p.JeeL);
 		ask("> JeeR  = ", p.JeeR);
-		ask("> Jeem  = ", p.Jeem);
+		ask("> Jeem  = ", p_edge.Jeem);
 		ask("> JeemL = ", p.JeemL);
 		ask("> JeemR = ", p.JeemR);
 		ask("> JeeLR = ", p.JeeLR);
 		cout << '\n';
 		ask("> AL = ", p.AL);
 		ask("> AR = ", p.AR);
-		ask("> Am = ", p.Am);
+		ask("> Am = ", p_node.Am);
 		cout << '\n';
 		ask("> bL  = ", p.bL);
 		ask("> bR  = ", p.bR);
-		ask("> bm  = ", p.bm);
+		ask("> bm  = ", p_edge.bm);
 		ask("> bmL = ", p.bmL);
 		ask("> bmR = ", p.bmR);
 		ask("> bLR = ", p.bLR);
 		cout << '\n';
 		ask("> DL  = ", p.DL);
 		ask("> DR  = ", p.DR);
-		ask("> Dm  = ", p.Dm);
+		ask("> Dm  = ", p_edge.Dm);
 		ask("> DmL = ", p.DmL);
 		ask("> DmR = ", p.DmR);
 		ask("> DLR = ", p.DLR);
@@ -163,6 +169,8 @@ int main(int argc, char *argv[]) {
 	
 	//create MSD model
 	MSD msd(width, height, depth, molPosL, molPosR, topL, bottomL, frontR, backR);
+	msd.setParameters(p);
+	msd.setMolParameters(p_node, p_edge);
 	msd.flippingAlgorithm = arg2;
 	
 	try {
@@ -209,45 +217,45 @@ int main(int argc, char *argv[]) {
 			 << ",simCount = " << simCount
 			 << ",freq = " << freq
 			 << ",\"B = " << p.B << '"'
-			 << ",sL = " << p.sL
-			 << ",sR = " << p.sR
-			 << ",sm = " << p.sm
+			 << ",sL = " << p.SL
+			 << ",sR = " << p.SR
+			 << ",sm = " << p_node.Sm
 			 << ",FL = " << p.FL
 			 << ",FR = " << p.FR
-			 << ",Fm = " << p.Fm
+			 << ",Fm = " << p_node.Fm
 			 << ",JL = " << p.JL
 			 << ",JR = " << p.JR
-			 << ",Jm = " << p.Jm
+			 << ",Jm = " << p_edge.Jm
 			 << ",JmL = " << p.JmL
 			 << ",JmR = " << p.JmR
 			 << ",JLR = " << p.JLR
 			 << ",Je0L = " << p.Je0L
 			 << ",Je0R = " << p.Je0R
-			 << ",Je0m = " << p.Je0m
+			 << ",Je0m = " << p_node.Je0m
 			 << ",Je1L = " << p.Je1L
 			 << ",Je1R = " << p.Je1R
-			 << ",Je1m = " << p.Je1m
+			 << ",Je1m = " << p_edge.Je1m
 			 << ",Je1mL = " << p.Je1mL
 			 << ",Je1mR = " << p.Je1mR
 			 << ",Je1LR = " << p.Je1LR
 			 << ",JeeL = " << p.JeeL
 			 << ",JeeR = " << p.JeeR
-			 << ",Jeem = " << p.Jeem
+			 << ",Jeem = " << p_edge.Jeem
 			 << ",JeemL = " << p.JeemL
 			 << ",JeemR = " << p.JeemR
 			 << ",JeeLR = " << p.JeeLR
 			 << ",\"AL = " << p.AL << '"'
 			 << ",\"AR = " << p.AR << '"'
-			 << ",\"Am = " << p.Am << '"'
+			 << ",\"Am = " << p_node.Am << '"'
 			 << ",bL = " << p.bL
 			 << ",bR = " << p.bR
-			 << ",bm = " << p.bm
+			 << ",bm = " << p_edge.bm
 			 << ",bmL = " << p.bmL
 			 << ",bmR = " << p.bmR
 			 << ",bLR = " << p.bLR
 			 << ",\"DL = " << p.DL << '"'
 			 << ",\"DR = " << p.DR << '"'
-			 << ",\"Dm = " << p.Dm << '"'
+			 << ",\"Dm = " << p_edge.Dm << '"'
 			 << ",\"DmL = " << p.DmL << '"'
 			 << ",\"DmR = " << p.DmR << '"'
 			 << ",\"DLR = " << p.DLR << '"'
@@ -265,7 +273,7 @@ int main(int argc, char *argv[]) {
 			msd.record.clear();
 			
 			cout << "kT = " << p.kT << '\n';
-			msd.setParameters(p);
+			msd.set_kT(p.kT);
 			msd.metropolis(t_eq);
 			msd.metropolis(simCount, freq);
 			

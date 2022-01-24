@@ -1,6 +1,6 @@
 /*
  * Christopher D'Angelo
- * 1-13-2021
+ * 1-13-2022
  */
 
 #include <cstdlib>
@@ -15,11 +15,13 @@
 #include <string>
 #include "../MersenneTwister.h"
 #include "../MSD.h"
+#include "test-util.h"
 
 using std::cout;
 using namespace std;
 using namespace std::chrono;
 using namespace udc;
+using namespace udc::test;
 
 template <size_t n> void expand(set<string> &s, const string &key, const string (&arr)[n]) {
 	if (s.find(key) != s.end())
@@ -28,58 +30,6 @@ template <size_t n> void expand(set<string> &s, const string &key, const string 
 
 bool contains(const set<string> &s, const string &ele) {
 	return s.find(ele) != s.end();
-}
-
-// checks if x and y are different (within margin of error, e)
-// returns the difference
-template <typename T> double diff(T x, T y, double e, string prefix) {
-	double d = abs(x - y);
-	bool isDiff = d > e;
-	if (isDiff)
-		cout << prefix << d << " = " << x << " - " << y << '\n';
-	return d;
-}
-
-// checks if x and y are different (within margin of error, e)
-// returns the difference
-double diff(Vector x, Vector y, double e, string prefix) {
-	double d = (x - y).norm();
-	bool isDiff = d > e;
-	if (isDiff)
-		cout << prefix << d << " = " << x << " - " << y << '\n';
-	return d;
-}
-
-// r1, r2: to Results structs to compare
-// e: allowable margin of error
-// return the max difference
-double cmpResults(const MSD::Results &r1, const MSD::Results &r2, double e) {
-	double d = 0;
-
-	d = max(d, diff( r1.M,   r2.M,   e, "M:   " ));
-	d = max(d, diff( r1.ML,  r2.ML,  e, "ML:  " ));
-	d = max(d, diff( r1.MR,  r2.MR,  e, "MR:  " ));
-	d = max(d, diff( r1.Mm,  r2.Mm,  e, "Mm:  " ));
-	
-	d = max(d, diff( r1.MS,  r2.MS,  e, "MS:  " ));
-	d = max(d, diff( r1.MSL, r2.MSL, e, "MSL: " ));
-	d = max(d, diff( r1.MSR, r2.MSR, e, "MSR: " ));
-	d = max(d, diff( r1.MSm, r2.MSm, e, "MSm: " ));
-
-	d = max(d, diff( r1.MF,  r2.MF,  e, "MF:  " ));
-	d = max(d, diff( r1.MFL, r2.MFL, e, "MFL: " ));
-	d = max(d, diff( r1.MFR, r2.MFR, e, "MFR: " ));
-	d = max(d, diff( r1.MFm, r2.MFm, e, "MFm: " ));
-
-	d = max(d, diff( r1.U,   r2.U,   e, "U:   " ));
-	d = max(d, diff( r1.UL,  r2.UL,  e, "UL:  " ));
-	d = max(d, diff( r1.UR,  r2.UR,  e, "UR:  " ));
-	d = max(d, diff( r1.Um,  r2.Um,  e, "Um:  " ));
-	d = max(d, diff( r1.UmL, r2.UmL, e, "UmL: " ));
-	d = max(d, diff( r1.UmR, r2.UmR, e, "UmR: " ));
-	d = max(d, diff( r1.ULR, r2.ULR, e, "ULR: " ));
-
-	return d;
 }
 
 ostream& operator <<(ostream &out, const MSD &msd) {

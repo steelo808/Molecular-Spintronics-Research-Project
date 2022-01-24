@@ -1,7 +1,7 @@
 /*
  * MSD.h
  *
- *  Last Edited: October 22, 2021
+ *  Last Edited: January 13, 2022
  *       Author: Christopher D'Angelo
  */
 
@@ -416,6 +416,7 @@ class MSD {
 	void setParameters(const Parameters &);
 	Results getResults() const;
 	
+	void set_kT(double kT);
 	void setB(const Vector &B);
 
 	MolProto getMolProto() const;
@@ -856,11 +857,9 @@ void Molecule::Instance::setLocalM(unsigned int a, const Vector &spin, const Vec
 		              + nodeParams.Je0m * ( spin * flux - s * f );
 		results.U -= deltaU;
 		results.Um -= deltaU;
-		std::cout << __LINE__ << ": deltaU= " << deltaU << '\n';
 	}
 
 	// energy from edges (i.e. bonds)
-	std::cout << __LINE__ << ": #neighbors= " << node.neighbors.size() << '\n';
 	for (const Edge &edge : node.neighbors) {
 		unsigned int a1 = edge.nodeIndex;  // index of neighbor
 		Vector neighbor_s = spins[a1];
@@ -874,7 +873,6 @@ void Molecule::Instance::setLocalM(unsigned int a, const Vector &spin, const Vec
 		              + edgeParams.Dm * (edge.direction * deltaM.crossProduct(neighbor_m));  // uses edge.direction to solve anti-communative property of crossProduct
 		results.U -= deltaU;
 		results.Um -= deltaU;
-		std::cout << __LINE__ << ": deltaU= " << deltaU << '\n';
 	}
 
 	// energy from leads
@@ -1607,6 +1605,11 @@ MSD::Results MSD::getResults() const {
 }
 
 
+void MSD::set_kT(double kT) {
+	// kT doesn't effect energy (U)
+	parameters.kT = kT;
+}
+
 void MSD::setB(const Vector &B) {
 	// optimized energy recalculation when only changing magnetic field
 	Vector deltaB = B - parameters.B;
@@ -2252,8 +2255,8 @@ void MSD::reinitialize(bool reseed) {
 	for( auto i = begin(); i != end(); i++ )
 		setLocalM( i, initSpin, initFlux );
 	record.clear();
-	setParameters(parameters);  // TODO: do we need this?
-	setMolProto(molProto);
+	setParameters(parameters);  // TODO: do we need this? Yes, but I think only because we
+	setMolProto(molProto);  // need to rescale Spin and Flux vectors to match S and F params
 	results.t = 0;
 }
 
@@ -2262,11 +2265,11 @@ void MSD::randomize(bool reseed) {
 		seed = genSeed();
 	prng.seed(seed);
 	for( auto i = begin(); i != end(); i++ )
-		setLocalM( i,
+		setLocalM( i,  // TODO: this calculation isn't uniform. It favors F close to 0
 				Vector::sphericalForm(1, 2 * PI * rand(prng), asin(2 * rand(prng) - 1)),
 				Vector::sphericalForm(rand(prng), 2 * PI * rand(prng), asin(2 * rand(prng) - 1)) );
 	record.clear();
-	setParameters(parameters);  // TODO: do we still need this?
+	setParameters(parameters);  // TODO: do we still need this? Yes. (See comment in MSD::reinitialize())
 	setMolProto(molProto);
 	results.t = 0;
 }
@@ -2302,10 +2305,8 @@ void MSD::metropolis(unsigned long long N) {
 				Vector::sphericalForm(F * random(), 2 * PI * random(), asin(2 * random() - 1)) );
 		
 		Results r2 = getResults(); //get the energy of the system (for the new state)
-		double w = random(); // DEBUG
 		double dU = r2.U - r.U;  // delta-U (change in energy)
-		std::printf("%12llu: w= %23.10f, -dU= %23.10f, p= %23.10f\n", results.t + i, w, -dU, pow( E, (-dU) / parameters.kT ));
-		if( dU <= 0 || w < pow( E, -dU / parameters.kT ) ) {
+		if( dU <= 0 || random() < pow( E, -dU / parameters.kT ) ) {
 			//either the new system requires less energy or external energy (kT) is disrupting it
 			r = r2; //in either case we keep the new system
 		} else {

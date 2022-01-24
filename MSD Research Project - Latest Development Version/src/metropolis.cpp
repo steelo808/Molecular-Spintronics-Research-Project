@@ -1,7 +1,10 @@
-
-/*
- * Christopher D'Angelo
- * 7-11-2021
+/**
+ * @file metropolis.cpp
+ * @author Christopher D'Angelo
+ * @brief App for simulating numerous MSD's in paralell, each with different independent parameters.
+ * @date 2022-01-24
+ * 
+ * @copyright Copyright (c) 2022
  */
 
 #include <cstdlib>
@@ -83,6 +86,12 @@ struct Info {
 	MSD::FlippingAlgorithm flippingAlgorithm;
 	ARG4 initMode;
 	MSD::Parameters parameters;
+
+	// TODO: replace these three lines with MSD::MolProto when ready
+	Molecule::NodeParameters nodeParameters;
+	Molecule::EdgeParameters edgeParameters;
+	MSD::MolProtoFactory molType;
+
 	MSD::Results results;
 	double c, cL, cR, cm, cmL, cmR, cLR;
 	double x, xL, xR, xm;
@@ -90,9 +99,12 @@ struct Info {
 };
 
 Info algorithm(Info info) {
-	MSD msd( info.width, info.height, info.depth, info.molPosL, info.molPosR, info.topL, info.bottomL, info.frontR, info.backR );
+	MSD msd( info.width, info.height, info.depth,
+			info.molType, info.molPosL, info.molPosR,
+			info.topL, info.bottomL, info.frontR, info.backR );
 	
-	msd.setParameters( info.parameters );
+	msd.setParameters(info.parameters);
+	msd.setMolParameters(info.nodeParameters, info.edgeParameters);
 	msd.flippingAlgorithm = info.flippingAlgorithm;
 	
 	for (const Spin &s : info.spins) {  // custom spins
@@ -182,13 +194,16 @@ int main(int argc, char *argv[]) {
 		cout << "Need an initialization mode.\n";
 		return -7;
 	} else if( argc <= 5 ) {
+		cout << "Need a molecule type.\n";
+		return -8;
+	} else if( argc <= 6 ) {
 		cout << "Using a default number of threads: " << threadCount << '\n';
 	} else {
 		stringstream ss;
-		ss << argv[5];
+		ss << argv[6];
 		ss >> threadCount;
 		if( ss.fail() || threadCount <= 0 ) {
-			cout << "Invalid number of threads: " << argv[5] << '\n';
+			cout << "Invalid number of threads: " << argv[6] << '\n';
 			return -4;
 		}
 	}
@@ -213,6 +228,17 @@ int main(int argc, char *argv[]) {
 	else {
 		cout << "Invalid initialization mode: " << argv[4] << '\n';
 		return -5;
+	}
+
+	MSD::MolProtoFactory molType = MSD::LINEAR_MOL;
+	s = string(argv[5]);
+	if (s == string("LINEAR")) {
+		// do nothing
+	} else if (s == string("CIRCULAR")) {
+		molType = MSD::CIRCULAR_MOL;
+	} else {
+		// TODO: allow for custom MolProto or MolProtoFactory
+		cout << "Unrecognized MOL_TYPE! (Note: custom mol. are not supported yet. Only LINEAR or CIRCULAR.) Defaulting to 'LINEAR'.\n";
 	}
 
 	ofstream fout;
@@ -506,36 +532,36 @@ int main(int argc, char *argv[]) {
 			recordVar( doc, *data, "param", "B_x", info.parameters.B.x );
 			recordVar( doc, *data, "param", "B_y", info.parameters.B.y );
 			recordVar( doc, *data, "param", "B_z", info.parameters.B.z );
-			recordVar( doc, *data, "param", "sL", info.parameters.sL );
-			recordVar( doc, *data, "param", "sR", info.parameters.sR );
-			recordVar( doc, *data, "param", "sm", info.parameters.sm );
+			recordVar( doc, *data, "param", "sL", info.parameters.SL );
+			recordVar( doc, *data, "param", "sR", info.parameters.SR );
+			recordVar( doc, *data, "param", "sm", info.nodeParameters.Sm );
 			recordVar( doc, *data, "param", "FL", info.parameters.FL );
 			recordVar( doc, *data, "param", "FR", info.parameters.FR );
-			recordVar( doc, *data, "param", "Fm", info.parameters.Fm );
+			recordVar( doc, *data, "param", "Fm", info.nodeParameters.Fm );
 			recordVar( doc, *data, "param", "JL", info.parameters.JL );
 			recordVar( doc, *data, "param", "JR", info.parameters.JR );
-			recordVar( doc, *data, "param", "Jm", info.parameters.Jm );
+			recordVar( doc, *data, "param", "Jm", info.edgeParameters.Jm );
 			recordVar( doc, *data, "param", "JmL", info.parameters.JmL );
 			recordVar( doc, *data, "param", "JmR", info.parameters.JmR );
 			recordVar( doc, *data, "param", "JLR", info.parameters.JLR );
 			recordVar( doc, *data, "param", "Je0L", info.parameters.Je0L );
 			recordVar( doc, *data, "param", "Je0R", info.parameters.Je0R );
-			recordVar( doc, *data, "param", "Je0m", info.parameters.Je0m );
+			recordVar( doc, *data, "param", "Je0m", info.nodeParameters.Je0m );
 			recordVar( doc, *data, "param", "Je1L", info.parameters.Je1L );
 			recordVar( doc, *data, "param", "Je1R", info.parameters.Je1R );
-			recordVar( doc, *data, "param", "Je1m", info.parameters.Je1m );
+			recordVar( doc, *data, "param", "Je1m", info.edgeParameters.Je1m );
 			recordVar( doc, *data, "param", "Je1mL", info.parameters.Je1mL );
 			recordVar( doc, *data, "param", "Je1mR", info.parameters.Je1mR );
 			recordVar( doc, *data, "param", "Je1LR", info.parameters.Je1LR );
 			recordVar( doc, *data, "param", "JeeL", info.parameters.JeeL );
 			recordVar( doc, *data, "param", "JeeR", info.parameters.JeeR );
-			recordVar( doc, *data, "param", "Jeem", info.parameters.Jeem );
+			recordVar( doc, *data, "param", "Jeem", info.edgeParameters.Jeem );
 			recordVar( doc, *data, "param", "JeemL", info.parameters.JeemL );
 			recordVar( doc, *data, "param", "JeemR", info.parameters.JeemR );
 			recordVar( doc, *data, "param", "JeeLR", info.parameters.JeeLR );
 			recordVar( doc, *data, "param", "bL", info.parameters.bL );
 			recordVar( doc, *data, "param", "bR", info.parameters.bR );
-			recordVar( doc, *data, "param", "bm", info.parameters.bm );
+			recordVar( doc, *data, "param", "bm", info.edgeParameters.bm );
 			recordVar( doc, *data, "param", "bmL", info.parameters.bmL );
 			recordVar( doc, *data, "param", "bmR", info.parameters.bmR );
 			recordVar( doc, *data, "param", "bLR", info.parameters.bLR );
@@ -545,18 +571,18 @@ int main(int argc, char *argv[]) {
 			recordVar( doc, *data, "param", "AR_x", info.parameters.AR.x );
 			recordVar( doc, *data, "param", "AR_y", info.parameters.AR.y );
 			recordVar( doc, *data, "param", "AR_z", info.parameters.AR.z );
-			recordVar( doc, *data, "param", "Am_x", info.parameters.Am.x );
-			recordVar( doc, *data, "param", "Am_y", info.parameters.Am.y );
-			recordVar( doc, *data, "param", "Am_z", info.parameters.Am.z );
+			recordVar( doc, *data, "param", "Am_x", info.nodeParameters.Am.x );
+			recordVar( doc, *data, "param", "Am_y", info.nodeParameters.Am.y );
+			recordVar( doc, *data, "param", "Am_z", info.nodeParameters.Am.z );
 			recordVar( doc, *data, "param", "DL_x", info.parameters.DL.x );
 			recordVar( doc, *data, "param", "DL_y", info.parameters.DL.y );
 			recordVar( doc, *data, "param", "DL_z", info.parameters.DL.z );
 			recordVar( doc, *data, "param", "DR_x", info.parameters.DR.x );
 			recordVar( doc, *data, "param", "DR_y", info.parameters.DR.y );
 			recordVar( doc, *data, "param", "DR_z", info.parameters.DR.z );
-			recordVar( doc, *data, "param", "Dm_x", info.parameters.Dm.x );
-			recordVar( doc, *data, "param", "Dm_y", info.parameters.Dm.y );
-			recordVar( doc, *data, "param", "Dm_z", info.parameters.Dm.z );
+			recordVar( doc, *data, "param", "Dm_x", info.edgeParameters.Dm.x );
+			recordVar( doc, *data, "param", "Dm_y", info.edgeParameters.Dm.y );
+			recordVar( doc, *data, "param", "Dm_z", info.edgeParameters.Dm.z );
 			recordVar( doc, *data, "param", "DmL_x", info.parameters.DmL.x );
 			recordVar( doc, *data, "param", "DmL_y", info.parameters.DmL.y );
 			recordVar( doc, *data, "param", "DmL_z", info.parameters.DmL.z );
@@ -689,41 +715,41 @@ int main(int argc, char *argv[]) {
 				fields["B_y"] = &preInfo.parameters.B.y;
 				fields["B_z"] = &preInfo.parameters.B.z;
 				
-				fields["sL"] = &preInfo.parameters.sL;
-				fields["sR"] = &preInfo.parameters.sR;
-				fields["sm"] = &preInfo.parameters.sm ;
+				fields["sL"] = &preInfo.parameters.SL;
+				fields["sR"] = &preInfo.parameters.SR;
+				fields["sm"] = &preInfo.nodeParameters.Sm ;
 				fields["FL"] = &preInfo.parameters.FL;
 				fields["FR"] = &preInfo.parameters.FR;
-				fields["Fm"] = &preInfo.parameters.Fm;
+				fields["Fm"] = &preInfo.nodeParameters.Fm;
 				
 				fields["JL"] = &preInfo.parameters.JL;
 				fields["JR"] = &preInfo.parameters.JR;
-				fields["Jm"] = &preInfo.parameters.Jm;
+				fields["Jm"] = &preInfo.edgeParameters.Jm;
 				fields["JmL"] = &preInfo.parameters.JmL;
 				fields["JmR"] = &preInfo.parameters.JmR;
 				fields["JLR"] = &preInfo.parameters.JLR;
 
 				fields["Je0L"] = &preInfo.parameters.Je0L;
 				fields["Je0R"] = &preInfo.parameters.Je0R;
-				fields["Je0m"] = &preInfo.parameters.Je0m;
+				fields["Je0m"] = &preInfo.nodeParameters.Je0m;
 
 				fields["Je1L"] = &preInfo.parameters.Je1L;
 				fields["Je1R"] = &preInfo.parameters.Je1R;
-				fields["Je1m"] = &preInfo.parameters.Je1m ;
+				fields["Je1m"] = &preInfo.edgeParameters.Je1m ;
 				fields["Je1mL"] = &preInfo.parameters.Je1mL;
 				fields["Je1mR"] = &preInfo.parameters.Je1mR;
 				fields["Je1LR"] = &preInfo.parameters.Je1LR;
 
 				fields["JeeL"] = &preInfo.parameters.JeeL;
 				fields["JeeR"] = &preInfo.parameters.JeeR;
-				fields["Jeem"] = &preInfo.parameters.Jeem;
+				fields["Jeem"] = &preInfo.edgeParameters.Jeem;
 				fields["JeemL"] = &preInfo.parameters.JeemL;
 				fields["JeemR"] = &preInfo.parameters.JeemR;
 				fields["JeeLR"] = &preInfo.parameters.JeeLR;
 				
 				fields["bL"] = &preInfo.parameters.bL;
 				fields["bR"] = &preInfo.parameters.bR;
-				fields["bm"] = &preInfo.parameters.bm;
+				fields["bm"] = &preInfo.edgeParameters.bm;
 				fields["bmL"] = &preInfo.parameters.bmL;
 				fields["bmR"] = &preInfo.parameters.bmR;
 				fields["bLR"] = &preInfo.parameters.bLR;
@@ -736,9 +762,9 @@ int main(int argc, char *argv[]) {
 				fields["AR_y"] = &preInfo.parameters.AR.y;
 				fields["AR_z"] = &preInfo.parameters.AR.z;
 				
-				fields["Am_x"] = &preInfo.parameters.Am.x;
-				fields["Am_y"] = &preInfo.parameters.Am.y;
-				fields["Am_z"] = &preInfo.parameters.Am.z;
+				fields["Am_x"] = &preInfo.nodeParameters.Am.x;
+				fields["Am_y"] = &preInfo.nodeParameters.Am.y;
+				fields["Am_z"] = &preInfo.nodeParameters.Am.z;
 
 				fields["DL_x"] = &preInfo.parameters.DL.x;
 				fields["DL_y"] = &preInfo.parameters.DL.y;
@@ -748,9 +774,9 @@ int main(int argc, char *argv[]) {
 				fields["DR_y"] = &preInfo.parameters.DR.y;
 				fields["DR_z"] = &preInfo.parameters.DR.z;
 
-				fields["Dm_x"] = &preInfo.parameters.Dm.x;
-				fields["Dm_y"] = &preInfo.parameters.Dm.y;
-				fields["Dm_z"] = &preInfo.parameters.Dm.z;
+				fields["Dm_x"] = &preInfo.edgeParameters.Dm.x;
+				fields["Dm_y"] = &preInfo.edgeParameters.Dm.y;
+				fields["Dm_z"] = &preInfo.edgeParameters.Dm.z;
 
 				fields["DmL_x"] = &preInfo.parameters.DmL.x;
 				fields["DmL_y"] = &preInfo.parameters.DmL.y;
@@ -770,6 +796,7 @@ int main(int argc, char *argv[]) {
 			// set constant Info fields
 			preInfo.flippingAlgorithm = flippingAlgorithm;
 			preInfo.initMode = initMode;
+			preInfo.molType = molType;
 
 			preInfo.width = p.at("width")[0];
 			preInfo.height = p.at("height")[0];
