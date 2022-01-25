@@ -1,8 +1,12 @@
-/*
- * MSD.h
- *
- *  Last Edited: January 13, 2022
- *       Author: Christopher D'Angelo
+/**
+ * @file MSD.h
+ * @author Christopher D'Angelo
+ * @brief The core logic which all the apps use to run MSD simulations.
+ *        Includes definitions and calculations.
+ * @version 6.0
+ * @date 2022-01-24
+ * 
+ * @copyright Copyright (c) 2022
  */
 
 #ifndef UDC_MSD
