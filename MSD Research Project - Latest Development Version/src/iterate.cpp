@@ -1,7 +1,11 @@
 
-/*
- * Christopher D'Angelo
- * 10-22-2021
+/**
+ * @file iterate.cpp
+ * @author Christopher D'Angelo
+ * @brief App that runs a single MSD simulation and reports results over time.
+ * @date 2022-01-24
+ * 
+ * @copyright Copyright (c) 2022
  */
 
 #include <fstream>
@@ -113,13 +117,12 @@ int main(int argc, char *argv[]) {
 	MSD::MolProtoFactory molType = MSD::LINEAR_MOL;
 	if (argc > MOL_TYPE) {
 		string s(argv[MOL_TYPE]);
-		if (s == string("LINEAR"))
+		if (s == "LINEAR")
 			molType = MSD::LINEAR_MOL;
-		else if (s == string("CIRCULAR"))
+		else if (s == "CIRCULAR")
 			molType = MSD::CIRCULAR_MOL;
-		else {
+		else
 			cout << "Unrecognized MOL_TYPE! (Note: custom mol. are not supported yet. Only LINEAR or CIRCULAR.) Defaulting to 'LINEAR'.\n";
-		}
 	} else
 		cout << "Defaulting to 'MOL_TYPE=LINEAR'.\n";
 

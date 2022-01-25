@@ -31,9 +31,9 @@ B_x = 0    # External magnetic field
 B_y = 0
 B_z = 0
 
-sL = 1    # Magnitude of spin vectors
-sR = 1
-sm = 1
+SL = 1    # Magnitude of spin vectors
+SR = 1
+Sm = 1
 FL = 0.5  # Magnitude of spin fluctuation ("flux") vectors
 FR = 0.5
 Fm = 0.5

@@ -1,13 +1,24 @@
+@rem /** ---- Docs ----
+@rem  * model=CONTINUOUS_SPIN_MODEL|UP_DOWN_MODEL
+@rem  * mol_type=LINEAR|CIRCULAR
+@rem  * randomize=0|1
+@rem  * seed=unique|<uint64>
+@rem  */
+
+
+@rem // ---- Edit Here ---- 
 @set model=CONTINUOUS_SPIN_MODEL
 @set mol_type=LINEAR
-@set randomize=0
+@set randomize=unique
 @set seed=0
+
 @set input_file=parameters-iterate.txt
-
-
 @set out_head=iteration
 
 
+
+
+@rem ------ Don't Edit Below This ------
 @rem -- Try to change to the project folder on the L: drive, stored in %projDir%
 @rem -- %projDir% holds the full path (including the drive letter) to the desired project folder
 @rem -- %trgDir% holds the name (path suffix) of the working directory, in case we are in a local copy of the folder

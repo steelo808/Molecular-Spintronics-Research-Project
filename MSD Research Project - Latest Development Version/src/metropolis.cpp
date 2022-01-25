@@ -232,9 +232,9 @@ int main(int argc, char *argv[]) {
 
 	MSD::MolProtoFactory molType = MSD::LINEAR_MOL;
 	s = string(argv[5]);
-	if (s == string("LINEAR")) {
-		// do nothing
-	} else if (s == string("CIRCULAR")) {
+	if (s == "LINEAR") {
+		/* do nothing */
+	} else if (s == "CIRCULAR") {
 		molType = MSD::CIRCULAR_MOL;
 	} else {
 		// TODO: allow for custom MolProto or MolProtoFactory
@@ -450,7 +450,7 @@ int main(int argc, char *argv[]) {
 			recordVar( doc, *global, "param", "freq", p.at("freq")[0] );
 			const unsigned int SIZE = 64;
 			string inds[SIZE] = { "kT", "B_x", "B_y", "B_z",  // + 4 (sum: 4)
-			                      "sL", "sR", "sm", "FL", "FR", "Fm",  // + 6 (sum: 10)
+			                      "SL", "SR", "Sm", "FL", "FR", "Fm",  // + 6 (sum: 10)
 			                      "JL", "JmL", "Jm", "JmR", "JR", "JLR",  // + 6 (sum: 16)
 								  "Je0L", "Je0m", "Je0R",  // + 3 (sum: 19)
 								  "Je1L", "Je1mL", "Je1m", "Je1mR", "Je1R", "Je1LR",  // + 6 (sum: 25)
@@ -532,9 +532,9 @@ int main(int argc, char *argv[]) {
 			recordVar( doc, *data, "param", "B_x", info.parameters.B.x );
 			recordVar( doc, *data, "param", "B_y", info.parameters.B.y );
 			recordVar( doc, *data, "param", "B_z", info.parameters.B.z );
-			recordVar( doc, *data, "param", "sL", info.parameters.SL );
-			recordVar( doc, *data, "param", "sR", info.parameters.SR );
-			recordVar( doc, *data, "param", "sm", info.nodeParameters.Sm );
+			recordVar( doc, *data, "param", "SL", info.parameters.SL );
+			recordVar( doc, *data, "param", "SR", info.parameters.SR );
+			recordVar( doc, *data, "param", "Sm", info.nodeParameters.Sm );
 			recordVar( doc, *data, "param", "FL", info.parameters.FL );
 			recordVar( doc, *data, "param", "FR", info.parameters.FR );
 			recordVar( doc, *data, "param", "Fm", info.nodeParameters.Fm );
@@ -715,9 +715,9 @@ int main(int argc, char *argv[]) {
 				fields["B_y"] = &preInfo.parameters.B.y;
 				fields["B_z"] = &preInfo.parameters.B.z;
 				
-				fields["sL"] = &preInfo.parameters.SL;
-				fields["sR"] = &preInfo.parameters.SR;
-				fields["sm"] = &preInfo.nodeParameters.Sm ;
+				fields["SL"] = &preInfo.parameters.SL;
+				fields["SR"] = &preInfo.parameters.SR;
+				fields["Sm"] = &preInfo.nodeParameters.Sm ;
 				fields["FL"] = &preInfo.parameters.FL;
 				fields["FR"] = &preInfo.parameters.FR;
 				fields["Fm"] = &preInfo.nodeParameters.Fm;

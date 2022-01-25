@@ -73,10 +73,22 @@ int main(int argc, char *argv[]) {
 		else if( s == string("noop") )
 			arg3 = NOOP;
 		else
-			cout << "Unrecognized second argument! Defaulting to 'noop'.\n";
+			cout << "Unrecognized thrid argument! Defaulting to 'noop'.\n";
 	} else
 		cout << "Defaulting to 'noop'.\n";
 	
+	MSD::MolProtoFactory molType = MSD::LINEAR_MOL;
+	if (argc > 4) {
+		string s(argv[4]);
+		if (s == "LINEAR")
+			molType = MSD::LINEAR_MOL;
+		else if (s == "CIRCULAR")
+			molType = MSD::CIRCULAR_MOL;
+		else
+			cout << "Unrecognized MOL_TYPE! (Note: custom mol. are not supported yet. Only LINEAR or CIRCULAR.) Defaulting to 'LINEAR'.\n";
+	} else
+		cout << "Defaulting to 'LINEAR'.\n";
+
 	ofstream file(argv[1]);
 	file.exceptions( ios::badbit | ios::failbit );
 	
@@ -112,9 +124,9 @@ int main(int argc, char *argv[]) {
 		cout << '\n';
 		ask("> B = ", p.B);
 		cout << '\n';
-		ask("> sL = ", p.SL);
-		ask("> sR = ", p.SR);
-		ask("> sm = ", p_node.Sm);
+		ask("> SL = ", p.SL);
+		ask("> SR = ", p.SR);
+		ask("> Sm = ", p_node.Sm);
 		ask("> FL = ", p.FL);
 		ask("> FR = ", p.FR);
 		ask("> Fm = ", p_node.Fm);
@@ -168,7 +180,7 @@ int main(int argc, char *argv[]) {
 	}
 	
 	//create MSD model
-	MSD msd(width, height, depth, molPosL, molPosR, topL, bottomL, frontR, backR);
+	MSD msd(width, height, depth, molType, molPosL, molPosR, topL, bottomL, frontR, backR);
 	msd.setParameters(p);
 	msd.setMolParameters(p_node, p_edge);
 	msd.flippingAlgorithm = arg2;
@@ -217,9 +229,9 @@ int main(int argc, char *argv[]) {
 			 << ",simCount = " << simCount
 			 << ",freq = " << freq
 			 << ",\"B = " << p.B << '"'
-			 << ",sL = " << p.SL
-			 << ",sR = " << p.SR
-			 << ",sm = " << p_node.Sm
+			 << ",SL = " << p.SL
+			 << ",SR = " << p.SR
+			 << ",Sm = " << p_node.Sm
 			 << ",FL = " << p.FL
 			 << ",FR = " << p.FR
 			 << ",Fm = " << p_node.Fm
@@ -259,6 +271,8 @@ int main(int argc, char *argv[]) {
 			 << ",\"DmL = " << p.DmL << '"'
 			 << ",\"DmR = " << p.DmR << '"'
 			 << ",\"DLR = " << p.DLR << '"'
+			 << ",molType = " << argv[4]
+			 << ",reset = " << argv[3]
 			 << ",seed = " << msd.getSeed()
 			 << ",,msd_version = " << UDC_MSD_VERSION
 			 << '\n';

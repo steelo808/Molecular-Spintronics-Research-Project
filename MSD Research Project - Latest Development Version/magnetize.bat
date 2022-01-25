@@ -1,9 +1,21 @@
-@set arg2=CONTINUOUS_SPIN_MODEL
-@set arg3=noop
+@rem /** ---- Docs ----
+@rem  * model=CONTINUOUS_SPIN_MODEL|UP_DOWN_MODEL
+@rem  * reset=noop|reinitialize|randomize
+@rem  * mol_type=LINEAR|CIRCULAR
+@rem  */
+
+
+@rem // ---- Edit Here ----
+@set model=CONTINUOUS_SPIN_MODEL
+@set reset=noop
+@set mol_type=LINEAR
 
 @set out_head=magnetization
 
 
+
+
+@rem ------ Don't Edit Below This ------
 @rem -- Try to change to the project folder on the L: drive, stored in %projDir%
 @rem -- %projDir% holds the full path (including the drive letter) to the desired project folder
 @rem -- %trgDir% holds the name (path suffix) of the working directory, in case we are in a local copy of the folder
@@ -36,7 +48,7 @@
 @date /t
 @time /t
 @echo ----------------------------------------
-bin\%prgm% %out_file% %arg2% %arg3%
+bin\%prgm% %out_file% %model% %reset% %mol_type%
 @echo ----------------------------------------
 @date /t
 @time /t

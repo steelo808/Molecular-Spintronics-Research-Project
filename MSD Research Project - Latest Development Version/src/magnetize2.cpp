@@ -58,6 +58,18 @@ int main(int argc, char *argv[]) {
 	} else
 		cout << "Defaulting to 'CONTINUOUS_SPIN_MODEL'.\n";
 	
+	MSD::MolProtoFactory molType = MSD::LINEAR_MOL;
+	if (argc > 5) {
+		string s(argv[5]);
+		if (s == "LINEAR")
+			molType = MSD::LINEAR_MOL;
+		else if (s == "CIRCULAR")
+			molType = MSD::CIRCULAR_MOL;
+		else
+			cout << "Unrecognized MOL_TYPE! (Note: custom mol. are not supported yet. Only LINEAR or CIRCULAR.) Defaulting to 'LINEAR'.\n";
+	} else
+		cout << "Defaulting to 'LINEAR'.\n";
+	
 	ofstream file(argv[1]);
 	file.exceptions( ios::badbit | ios::failbit );
 	
@@ -94,9 +106,9 @@ int main(int argc, char *argv[]) {
 		ask("> B_theta = ", B_theta);
 		ask("> B_phi = ", B_phi);
 		cout << '\n';
-		ask("> sL = ", p.SL);
-		ask("> sR = ", p.SR);
-		ask("> sm = ", p_node.Sm);
+		ask("> SL = ", p.SL);
+		ask("> SR = ", p.SR);
+		ask("> Sm = ", p_node.Sm);
 		ask("> FL = ", p.FL);
 		ask("> FR = ", p.FR);
 		ask("> Fm = ", p_node.Fm);
@@ -150,7 +162,7 @@ int main(int argc, char *argv[]) {
 	}
 	
 	//create MSD model
-	MSD msd(width, height, depth, molPosL, molPosR, topL, bottomL, frontR, backR);
+	MSD msd(width, height, depth, molType, molPosL, molPosR, topL, bottomL, frontR, backR);
 	msd.flippingAlgorithm = arg2;
 	msd.setParameters(p);
 	msd.setMolParameters(p_node, p_edge);
@@ -188,9 +200,9 @@ int main(int argc, char *argv[]) {
 			 << ",B_rate = " << B_rate
 			 << ",B_theta = " << B_theta
 			 << ",B_phi = " << B_phi
-			 << ",sL = " << p.SL
-			 << ",sR = " << p.SR
-			 << ",sm = " << p_node.Sm
+			 << ",SL = " << p.SL
+			 << ",SR = " << p.SR
+			 << ",Sm = " << p_node.Sm
 			 << ",FL = " << p.FL
 			 << ",FR = " << p.FR
 			 << ",Fm = " << p_node.Fm
@@ -230,6 +242,9 @@ int main(int argc, char *argv[]) {
 			 << ",\"DmL = " << p.DmL << '"'
 			 << ",\"DmR = " << p.DmR << '"'
 			 << ",\"DLR = " << p.DLR << '"'
+			 << ",molType = " << argv[5]
+			 << ",randomize = " << argv[3]
+			 << ",startWithMaxB = " << argv[4]
 			 << ",seed = " << msd.getSeed()
 			 << ",,msd_version = " << UDC_MSD_VERSION
 			 << '\n';
