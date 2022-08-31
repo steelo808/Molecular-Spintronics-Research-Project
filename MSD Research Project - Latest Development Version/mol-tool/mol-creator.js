@@ -1,13 +1,18 @@
-const R = 7.5;  // radius of each node in SVG units 
+const R = 10;  // radius of each node in SVG units
 
 class Node {
-	constructor(svg, x, y) {
+	constructor(svg, x, y, params) {
 		this.svgCircle = svg.myCreate("circle", { cx: x, cy: y, r: R });
 
-		this.Sm = 1;
-		this.Fm = 0;
-		this.Je0m = 0;
-		this.Am = 0;
+		if (params === undefined)
+			params = {
+				Sm: 1,
+				Fm: 0,
+				Je0m: 0,
+				Am: [0, 0, 0]
+			};
+		
+		Object.assign(this, (({Sm, Fm, Je0m, Am}) => ({Sm, Fm, Je0m, Am}))(params));
 	}
 
 	get x() { return +this.svgCircle.getAttribute("cx"); }
@@ -15,26 +20,111 @@ class Node {
 }
 
 class Edge {
-	constructor(svgLine, srcNode, destNode) {
+	constructor(svgLine, srcNode, destNode, params) {
 		this.svgLine = svgLine;
 		
 		this.srcNode = srcNode;
 		this.destNode = destNode;
 
-		this.Jm = 0;
-		this.Je1 = 0;
-		this.Jee = 0;
-		this.bm = 0;
-		this.Dm = [0, 0, 0];
+		if (params === undefined)
+			params = {
+				Jm: 0,
+				Je1m: 0,
+				Jeem: 0,
+				bm: 0,
+				Dm: [0, 0, 0]
+			};
+		
+		Object.assign(this, (({Jm, Je1m, Jeem, bm, Dm}) => ({Jm, Je1m, Jeem, bm, Dm}))(params));
 	}
 }
 
+class Mol {
+	constructor() {
+		this.nodes = [];  // array of Node objects
+		this.edges = [];  // array of Edge objects
+		this.leftLead = null;  // reference to Node
+		this.rightLead = null;  // reference to Node
+	}
+
+	/**
+	 * @return A string containing the data for this mol.
+	 */
+	save() {
+		let str = "";
+
+		// nodes
+		str += `${this.nodes.length}\n`;
+		for (let node of this.nodes) {
+			for (let prop of ["Sm", "Fm", "Je0m", "Am"])
+				str += `${prop}=${node[prop]}; `;
+			let circle = node.svgCircle;
+			str += `svgX=${circle.getAttribute("cx")}; `;
+			str += `svgY=${circle.getAttribute("cy")}\n`;
+		}
+		str += "\n";
+
+		// edges
+		str += `${this.edges.length}\n`;
+		for (let edge of this.edges) {
+			for (let prop of ["Jm", "Je1m", "Jeem", "bm", "Dm"])
+				str += `${prop}=${edge[prop]}; `;
+			str += `srcNode=${this.nodes.indexOf(edge.srcNode)}; `;
+			str += `destNode=${this.nodes.indexOf(edge.destNode)}\n`;
+		}
+		str += '\n';
+
+		// leads
+		str += `${this.nodes.indexOf(this.leftLead)}\n`;
+		str += `${this.nodes.indexOf(this.rightLead)}\n`;
+
+		return str;
+	}
+};
+/**
+ * Construct a new mol. be configured with the given data.
+ * @param {*} str A mol. data formatted string
+ * @return The new mol. object
+ */
+Mol.load = function(str) {
+	let mol = new Mol();
+
+	let lines = str.split("\n").map(x => x.trim()).filter(x => x.length > 0);  // trim, then remove empty lines
+	let i = 0;
+
+	let nodesRemaining = +lines[i++];
+	while (nodesRemaining-- > 0) {
+		let obj = {};
+		for (let pair of lines[i++].split(";")) {
+			let [prop, value] = pair.split("=", 2);
+			obj[prop.trim()] = +value.trim();  // values will be Number type
+		}
+		let node = new Node(svg, obj.svgX, obj.svgY, obj);
+	}
+	
+	let edgesRemaining = +lines[i++];
+	while (edgesRemaining-- > 0) {
+		let obj = {};
+		for (let pair of lines[i++].split(";")) {
+			let [prop, value] = pair.split("=", 2);
+			prop = prop.trim();
+			if (prop === "Dm")
+				obj[prop] = value.split(",", 3).map(x => +x);
+			else
+				obj[prop] = +value.trim();
+		}
+	}
+
+	mol.leftLead = mol.nodes[+lines[i++]];
+	mol.rightLead = mol.nodes[+lines[i++]];
+
+	return mol;
+};
 
 
 let svg = document.querySelector("svg#mol-canvas");
 let form = document.querySelector("#form");  // a container for the parameter update form
-let nodes = [];
-let edges = [];  // edge matrix
+let mol = new Mol();
 let selected = null;
 let dragging = null;
 
@@ -82,9 +172,9 @@ shadowEdge.classList.add("shadow");
  * @param svgPoint Where the user clicked (in SVG-space)
  * @see svg.clientToSVG()
  */
-const createNode = function({x, y}) {
-	let node = new Node(svg, x, y);
-	nodes.push(node);
+const createNode = function({x, y}, params) {
+	let node = new Node(svg, x, y, params);
+	mol.nodes.push(node);
 
 	// event handlers
 	node.svgCircle.addEventListener("mousedown", function(event) {
@@ -98,17 +188,17 @@ const createNode = function({x, y}) {
 	});
 };
 
-const createEdge = function(srcNode, destNode) {
+const createEdge = function({srcNode, destNode}, params) {
 	let line = svg.myCreate("line", { x1: srcNode.x, y1: srcNode.y, x2: destNode.x, y2: destNode.y });
-	let edge = new Edge(line, srcNode, destNode);
-	edges.push(edge);
+	let edge = new Edge(line, srcNode, destNode, params);
+	mol.edges.push(edge);
 	
 	// event handlers
 	line.addEventListener("mouseup", function(event) {
 		if (event.button !== 0)  // 0: primary ("left") mouse button
 			return;
 		
-		let index = edges.indexOf(edge);
+		let index = mol.edges.indexOf(edge);
 		if (event.ctrlKey)
 			removeEdge(index);
 		else
@@ -128,8 +218,8 @@ const createEdge = function(srcNode, destNode) {
 const findNode = function({x, y}) {
 	const R2 = R * R;
 
-	for (let i = 0; i < nodes.length; i++) {
-		const node = nodes[i];
+	for (let i = 0; i < mol.nodes.length; i++) {
+		const node = mol.nodes[i];
 		const dx = node.x - x, dy = node.y - y;
 		if (dx * dx + dy * dy <= R2)
 			return { node: node, index: i };
@@ -138,8 +228,8 @@ const findNode = function({x, y}) {
 };
 
 const findEdge = function(nodeA, nodeB) {
-	for (let i = 0; i < edges.length; i++) {
-		let edge = edges[i];
+	for (let i = 0; i < mol.edges.length; i++) {
+		let edge = mol.edges[i];
 		let {srcNode, destNode} = edge;
 		if ((nodeA === srcNode && nodeB === destNode) || (nodeA === destNode && nodeB === srcNode))
 			return { edge: edge, index: i };
@@ -168,7 +258,7 @@ const updateFormWithNode = function(node, index) {
 	h1.innerText = `Node ${index}`;
 	form.append(h1);
 
-	for (let prop of ["Sm", "Fm", "Am", "Je0m"]) {
+	for (let prop of ["Sm", "Fm", "Je0m"]) {
 		let div = document.createElement("div");
 
 		let label = document.createElement("label");
@@ -190,17 +280,114 @@ const updateFormWithNode = function(node, index) {
 		form.append(div);
 	}
 
+	{	let prop = "Am";
+		let div = document.createElement("div");
+		
+		let label = document.createElement("label");
+		label.innerText = `${prop}: `;
+		label.for = prop;
+		div.append(label);
+
+		let input = document.createElement("input");
+		input.type = "text";
+		input.id = prop;
+		input.value = node[prop];
+		const onChange = function(event) {
+			node[prop] = input.value.split(",").map(x => +x.trim());
+		};
+		input.addEventListener("change", onChange);
+		input.addEventListener("keypress", onChange);
+		div.append(input);
+
+		form.append(div);
+	}
+
+	for (let prop of ["leftLead", "rightLead"]) {
+		let div = document.createElement("div");
+
+		let label = document.createElement("label");
+		label.innerText = `${prop}: `;
+		label.for = prop;
+		div.append(label);
+
+		let input = document.createElement("input");
+		input.type = "checkbox";
+		input.id = prop;
+		input.checked = (mol[prop] === node);  // boolean
+		const onChange = function(event) {
+			mol[prop] = (input.checked ? node : null);
+		};
+		input.addEventListener("change", onChange);
+		input.addEventListener("keyup", onChange);
+		input.addEventListener("mouseup", onChange);
+		div.append(input);
+
+		form.append(div);
+	}
+
 	let section = document.getElementById("form");
 	section.innerHTML = "";
 	section.append(form);
 };
 
 const updateFormWithEdge = function(edge, index) {
-	// TODO: allow values to be updated
-	let html = `<h1> Edge ${index} </h1>`;
-	for (let key in edge)
-		html += `<p> <b>${key}</b>: ${edge[key]} </p>`;
-	form.innerHTML = html;
+	let form = document.createElement("form");
+	form.action = "";
+	form.addEventListener("submit", function(event) {
+		event.preventDefault();
+	});
+
+	let h1 = document.createElement("h1");
+	h1.innerText = `Edge ${index}`;
+	form.append(h1);
+
+	for (let prop of ["Jm", "Je1m", "Jeem", "bm"]) {
+		let div = document.createElement("div");
+
+		let label = document.createElement("label");
+		label.innerText = `${prop}: `;
+		label.for = prop;
+		div.append(label);
+
+		let input = document.createElement("input");
+		input.type = "number";
+		input.id = prop;
+		input.value = edge[prop];
+		const onChange = function(event) {
+			edge[prop] = input.value;
+		};
+		input.addEventListener("change", onChange);
+		input.addEventListener("keyup", onChange);
+		div.append(input);
+
+		form.append(div);
+	}
+
+	{	let prop = "Dm";
+		let div = document.createElement("div");
+
+		let label = document.createElement("label");
+		label.innerText = `${prop}: `;
+		label.for = prop;
+		div.append(label);
+
+		let input = document.createElement("input");
+		input.type = "text";
+		input.id = prop;
+		input.value = edge[prop];
+		const onChange = function(event) {
+			edge[prop] = input.value.split(",").map(x => +x.trim());
+		};
+		input.addEventListener("change", onChange);
+		input.addEventListener("keyup", onChange);
+		div.append(input);
+
+		form.append(div);
+	}
+
+	let section = document.getElementById("form");
+	section.innerHTML = "";
+	section.append(form);
 }
 
 /**
@@ -209,7 +396,7 @@ const updateFormWithEdge = function(edge, index) {
  * it's parameter's can be updated. 
  */
 const selectNode = function(index) {
-	let node = nodes[index];
+	let node = mol.nodes[index];
 	let wasSelected = (node === selected);
 	clearSelected();
 
@@ -226,7 +413,7 @@ const selectNode = function(index) {
  * it's parameter's can be updated.
  */
 const selectEdge = function(index) {
-	let edge = edges[index];
+	let edge = mol.edges[index];
 	let wasSelected = (edge === selected);
 	clearSelected();
 
@@ -243,13 +430,13 @@ const selectEdge = function(index) {
  * @returns The removed Node.
  */
 const removeNode = function(index) {
-	let [node] = nodes.splice(index, 1);
+	let [node] = mol.nodes.splice(index, 1);
 	if (node === selected)
 		clearSelected()
 	node.svgCircle.remove();
 
-	for (let i = 0; i < edges.length; /* iterate in loop */) {
-		let edge = edges[i];
+	for (let i = 0; i < mol.edges.length; /* iterate in loop */) {
+		let edge = mol.edges[i];
 		if (node === edge.srcNode || node === edge.destNode)
 			removeEdge(i);
 		else
@@ -265,7 +452,7 @@ const removeNode = function(index) {
  * @returns The removed Edge.
  */
 const removeEdge = function(index) {
-	let [edge] = edges.splice(index, 1);
+	let [edge] = mol.edges.splice(index, 1);
 	if (edge === selected)
 		clearSelected();
 	edge.svgLine.remove();
@@ -321,13 +508,13 @@ svg.addEventListener("mouseup", function(event) {
 			createNode(p);
 		} else {
 			if (p.x >= 80 && p.y <= -80)
-				removeNode(nodes.indexOf(dragging));
+				removeNode(mol.nodes.indexOf(dragging));
 			else {
 				// move node
 				dragging.svgCircle.setAttribute("cx", p.x);
 				dragging.svgCircle.setAttribute("cy", p.y);
 				// move connected edges
-				for (let edge of edges)
+				for (let edge of mol.edges)
 					if (edge.srcNode === dragging) {
 						edge.svgLine.setAttribute("x1", p.x);
 						edge.svgLine.setAttribute("y1", p.y);
@@ -345,7 +532,7 @@ svg.addEventListener("mouseup", function(event) {
 	} else if (dragging !== null) {
 		// dragged between two different nodes
 		if (findEdge(dragging, node).edge === null)
-			createEdge(dragging, node);
+			createEdge({srcNode: dragging, destNode: node});
 	}
 
 	dragging?.svgCircle.classList.remove("dragging");
@@ -372,8 +559,57 @@ document.addEventListener("keydown", function(event) {
 		event.preventDefault();
 		selected[dir] = clamp(Math.round(selected[dir]) + delta, limit);
 		selected.svgCircle.setAttribute("c" + dir, selected[dir]);
-		updateFormWithNode(selected, nodes.indexOf(selected));
+		updateFormWithNode(selected, mol.nodes.indexOf(selected));
 	}
 });
 
-// TOOD: drag to move nodes
+const initGUI = function(mol) {
+	window.mol = mol;
+	selected = null;
+	dragging = null;
+	for (let child in svg.childNodes) {
+		if (child.classList && !child.classList.contains("init"))
+			svg.removeChild(child);
+	}
+	for (let node of mol.nodes)
+		createNode(node, node);
+	for (let edge of mol.edges)
+		createEdge(edge, edge);
+};
+
+// ----------------------------------------------------------------------------
+
+const sizeInput = document.querySelector("#svgSize");
+const onSizeChange = function() {
+	let v = sizeInput.value;
+	document.querySelector(":root").style.setProperty("--svg-size", `min(${v}vh, ${v}vw)`);
+};
+sizeInput.addEventListener("change", onSizeChange);
+sizeInput.addEventListener("keyup", onSizeChange);
+
+const saveBtn = document.querySelector("#save");
+saveBtn.addEventListener("click", function(event) {
+	let section = document.querySelector("#form");
+	section.innerHTML = "";
+
+	let	h = document.createElement("h2");
+	h.innerText = "Save Data";
+	section.append(h);
+
+	let textarea = document.createElement("textarea");
+	textarea.innerHTML = mol.save();
+	textarea.cols = "80";
+	textarea.rows = "25";
+	const onChange = function() {
+		initGUI(Mol.load(textarea.value));
+	};
+	textarea.addEventListener("change", onChange);
+	textarea.addEventListener("keyup", onChange);
+	section.append(textarea);
+
+	let a = document.createElement("a");
+	a.innerText = "Download";
+	a.href = URL.createObjectURL(new Blob([textarea.value], {type: "text/plain"}));
+	a.download = "mol-creator.mmt"
+	section.append(a);
+});

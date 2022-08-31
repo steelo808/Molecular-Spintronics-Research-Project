@@ -1,5 +1,5 @@
 :root {
-	--svg-size: min(70vw, 70vh);
+	--svg-size: min(65vw, 65vh);
 }
 
 body {
@@ -63,6 +63,18 @@ h2, h3, h4, h5, h6 {
 	font-size: 1rem
 }
 
+#mol-editor form {
+	margin: 0.5em;
+	font-size: 1.25rem;
+	font-weight: lighter;
+}
+
+#mol-editor form input {
+	width: 4em;
+	font-size: 1.25rem;
+	font-weight: lighter;
+}
+
 #mol-canvas {
 	width: var(--svg-size);
 	height: var(--svg-size);
@@ -76,12 +88,12 @@ h2, h3, h4, h5, h6 {
 #mol-canvas circle {
 	fill: black;
 	stroke: white;
-	stroke-width: 1;
+	stroke-width: 1.5;
 }
 
 #mol-canvas line {
 	stroke: black;
-	stroke-width: 2;
+	stroke-width: 4;
 }
 
 #mol-canvas circle:hover, #mol-canvas line:hover {
@@ -91,7 +103,7 @@ h2, h3, h4, h5, h6 {
 
 #mol-canvas .selected {
 	stroke: yellow;
-	stroke-width: 2;
+	stroke-width: 4;
 }
 
 #mol-canvas .dragging {
@@ -106,7 +118,7 @@ h2, h3, h4, h5, h6 {
 #mol-canvas .trash {
 	fill: red;
 	stroke: white;
-	stroke-width: 1;
+	stroke-width: 1.5;
 }
 
 #mol-canvas .trash-text {

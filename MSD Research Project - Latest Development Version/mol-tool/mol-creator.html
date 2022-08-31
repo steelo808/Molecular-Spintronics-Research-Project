@@ -11,9 +11,14 @@
 	<main>
 		<section id="mol-editor">
 			<h1> Molecual Prototype Creator </h1>
+			<form action="" onsubmit="event.preventDefault();">
+				Size: <input type="number" value="65" id="svgSize">
+				<input type="button" id="save" value="Save">
+				<input type="button" id="load" value="Load">
+			</form>
 			<svg id="mol-canvas" viewBox="-100 -100 200 200">
-				<rect x="80" y="-100" width="20" height="20" class="trash"></rect>
-				<text x="83.5" y="-82.65" class="trash-text">X</text>
+				<rect x="80" y="-100" width="20" height="20" class="trash init"></rect>
+				<text x="83.5" y="-82.65" class="trash-text init">X</text>
 			</svg>
 		</section>
 		<section id="form">
@@ -25,6 +30,33 @@
 		<p>
 			<u>Create Node</u>:
 			Click on a blank space in the canvas (above) to create a new node.
+			<br><br>
+
+			<u>Create Edge</u>:
+			Drag from source node to destination node to create a edge between them.
+			(For non-communative effects like Dm where direction matters,
+			the direction of the edge is from source to destination.)
+			<br><br>
+			
+			<u>Modify Node or Edge Parameters</u>:
+			Select a node or edge by clicking on it. The current parameters will be displayed aside
+			(or below) the canvas in the "form" section. These parameters can be modified
+			by editing the fields in the form. The new values will be immediately saved and applied.
+			<br><br>
+			
+			<u>Delete Node</u>:
+			Drag node to the red "X", then drop.
+			<br><br>
+			
+			<u>Delete Edge</u>:
+			Ctrl-click on an edge to delete it.
+			Note: edges will automatically be deleted if one of their attached nodes is deleted.
+			<br><br>
+			
+			<u>Move Node</u>:
+			You can move the location of a node, by dragging it to an unoccupied location.
+			Note: moving a node, will also move its edges appropriately.
+			<br><br>
 		</p>
 	</aside>
 </body>
