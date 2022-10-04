@@ -3,7 +3,7 @@
  * @file iterate.cpp
  * @author Christopher D'Angelo
  * @brief App that runs a single MSD simulation and reports results over time.
- * @date 2022-01-24
+ * @date 2022-10-04
  * 
  * @copyright Copyright (c) 2022
  */
@@ -114,15 +114,24 @@ int main(int argc, char *argv[]) {
 	} else
 		cout << "Defaulting to 'CONTINUOUS_SPIN_MODEL'.\n";
 	
-	MSD::MolProtoFactory molType = MSD::LINEAR_MOL;
+	bool usingMMB = false;
+	MSD::MolProto molProto;  // iff usingMMB
+	MSD::MolProtoFactory molType = MSD::LINEAR_MOL;  // iff not usingMMB
 	if (argc > MOL_TYPE) {
 		string s(argv[MOL_TYPE]);
 		if (s == "LINEAR")
 			molType = MSD::LINEAR_MOL;
 		else if (s == "CIRCULAR")
 			molType = MSD::CIRCULAR_MOL;
-		else
-			cout << "Unrecognized MOL_TYPE! (Note: custom mol. are not supported yet. Only LINEAR or CIRCULAR.) Defaulting to 'LINEAR'.\n";
+		else {
+			try {
+				molProto = MSD::MolProto::load(ifstream(argv[MOL_TYPE], istream::binary));
+				usingMMB = true;
+			} catch(Molecule::DeserializationException &ex) {
+				cerr << "Unrecognized MOL_TYPE, and invalid .mmb file!";
+				return INVALID_PARAM_ERR;
+			}
+		}
 	} else
 		cout << "Defaulting to 'MOL_TYPE=LINEAR'.\n";
 
@@ -193,8 +202,8 @@ int main(int argc, char *argv[]) {
 	unsigned int width, height, depth, molPosL, molPosR, topL, bottomL, frontR, backR;
 	unsigned long long simCount, freq;
 	MSD::Parameters p;
-	Molecule::NodeParameters p_node;
-	Molecule::EdgeParameters p_edge;
+	Molecule::NodeParameters p_node;  // used iff not usingMMB
+	Molecule::EdgeParameters p_edge;  // used iff not usingMMB
 	
 	cin.exceptions( ios::badbit | ios::failbit | ios::eofbit );
 	try {
@@ -204,6 +213,11 @@ int main(int argc, char *argv[]) {
 		cout << '\n';
 		getParam(params, "molPosL", molPosL);
 		getParam(params, "molPosR", molPosR);
+		unsigned int molLen = molPosR + 1 - molPosL;
+		if (usingMMB && molLen != molProto.nodeCount()) {
+			cerr << "Using .mmb file, but molLen=" << molLen << " doesn't equal mmb nodeCount=" << molProto.nodeCount() << '\n';
+			return INVALID_PARAM_ERR;
+		}
 		cout << '\n';
 		getParam(params, "topL   ", topL);
 		getParam(params, "bottomL", bottomL);
@@ -219,50 +233,50 @@ int main(int argc, char *argv[]) {
 		cout << '\n';
 		getParam(params, "SL", p.SL);
 		getParam(params, "SR", p.SR);
-		getParam(params, "Sm", p_node.Sm);
+		if (!usingMMB)  getParam(params, "Sm", p_node.Sm);
 		getParam(params, "FL", p.FL);
 		getParam(params, "FR", p.FR);
-		getParam(params, "Fm", p_node.Fm);
+		if (!usingMMB)  getParam(params, "Fm", p_node.Fm);
 		cout << '\n';
 		getParam(params, "JL ", p.JL);
 		getParam(params, "JR ", p.JR);
-		getParam(params, "Jm ", p_edge.Jm);
+		if (!usingMMB)  getParam(params, "Jm ", p_edge.Jm);
 		getParam(params, "JmL", p.JmL);
 		getParam(params, "JmR", p.JmR);
 		getParam(params, "JLR", p.JLR);
 		cout << '\n';
 		getParam(params, "Je0L ", p.Je0L);
 		getParam(params, "Je0R ", p.Je0R);
-		getParam(params, "Je0m ", p_node.Je0m);
+		if (!usingMMB)  getParam(params, "Je0m ", p_node.Je0m);
 		cout << '\n';
 		getParam(params, "Je1L ", p.Je1L);
 		getParam(params, "Je1R ", p.Je1R);
-		getParam(params, "Je1m ", p_edge.Je1m);
+		if (!usingMMB)  getParam(params, "Je1m ", p_edge.Je1m);
 		getParam(params, "Je1mL", p.Je1mL);
 		getParam(params, "Je1mR", p.Je1mR);
 		getParam(params, "Je1LR", p.Je1LR);
 		cout << '\n';
 		getParam(params, "JeeL ", p.Je1L);
 		getParam(params, "JeeR ", p.Je1R);
-		getParam(params, "Jeem ", p_edge.Je1m);
+		if (!usingMMB)  getParam(params, "Jeem ", p_edge.Je1m);
 		getParam(params, "JeemL", p.Je1mL);
 		getParam(params, "JeemR", p.Je1mR);
 		getParam(params, "JeeLR", p.Je1LR);
 		cout << '\n';
 		getParam(params, "AL", p.AL);
 		getParam(params, "AR", p.AR);
-		getParam(params, "Am", p_node.Am);
+		if (!usingMMB)  getParam(params, "Am", p_node.Am);
 		cout << '\n';
 		getParam(params, "bL ", p.bL);
 		getParam(params, "bR ", p.bR);
-		getParam(params, "bm ", p_edge.bm);
+		if (!usingMMB)  getParam(params, "bm ", p_edge.bm);
 		getParam(params, "bmL", p.bmL);
 		getParam(params, "bmR", p.bmR);
 		getParam(params, "bLR", p.bLR);
 		cout << '\n';
 		getParam(params, "DL ", p.DL);
 		getParam(params, "DR ", p.DR);
-		getParam(params, "Dm ", p_edge.Dm);
+		if (!usingMMB)  getParam(params, "Dm ", p_edge.Dm);
 		getParam(params, "DmL", p.DmL);
 		getParam(params, "DmR", p.DmR);
 		getParam(params, "DLR", p.DLR);
@@ -286,7 +300,10 @@ int main(int argc, char *argv[]) {
 	MSD msd(width, height, depth, molType, molPosL, molPosR, topL, bottomL, frontR, backR);
 	msd.flippingAlgorithm = arg2;
 	msd.setParameters(p);
-	msd.setMolParameters(p_node, p_edge);
+	if (usingMMB)
+		msd.setMolProto(molProto);
+	else
+		msd.setMolParameters(p_node, p_edge);
 
 	bool customSeed = (argc > SEED && string(argv[SEED]) != string("unique"));
 	if (customSeed) {
@@ -327,45 +344,45 @@ int main(int argc, char *argv[]) {
 			 << ",kT = " << p.kT
 			 << ",\"B = " << p.B << '"'
 			 << ",SL = " << p.SL
-			 << ",SR = " << p.SR
-			 << ",Sm = " << p_node.Sm
-			 << ",FL = " << p.FL
-			 << ",FR = " << p.FR
-			 << ",Fm = " << p_node.Fm
-			 << ",JL = " << p.JL
-			 << ",JR = " << p.JR
-			 << ",Jm = " << p_edge.Jm
-			 << ",JmL = " << p.JmL
+			 << ",SR = " << p.SR;
+		if(!usingMMB)  file << ",Sm = " << p_node.Sm;
+		file << ",FL = " << p.FL
+			 << ",FR = " << p.FR;
+		if (!usingMMB)  file << ",Fm = " << p_node.Fm;
+		file << ",JL = " << p.JL
+			 << ",JR = " << p.JR;
+		if (!usingMMB)  file << ",Jm = " << p_edge.Jm;
+		file << ",JmL = " << p.JmL
 			 << ",JmR = " << p.JmR
 			 << ",JLR = " << p.JLR
 			 << ",Je0L = " << p.Je0L
-			 << ",Je0R = " << p.Je0R
-			 << ",Je0m = " << p_node.Je0m
-			 << ",Je1L = " << p.Je1L
-			 << ",Je1R = " << p.Je1R
-			 << ",Je1m = " << p_edge.Je1m
-			 << ",Je1mL = " << p.Je1mL
+			 << ",Je0R = " << p.Je0R;
+		if (!usingMMB)  file << ",Je0m = " << p_node.Je0m;
+		file << ",Je1L = " << p.Je1L
+			 << ",Je1R = " << p.Je1R;
+		if (!usingMMB)  file << ",Je1m = " << p_edge.Je1m;
+		file << ",Je1mL = " << p.Je1mL
 			 << ",Je1mR = " << p.Je1mR
 			 << ",Je1LR = " << p.Je1LR
 			 << ",JeeL = " << p.JeeL
-			 << ",JeeR = " << p.JeeR
-			 << ",Jeem = " << p_edge.Jeem
-			 << ",JeemL = " << p.JeemL
+			 << ",JeeR = " << p.JeeR;
+		if (!usingMMB)  file << ",Jeem = " << p_edge.Jeem;
+		file << ",JeemL = " << p.JeemL
 			 << ",JeemR = " << p.JeemR
 			 << ",JeeLR = " << p.JeeLR
 			 << ",\"AL = " << p.AL << '"'
-			 << ",\"AR = " << p.AR << '"'
-			 << ",\"Am = " << p_node.Am << '"'
-			 << ",bL = " << p.bL
-			 << ",bR = " << p.bR
-			 << ",bm = " << p_edge.bm
-			 << ",bmL = " << p.bmL
+			 << ",\"AR = " << p.AR << '"';
+		if (!usingMMB)  file << ",\"Am = " << p_node.Am << '"';
+		file << ",bL = " << p.bL
+			 << ",bR = " << p.bR;
+		if (!usingMMB)  file << ",bm = " << p_edge.bm;
+		file << ",bmL = " << p.bmL
 			 << ",bmR = " << p.bmR
 			 << ",bLR = " << p.bLR
 			 << ",\"DL = " << p.DL << '"'
-			 << ",\"DR = " << p.DR << '"'
-			 << ",\"Dm = " << p_edge.Dm << '"'
-			 << ",\"DmL = " << p.DmL << '"'
+			 << ",\"DR = " << p.DR << '"';
+		if (!usingMMB)  file << ",\"Dm = " << p_edge.Dm << '"';
+		file << ",\"DmL = " << p.DmL << '"'
 			 << ",\"DmR = " << p.DmR << '"'
 			 << ",\"DLR = " << p.DLR << '"'
 			 << ",molType = " << argv[MOL_TYPE]

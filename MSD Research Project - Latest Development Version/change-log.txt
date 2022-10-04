@@ -133,3 +133,5 @@ Second bug fix. In MSD::setParameters()
 TODO: Fix flux != 0 on mol. that are "turned off"
 TODO: Add graph-based mol. to MSD. (including ability to create fully customizable MolProto,
 		and input them into the apps)
+TODO: (Maybe) Add NodeRef and EdgeRef types to Molecule (i.e. MolProto) for public/full access to Edge data.
+ 

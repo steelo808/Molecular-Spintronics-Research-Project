@@ -610,6 +610,6 @@ saveBtn.addEventListener("click", function(event) {
 	let a = document.createElement("a");
 	a.innerText = "Download";
 	a.href = URL.createObjectURL(new Blob([textarea.value], {type: "text/plain"}));
-	a.download = "mol-creator.mmt"
+	a.download = "new-mol.mmt"
 	section.append(a);
 });

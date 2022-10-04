@@ -1,14 +1,14 @@
-simCount = 10000000
+simCount = 50000000
 freq = 50000
 
 # dimensions of bounding box
-width  = 13
+width  = 27
 height = 28
 depth  = 28
 
 # boundaries which define the exact dimensions of FM_L, FM_R, and mol.
-molPosL = 5
-molPosR = 7
+molPosL = 10
+molPosR = 16
 topL    = 12
 bottomL = 15
 frontR  = 12

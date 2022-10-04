@@ -1,6 +1,6 @@
 @rem /** ---- Docs ----
 @rem  * model=CONTINUOUS_SPIN_MODEL|UP_DOWN_MODEL
-@rem  * mol_type=LINEAR|CIRCULAR
+@rem  * mol_type=LINEAR|CIRCULAR|__PATH__.mmb
 @rem  * randomize=0|1
 @rem  * seed=unique|<uint64>
 @rem  */
@@ -8,7 +8,7 @@
 
 @rem // ---- Edit Here ---- 
 @set model=CONTINUOUS_SPIN_MODEL
-@set mol_type=LINEAR
+@set mol_type=CIRCULAR
 @set randomize=unique
 @set seed=0
 

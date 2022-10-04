@@ -18,6 +18,7 @@
 #include <cmath>
 #include <ctime>
 #include <cstring>
+#include <exception>
 #include <functional>
 #include <iostream>
 #include <memory>
@@ -36,13 +37,17 @@ using std::bind;
 using std::function;
 using std::invalid_argument;
 using std::mt19937_64;
+using std::istream;
 using std::ostream;
+using std::streampos;
 using std::out_of_range;
 using std::ref;
 using std::string;
 using std::uniform_int_distribution;
 using std::uniform_real_distribution;
 using std::shared_ptr;
+using std::exception;
+using std::strcmp;
 
 using udc::E;
 using udc::PI;
@@ -84,6 +89,8 @@ class Molecule {
 
 		NodeParameters();
 	};
+
+	class DeserializationException : public exception {};
 
  private:
 	struct Node;
@@ -127,6 +134,8 @@ class Molecule {
 	size_t sSize;  // size of buffer (bytes) needed for serialization or deserizalization
 
  public:
+	static const char * const HEADER;  // safety header for (de)serizlization
+	static const size_t HEADER_SIZE;  // size of HEADER string (not including null-terminator, '\0'): strlen(HEADER)
 	static const unsigned int NOT_FOUND = (unsigned int) -1;  // -1 will be the maximum unsigned int
 
  public:
@@ -152,6 +161,10 @@ class Molecule {
 	void serialize(unsigned char *buffer) const;  // store this Molecule object into the given buffer
 	void deserialize(const unsigned char *buffer);  // reconstruct this Molecule object using the given buffer
 	size_t serializationSize() const;  // the size needed (in bytes) to serialize this Molecule object
+
+	istream& read(istream &in);  // reads the serialized data from the given binary istream
+	ostream& write(ostream &out) const;  // writes the serialized data to the given binary ostream
+	static Molecule load(istream &in);  // same as read, but constructs and returns a new Molecule (MSD::MolProto) object
 
 	/**
 	 * Returns the new node's index.
@@ -564,19 +577,26 @@ Molecule::Edge::Edge(size_t eIdx, size_t nIdx, size_t sIdx, double dir)
 Molecule::Node::Node(const NodeParameters &parameters) : parameters(parameters) {
 }
 
+const char * const Molecule::HEADER = "MMB";
+const size_t Molecule::HEADER_SIZE = 3;  // compile-time constant of strlen(HEADER)
+
 // 2 size_t's for the leads, and 1 for each block length (nodeParams, and edgeParams)
-Molecule::Molecule() : leftLead(0), rightLead(0), sSize(4 * sizeof(size_t)) {
+Molecule::Molecule() : leftLead(0), rightLead(0), sSize(HEADER_SIZE + 4 * sizeof(size_t)) {
 }
 
 Molecule::Molecule(size_t nodeCount, const NodeParameters &nodeParams)
 : nodes(nodeCount), leftLead(0), rightLead(0),
-  sSize(4 * sizeof(size_t) + nodeCount * (6 * sizeof(double) + sizeof(size_t)))
+  sSize(HEADER_SIZE + 4 * sizeof(size_t) + nodeCount * (6 * sizeof(double) + sizeof(size_t)))
 {
 	for (Node &node : nodes)
 		node.parameters = nodeParams;
 }
 
 void Molecule::serialize(unsigned char *buffer) const {
+	// "MMB" (MSD mol. binary) header (for safety)
+	for (size_t i = 0; i < HEADER_SIZE; i++)
+		bwrite(HEADER[i], buffer);
+	
 	// First write the edge-parameters section
 	bwrite(edgeParameters.size(), buffer);
 	for (const EdgeParameters &eParam : edgeParameters) {
@@ -617,6 +637,15 @@ void Molecule::serialize(unsigned char *buffer) const {
 
 void Molecule::deserialize(const unsigned char *buffer) {
 	const unsigned char *buffer_start = buffer;
+
+	// Read "MMB" header (for saftey)
+	char header[HEADER_SIZE + 1];
+	for (size_t i = 0; i < HEADER_SIZE; i++)
+		bread(header[i], buffer);
+	header[HEADER_SIZE] = '\0';
+	
+	if (strcmp(HEADER, header) != 0)
+		throw DeserializationException();
 
 	// First read edges
 	size_t edgeCount;
@@ -675,6 +704,41 @@ void Molecule::deserialize(const unsigned char *buffer) {
 
 size_t Molecule::serializationSize() const {
 	return sSize;
+}
+
+istream& Molecule::read(istream &in) {
+	// get file size
+	in.seekg(0, in.end);
+	streampos size = in.tellg();
+	in.seekg(0, in.beg);
+
+	// read data into buffer
+	char *data = new char[size];
+	in.read(data, size);
+
+	// deserialize buffer
+	deserialize((unsigned char *) data);
+	delete [] data;
+
+	return in;
+}
+
+ostream& Molecule::write(ostream &out) const {
+	size_t size = serializationSize();
+	// std::cout << " -- Allocating...\n";  // DEBUG
+	unsigned char *data = new unsigned char[size];
+	// std::cout << " -- Serializing...\n";  // DEBUG
+	serialize(data);
+	// std::cout << " -- Writing...\n";  // DEBUG
+	out.write((char *) data, size);
+	delete [] data;
+	return out;
+}
+
+Molecule Molecule::load(istream &in) {
+	Molecule mol;
+	mol.read(in);
+	return mol;
 }
 
 unsigned int Molecule::createNode(const NodeParameters &parameters) {
