@@ -8,7 +8,7 @@
 
 @rem // ---- Edit Here ---- 
 @set model=CONTINUOUS_SPIN_MODEL
-@set mol_type=CIRCULAR
+@set mol_type=mol/diamond_bottleneck.mmb
 @set randomize=unique
 @set seed=0
 

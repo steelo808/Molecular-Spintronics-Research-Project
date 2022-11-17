@@ -73,6 +73,13 @@
 		"xloctime": "cpp",
 		"xmemory": "cpp",
 		"xstddef": "cpp",
-		"xtr1common": "cpp"
-	}
+		"xtr1common": "cpp",
+		"*.ipp": "cpp"
+	},
+	"C_Cpp.default.includePath": [
+		"${default}",
+		"$PYTHON_INCLUDE$",
+		"$BOOST_INCLUDE$"
+	],
+	"cmake.configureOnOpen": false
 }

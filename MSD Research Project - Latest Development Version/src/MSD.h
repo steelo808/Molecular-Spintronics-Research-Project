@@ -3,8 +3,8 @@
  * @author Christopher D'Angelo
  * @brief The core logic which all the apps use to run MSD simulations.
  *        Includes definitions and calculations.
- * @version 6.0
- * @date 2022-01-24
+ * @version 6.1
+ * @date 2022-10-11
  * 
  * @copyright Copyright (c) 2022
  */
@@ -90,7 +90,10 @@ class Molecule {
 		NodeParameters();
 	};
 
-	class DeserializationException : public exception {};
+	class DeserializationException : public UDCException {
+	 public:
+		DeserializationException(const char *message) : UDCException(message) {}
+	};
 
  private:
 	struct Node;
@@ -645,7 +648,7 @@ void Molecule::deserialize(const unsigned char *buffer) {
 	header[HEADER_SIZE] = '\0';
 	
 	if (strcmp(HEADER, header) != 0)
-		throw DeserializationException();
+		throw DeserializationException((string("Missing header: ") + string(HEADER)).c_str());
 
 	// First read edges
 	size_t edgeCount;

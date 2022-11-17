@@ -130,8 +130,19 @@ Second bug fix. In MSD::setParameters()
 (1-24-2022) Added MSD::set_kT() for optimization and used it in the "heat" app.
 (1-24-2022) Added mol_type=CIRCULAR support to all apps.
 
+6.1.0:
+(10-4-2022) Defined .mmt (MSD molecule text) and .mmb (MSD molecule binary) file formats.
+	These formats are used to store mol. prototypes for use in various apps.
+(10-4-2022) Create beta version of "mol-tool": a web app which lets users build custom molecules using a MSD_GUI
+	then outputs the .mmt file.
+(10-4-2022) Created a mmb-compiler to convert .mmt files to .mmb format.
+(10-4-2022) Added support to "iterate" app to use custom MolProto when given a .mmb file.
+(10-4-2022) Added code to MSD::MolProto for saving and loading .mmb files.
+	As well as an mmt.h header to parse .mmt files.
+
 TODO: Fix flux != 0 on mol. that are "turned off"
 TODO: Add graph-based mol. to MSD. (including ability to create fully customizable MolProto,
 		and input them into the apps)
+		WORKING... Currently we have a GUI builder, .mmb compiler, and "iterate" support.
+		Finish other apps.
 TODO: (Maybe) Add NodeRef and EdgeRef types to Molecule (i.e. MolProto) for public/full access to Edge data.
- 
