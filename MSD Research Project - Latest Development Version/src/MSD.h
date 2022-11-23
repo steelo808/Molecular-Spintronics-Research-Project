@@ -191,7 +191,7 @@ class Molecule {
 
 	/**
 	 * Search for and return the index of the edge connecting the given nodes if one exists,
-	 * or MOLECULE::NOT_FOUND if one doesn't.
+	 * or Molecule::NOT_FOUND if one doesn't.
 	 */
 	unsigned int edgeIndex(unsigned int nodeA, unsigned int nodeB) const;
 

@@ -8,9 +8,9 @@
 
 @rem // ---- Edit Here ---- 
 @set model=CONTINUOUS_SPIN_MODEL
-@set mol_type=mol/diamond_bottleneck.mmb
-@set randomize=unique
-@set seed=0
+@set mol_type=LINEAR
+@set randomize=1
+@set seed=unique
 
 @set input_file=parameters-iterate.txt
 @set out_head=iteration
