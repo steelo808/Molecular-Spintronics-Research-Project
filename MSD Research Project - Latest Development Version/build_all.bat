@@ -15,6 +15,7 @@
 @cl /EHsc /Fe"bin/metropolis.exe" src/metropolis.cpp
 @cl /EHsc /Fe"bin/extract.exe" src/extract.cpp
 @cl /EHsc /Fe"bin/mfm_aggregator.exe" src/mfm_aggregator.cpp
+@cl /EHsc /LD /Fe"lib/python/MSD-export.dll" src/MSD-export.cpp
 
 
 @rem Compile 32-bit versions
@@ -27,10 +28,12 @@
 @cl /EHsc /Fe"bin/metropolis_x86.exe" src/metropolis.cpp
 @cl /EHsc /Fe"bin/extract_x86.exe" src/extract.cpp
 @cl /EHsc /Fe"bin/mfm_aggregator_x86.exe" src/mfm_aggregator.cpp
+@cl /EHsc /LD /Fe"lib/python/MSD-export_x86.dll" src/MSD-export.cpp
 
 
 @rem Remove .obj file
 @del iterate.obj heat.obj magnetize.obj magnetize2.obj metropolis.obj extract.obj mfm_aggregator.obj
+@del lib\python\MSD-export.exp lib\python\MSD-export.lib lib\python\MSD-export_x86.exp lib\python\MSD-export_x86.lib
 
 
 @rem End of file
