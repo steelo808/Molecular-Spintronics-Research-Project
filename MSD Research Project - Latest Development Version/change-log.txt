@@ -147,6 +147,7 @@ Second bug fix. In MSD::setParameters()
 	Added this functionality to MSD-export.cpp and MSD.py as well.
 	Added Vector math to MSD-export.cpp and MSD.py.
 	Added E and PI global constants (for consistancy) to MSD-export.cpp and MSD.py.
+	Added support for MSD iterator in MSD-export.cpp and MSD.py.
 
 TODO: Fix flux != 0 on mol. that are "turned off"
 TODO: Add graph-based mol. to MSD. (including ability to create fully customizable MolProto,

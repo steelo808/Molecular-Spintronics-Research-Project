@@ -192,7 +192,7 @@ class Molecule:
 			
 			curr = self.clone()
 			msd_clib.next_n(self._node)
-			self._pos += 1
+			self._i += 1
 			return curr
 		
 		def prev(self):
@@ -200,7 +200,7 @@ class Molecule:
 				raise StopIteration
 			
 			msd_clib.prev_n(self._node)
-			self._pos -= 1
+			self._i -= 1
 			return self.clone()
 		
 		# direction = tuple(__next__)
@@ -210,15 +210,15 @@ class Molecule:
 		def __init__(self, iterable, start = (None, 0), direction = FORWARD):
 			self._iterable = iterable
 			self._node = msd_clib.copyNodeIter(iterable._begin if start[0] is None else start[0])
-			self._pos = start[1]
+			self._i = start[1]
 			
 			self._next = direction[0]
 		
 		def __del__(self): msd_clib.destroyNodeIter(self._node)
 		
-		def clone(self): return Molecule._Node(self._iterable, start = (self._node, self._pos), direction = (self._next,))
+		def clone(self): return Molecule._Node(self._iterable, start = (self._node, self._i), direction = (self._next,))
 
-		pos = property(fget = lambda self: self._pos)
+		metaIndex = property(fget = lambda self: self._i)
 
 		index = property(fget = lambda self: msd_clib.nodeIndex_i(self._node))
 		def getParameters(self): return msd_clib.getNodeParameters_i(self._node)
@@ -234,16 +234,16 @@ class Molecule:
 		def __next__(self): return self._next(self)
 
 		def __iadd__(self, offset):
-			newPos = self._pos + offset
+			newPos = self._i + offset
 			_boundsCheck(newPos, len(self._iterable))
 			msd_clib.add_n(self._node, offset)
-			self._pos = newPos
+			self._i = newPos
 		
 		def __isub__(self, offset):
-			newPos = self._pos - offset
+			newPos = self._i - offset
 			_boundsCheck(newPos, len(self._iterable))
 			msd_clib.sub_n(self._node, offset)
-			self._pos = newPos
+			self._i = newPos
 		
 		def __add__(self, offset):
 			copy = self.clone()
@@ -298,7 +298,7 @@ class Molecule:
 			
 			curr = self.clone()
 			msd_clib.next_e(self._edge)
-			self._pos += 1
+			self._i += 1
 			return curr
 		
 		def prev(self):
@@ -306,7 +306,7 @@ class Molecule:
 				raise StopIteration
 			
 			msd_clib.prev_e(self._edge)
-			self._pos -= 1
+			self._i -= 1
 			return self.clone()
 		
 		# direction = (__next__)
@@ -316,15 +316,15 @@ class Molecule:
 		def __init__(self, iterable, start = (None, 0), direction = FORWARD):
 			self._iterable = iterable
 			self._edge = msd_clib.copyEdgeIter(iterable._begin if start[0] is None else start[0])
-			self._pos = start[1]
+			self._i = start[1]
 			
 			self._next = direction[0]
 		
 		def __del__(self): msd_clib.destroyEdgeIter(self._edge)
 
-		def clone(self): return Molecule._Edge(self._iterable, start = (self._edge, self._pos), direction = (self._next,))
+		def clone(self): return Molecule._Edge(self._iterable, start = (self._edge, self._i), direction = (self._next,))
 		
-		pos = property(fget = lambda self: self._pos)
+		metaIndex = property(fget = lambda self: self._i)
 
 		index = property(fget = lambda self: msd_clib.edgeIndex_i(self._edge))
 		def getParameters(self): return msd_clib.getEdgeParameters_i(self._edge)
@@ -342,16 +342,16 @@ class Molecule:
 		def __next__(self): return self._next(self)
 		
 		def __iadd__(self, offset):
-			newPos = self._pos + offset
+			newPos = self._i + offset
 			_boundsCheck(newPos, len(self._iterable))
 			msd_clib.add_e(self._edge, offset)
-			self._pos = newPos
+			self._i = newPos
 		
 		def __isub__(self, offset):
-			newPos = self._pos - offset
+			newPos = self._i - offset
 			_boundsCheck(newPos, len(self._iterable))
 			msd_clib.sub_e(self._edge, offset)
-			self._pos = newPos
+			self._i = newPos
 		
 		def __add__(self, offset):
 			copy = self.clone()
@@ -568,8 +568,81 @@ class MSD:
 			super().__init__(*args, **kw)
 
 
-	class Iterator:
-		pass  #TODO
+	class _Iterator:
+		def next(self):
+			if msd_clib.eq_a(self._iter, self._msd._end):
+				raise StopIteration
+			
+			curr = self.clone()
+			msd_clib.next_a(self._iter)
+			self._i += 1
+			return curr
+		
+		def prev(self):
+			if msd_clib.eq_a(self._iter, self._msd._begin):
+				raise StopIteration
+			
+			msd_clib.prev_a(self._iter)
+			self._i -= 1
+			return self.clone()
+
+		FORWARD = (next,)
+		BACKWARD = (prev,)
+
+		def __init__(self, msd, start = (None, 0), direction = FORWARD):
+			self._msd = msd
+			self._iter = msd_clib.copyMSDIter(msd._begin if start[0] is None else start[0])
+			self._i = start[1]
+
+			self._next = direction[0]
+		
+		def __del__(self): msd_clib.destroyMSDIter(self._iter)
+		
+		def clone(self): return MSD._Iterator(self._msd, start = (self._iter, self._i), direction = (self._next,))
+
+		metaIndex = property(fget = lambda self: self._i)
+
+		index = property(fget = lambda self: msd_clib.msdIndex(self._iter))
+		x = property(fget = lambda self: msd_clib.getX(self._iter))
+		y = property(fget = lambda self: msd_clib.getY(self._iter))
+		z = property(fget = lambda self: msd_clib.getZ(self._iter))
+		pos = property(fget = lambda self: (self.x, self.y, self.z))
+		spin = property(fget = lambda self: msd_clib.getSpin_a(self._iter))
+		flux = property(fget = lambda self: msd_clib.getFlux_a(self._iter))
+		localM = property(fget = lambda self: msd_clib.getLocalM_a(self._iter))
+
+		def __eq__(self, other): return msd_clib.eq_a(self._iter, other._iter)
+		def __ne__(self, other): return msd_clib.ne_a(self._iter, other._iter)
+		def __lt__(self, other): return msd_clib.lt_a(self._iter, other._iter)
+		def __gt__(self, other): return msd_clib.gt_a(self._iter, other._iter)
+		def __le__(self, other): return msd_clib.le_a(self._iter, other._iter)
+		def __ge__(self, other): return msd_clib.ge_a(self._iter, other._iter)
+		
+		def __next__(self): return self._next(self)
+
+		def __iadd__(self, offset):
+			newPos = self._i + offset
+			_boundsCheck(newPos, len(self._msd))
+			msd_clib.add_a(self._iter, offset)
+			self._i = newPos
+		
+		def __isub__(self, offset):
+			newPos = self._i - offset
+			_boundsCheck(newPos, len(self._msd))
+			msd_clib.sub_a(self._iter, offset)
+			self._i = newPos
+		
+		def __add__(self, offset):
+			copy = self.clone()
+			copy += offset
+			return copy
+		
+		def __sub__(self, offset):
+			copy = self.clone()
+			copy -= offset
+			return copy
+		
+
 
 	# MSD Methods and Properties
 	def __init__(self, width, height, depth, \
@@ -665,8 +738,15 @@ class MSD:
 			self._msd = msd_clib.createMSD_f(width, height, depth, molType, molPosL, molPosR, topL, bottomL, frontR, backR)
 		else:
 			self._msd = msd_clib.createMSD_i(width, height, depth, molPosL, molPosR, topL, bottomL, frontR, backR)
+		
+		# get iterators at construction because msd dimensions are immutable
+		self._begin = msd_clib.createBeginMSDIter(self._msd)
+		self._end = msd_clib.createEndMSDIter(self._msd)
 
-	def __del__(self): msd_clib.destroyMSD(self._msd)
+	def __del__(self):
+		msd_clib.destroyMSDIter(self._end)
+		msd_clib.destroyMSDIter(self._begin)
+		msd_clib.destroyMSD(self._msd)
 
 	@property
 	def record(self):
@@ -861,6 +941,12 @@ class MSD:
 	meanUmL = property(fget = lambda self : msd_clib.meanUmL(self._msd))
 	meanUmR = property(fget = lambda self : msd_clib.meanUmR(self._msd))
 	meanULR = property(fget = lambda self : msd_clib.meanULR(self._msd))
+
+	begin = property(fget = lambda self: MSD._Iterator(msd = self))
+	end = property(fget = lambda self: MSD._Iterator(msd = self, start = (self._end, len(self))))
+	def __iter__(self): return self.begin
+	def __reversed__(self): return MSD._Iterator(msd = self, start = (self._end, len(self)), direction = MSD._Iterator.BACKWARD)
+	def __len__(self): return self.n
 
 
 # (export "C") Function Signatures/Declarations
@@ -1208,6 +1294,12 @@ if __name__ == "__main__":
 	msd[x,y,z] = (Vector.ZERO, Vector.K)
 	msd[a] = msd[x,y,z]
 	print("__getitem__:", msd[x,y,z], msd[a])
+	print()
+
+	print("---- MSD iterator ----")
+	for atom in msd:
+		print(f"{atom.metaIndex}. {atom.pos} = {atom.index}: {atom.spin} + {atom.flux} = {atom.localM}")
+	print("assert n == len: ", msd.n, len(msd))
 	print()
 
 	print("---- __del__ test ----")

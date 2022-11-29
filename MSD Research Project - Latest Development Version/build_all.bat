@@ -32,7 +32,7 @@
 
 
 @rem Remove .obj file
-@del iterate.obj heat.obj magnetize.obj magnetize2.obj metropolis.obj extract.obj mfm_aggregator.obj
+@del iterate.obj heat.obj magnetize.obj magnetize2.obj metropolis.obj extract.obj mfm_aggregator.obj MSD-export.obj
 @del lib\python\MSD-export.exp lib\python\MSD-export.lib lib\python\MSD-export_x86.exp lib\python\MSD-export_x86.lib
 
 

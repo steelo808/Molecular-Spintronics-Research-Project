@@ -228,7 +228,7 @@ C DLL void getLeads(const MolProto *proto, uint *left, uint *right) { proto->get
 C DLL MSDIter* createBeginMSDIter(const MSD *msd) { return new MSDIter(msd->begin()); }
 C DLL MSDIter* createEndMSDIter(const MSD *msd) { return new MSDIter(msd->end()); }
 C DLL MSDIter* copyMSDIter(const MSDIter *iter) { return new MSDIter(*iter); }
-C DLL void destroyMSDIter(MSD *iter) { delete iter; }
+C DLL void destroyMSDIter(MSDIter *iter) { delete iter; }
 C DLL unsigned int getX(const MSDIter *iter) { return iter->getX(); }
 C DLL unsigned int getY(const MSDIter *iter) { return iter->getY(); }
 C DLL unsigned int getZ(const MSDIter *iter) { return iter->getZ(); }
