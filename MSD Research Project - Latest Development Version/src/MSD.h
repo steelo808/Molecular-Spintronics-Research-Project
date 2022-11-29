@@ -3,8 +3,8 @@
  * @author Christopher D'Angelo
  * @brief The core logic which all the apps use to run MSD simulations.
  *        Includes definitions and calculations.
- * @version 6.1
- * @date 2022-10-11
+ * @version 6.2
+ * @date 2022-11-29
  * 
  * @copyright Copyright (c) 2022
  */
@@ -12,7 +12,7 @@
 #ifndef UDC_MSD
 #define UDC_MSD
 
-#define UDC_MSD_VERSION "6.0"
+#define UDC_MSD_VERSION "6.2"
 
 #include <cstdlib>
 #include <cmath>
@@ -65,6 +65,10 @@ using udc::bwrite;
  */
 class Molecule {
 	friend class MSD;
+	friend class NodeIterable;
+	friend class NodeIterator;
+	friend class EdgeIterable;
+	friend class EdgeIterator;
 
  public:
 	/**
@@ -201,14 +205,131 @@ class Molecule {
 	void setNodeParameters(unsigned int index, const NodeParameters &p);
 	void setAllParameters(const Molecule::NodeParameters &nodeParams, const Molecule::EdgeParameters &edgeParams);
 
-	// TODO? Add methods for getting adjacency list for each node?
-
 	void setLeftLead(unsigned int node);
 	void setRightLead(unsigned int node);
 	void setLeads(unsigned int left, unsigned int right);
 	unsigned int getLeftLead() const;
 	unsigned int getRightLead() const;
 	void getLeads(unsigned int &left, unsigned int &right) const;
+
+	// Iterators
+	class NodeIterable;
+	class EdgeIterable;
+
+	NodeIterable getNodes() const;  // iterates over all nodes in the Molecule 
+	EdgeIterable getEdges() const;  // iterates over all the edges in the entire Molecule
+	EdgeIterable getAdjacencyList(unsigned int nodeIndex) const;  // iterates over the edges (i.e. adjacency list) of a given node
+	// Note: changes to the molecule invalidate all previously constructed Iterable or Iterator objects
+
+	class NodeIterator {
+		friend class NodeIterable;
+
+	 private:
+		const NodeIterable &iterable;
+		unsigned int idx;
+
+		NodeIterator(const NodeIterable &nodes, unsigned int idx);
+	
+	 public:
+		unsigned int getIndex() const;
+		NodeParameters getParameters() const;
+		EdgeIterable getNeighbors() const;
+
+		unsigned int operator*() const;
+		unsigned int operator[](int) const;
+		operator unsigned int() const;
+		
+		NodeIterator& operator++();
+		NodeIterator operator++(int);
+		NodeIterator& operator--();
+		NodeIterator operator--(int);
+		NodeIterator& operator+=(int);
+		NodeIterator& operator-=(int);
+		
+		NodeIterator operator+(int) const;
+		NodeIterator operator-(int) const;
+		
+		bool operator==(const NodeIterator &) const;
+		bool operator!=(const NodeIterator &) const;
+		bool operator>(const NodeIterator &) const;
+		bool operator<(const NodeIterator &) const;
+		bool operator>=(const NodeIterator &) const;
+		bool operator<=(const NodeIterator &) const;
+	};
+
+	class NodeIterable {
+		friend class Molecule;
+		friend class NodeIterator;
+
+	 private:
+		const Molecule &mol;
+		unsigned int _begin;
+		unsigned int _end;
+	
+		NodeIterable(const Molecule &mol);
+	
+	 public:
+		NodeIterator begin() const;
+		NodeIterator end() const;
+		unsigned int size() const;
+	};
+
+	class EdgeIterator {
+		friend class EdgeIterable;
+
+	 private:
+		const EdgeIterable &iterable;
+		unsigned int idx;  // idx of edges iterable. not nessesarily the same as the "edgeIndex" returned by Molecule::connectNodes
+
+		EdgeIterator(const EdgeIterable &edges, unsigned int idx);
+
+		const Edge& getEdge() const;  // helper method
+
+	 public:
+		unsigned int getIndex() const;
+		EdgeParameters getParameters() const;
+		unsigned int src() const;  // (index of) source node
+		unsigned int dest() const;  // (index of) destination node
+		double getDirection() const;  // direction of node: either 1.0, -1.0, or 0.0
+
+		unsigned int operator*() const;
+		unsigned int operator[](int) const;
+		operator unsigned int() const;
+		
+		EdgeIterator& operator++();
+		EdgeIterator operator++(int);
+		EdgeIterator& operator--();
+		EdgeIterator operator--(int);
+		EdgeIterator& operator+=(int);
+		EdgeIterator& operator-=(int);
+		
+		EdgeIterator operator+(int) const;
+		EdgeIterator operator-(int) const;
+		
+		bool operator==(const EdgeIterator &) const;
+		bool operator!=(const EdgeIterator &) const;
+		bool operator>(const EdgeIterator &) const;
+		bool operator<(const EdgeIterator &) const;
+		bool operator>=(const EdgeIterator &) const;
+		bool operator<=(const EdgeIterator &) const;
+	};
+
+	class EdgeIterable {
+		friend class Molecule;
+		friend class EdgeIterator;
+	
+	 private:
+		const Molecule &mol;
+		std::vector<Edge> edges;
+
+		EdgeIterable(const Molecule &);
+		EdgeIterable(const Molecule &, unsigned int node);
+	
+	 public:
+		EdgeIterator begin() const;
+		EdgeIterator end() const;
+		unsigned int size() const;
+	};
 
  // ----- Molecule::Instance stuff -----
  private:
@@ -858,6 +979,257 @@ unsigned int Molecule::getRightLead() const {
 void Molecule::getLeads(unsigned int &left, unsigned int &right) const {
 	left = leftLead;
 	right = rightLead;
+}
+
+Molecule::NodeIterable Molecule::getNodes() const {
+	return Molecule::NodeIterable(*this);
+}
+
+Molecule::EdgeIterable Molecule::getEdges() const {
+	return Molecule::EdgeIterable(*this);
+}
+
+Molecule::EdgeIterable Molecule::getAdjacencyList(unsigned int nodeIndex) const {
+	return Molecule::EdgeIterable(*this, nodeIndex);
+}
+
+Molecule::NodeIterator::NodeIterator(const NodeIterable &nodes, unsigned int idx) : iterable(nodes), idx(idx) {
+}
+
+unsigned int Molecule::NodeIterator::getIndex() const {
+	return idx;
+}
+
+Molecule::NodeParameters Molecule::NodeIterator::getParameters() const {
+	return iterable.mol.getNodeParameters(getIndex());
+}
+
+Molecule::EdgeIterable Molecule::NodeIterator::getNeighbors() const {
+	return iterable.mol.getAdjacencyList(getIndex());
+}
+
+unsigned int Molecule::NodeIterator::operator*() const {
+	return getIndex();
+}
+
+unsigned int Molecule::NodeIterator::operator[](int offset) const {
+	return *(*this + offset);
+}
+
+Molecule::NodeIterator::operator unsigned int() const {
+	return getIndex();
+}
+
+Molecule::NodeIterator& Molecule::NodeIterator::operator++() {
+	++idx;
+	return *this;
+}
+
+Molecule::NodeIterator Molecule::NodeIterator::operator++(int) {
+	Molecule::NodeIterator prev = *this;
+	++(*this);
+	return prev;
+}
+
+Molecule::NodeIterator& Molecule::NodeIterator::operator--() {
+	--idx;
+	return *this;
+}
+
+Molecule::NodeIterator Molecule::NodeIterator::operator--(int) {
+	Molecule::NodeIterator prev = *this;
+	--(*this);
+	return prev;
+}
+
+Molecule::NodeIterator& Molecule::NodeIterator::operator+=(int offset) {
+	idx += offset;
+	return *this;
+}
+
+Molecule::NodeIterator& Molecule::NodeIterator::operator-=(int offset) {
+	idx -= offset;
+	return *this;
+}
+
+Molecule::NodeIterator Molecule::NodeIterator::operator+(int offset) const {
+	return Molecule::NodeIterator(iterable, idx + offset);
+}
+
+Molecule::NodeIterator Molecule::NodeIterator::operator-(int offset) const {
+	return Molecule::NodeIterator(iterable, idx - offset);
+}
+
+bool Molecule::NodeIterator::operator==(const NodeIterator &iter) const {
+	return idx == iter.idx;
+}
+
+bool Molecule::NodeIterator::operator!=(const NodeIterator &iter) const {
+	return !(*this == iter);
+}
+
+bool Molecule::NodeIterator::operator>(const NodeIterator &iter) const {
+	return idx < iter.idx;
+}
+
+bool Molecule::NodeIterator::operator<(const NodeIterator &iter) const {
+	return idx > iter.idx;
+}
+
+bool Molecule::NodeIterator::operator>=(const NodeIterator &iter) const {
+	return !(*this < iter);
+}
+
+bool Molecule::NodeIterator::operator<=(const NodeIterator &iter) const {
+	return !(*this > iter);
+}
+
+Molecule::NodeIterable::NodeIterable(const Molecule &mol)
+: mol(mol), _begin(0), _end(mol.nodeCount())
+{
+	/* empty */
+}
+
+Molecule::NodeIterator Molecule::NodeIterable::begin() const {
+	return Molecule::NodeIterator(*this, _begin);
+}
+
+Molecule::NodeIterator Molecule::NodeIterable::end() const {
+	return Molecule::NodeIterator(*this, _end);
+}
+
+unsigned int Molecule::NodeIterable::size() const {
+	return _end - _begin;
+}
+
+Molecule::EdgeIterator::EdgeIterator(const EdgeIterable &edges, unsigned idx) : iterable(edges), idx(idx) {
+}
+
+const Molecule::Edge& Molecule::EdgeIterator::getEdge() const {
+	return iterable.edges.at(idx);
+}
+
+unsigned int Molecule::EdgeIterator::getIndex() const {
+	return getEdge().edgeIndex;
+}
+
+Molecule::EdgeParameters Molecule::EdgeIterator::getParameters() const {
+	return iterable.mol.getEdgeParameters(getIndex());
+}
+
+unsigned int Molecule::EdgeIterator::src() const {
+	return getEdge().selfIndex;
+}
+
+unsigned int Molecule::EdgeIterator::dest() const {
+	return getEdge().nodeIndex;
+}
+
+double Molecule::EdgeIterator::getDirection() const {
+	return getEdge().direction;
+}
+
+unsigned int Molecule::EdgeIterator::operator*() const {
+	return getIndex();
+}
+
+unsigned int Molecule::EdgeIterator::operator[](int offset) const {
+	return *(*this + offset);
+}
+
+Molecule::EdgeIterator::operator unsigned int() const {
+	return getIndex();
+}
+		
+Molecule::EdgeIterator& Molecule::EdgeIterator::operator++() {
+	++idx;
+	return *this;
+}
+
+Molecule::EdgeIterator Molecule::EdgeIterator::operator++(int) {
+	Molecule::EdgeIterator prev = *this;
+	++(*this);
+	return prev;
+}
+
+Molecule::EdgeIterator& Molecule::EdgeIterator::operator--() {
+	--idx;
+	return *this;
+}
+
+Molecule::EdgeIterator Molecule::EdgeIterator::operator--(int) {
+	Molecule::EdgeIterator prev = *this;
+	--(*this);
+	return prev;
+}
+
+Molecule::EdgeIterator& Molecule::EdgeIterator::operator+=(int offset) {
+	idx += offset;
+	return *this;
+}
+
+Molecule::EdgeIterator& Molecule::EdgeIterator::operator-=(int offset) {
+	idx -= offset;
+	return *this;
+}
+
+Molecule::EdgeIterator Molecule::EdgeIterator::operator+(int offset) const {
+	return Molecule::EdgeIterator(iterable, idx + offset);
+}
+
+Molecule::EdgeIterator Molecule::EdgeIterator::operator-(int offset) const {
+	return Molecule::EdgeIterator(iterable, idx - offset);
+}
+
+bool Molecule::EdgeIterator::operator==(const EdgeIterator &iter) const {
+	return idx == iter.idx;
+}
+
+bool Molecule::EdgeIterator::operator!=(const EdgeIterator &iter) const {
+	return !(*this == iter);
+}
+
+bool Molecule::EdgeIterator::operator>(const EdgeIterator &iter) const {
+	return idx > iter.idx;
+}
+
+bool Molecule::EdgeIterator::operator<(const EdgeIterator &iter) const {
+	return idx < iter.idx;
+}
+
+bool Molecule::EdgeIterator::operator>=(const EdgeIterator &iter) const {
+	return !(*this < iter);
+}
+
+bool Molecule::EdgeIterator::operator<=(const EdgeIterator &iter) const {
+	return !(*this > iter);
+}
+
+Molecule::EdgeIterable::EdgeIterable(const Molecule &mol) : mol(mol) {
+	int sum = 0;
+	for (unsigned int node : mol.getNodes())
+		sum += mol.nodes.at(node).neighbors.size();
+	edges.reserve(sum);
+	for (unsigned int node : mol.getNodes()) {
+		auto neighbors = mol.nodes.at(node).neighbors;
+		edges.insert(edges.end(), neighbors.begin(), neighbors.end());
+	}
+}
+
+Molecule::EdgeIterable::EdgeIterable(const Molecule &mol, unsigned int node) :mol(mol) {
+	edges = mol.nodes.at(node).neighbors;
+}
+
+Molecule::EdgeIterator Molecule::EdgeIterable::begin() const {
+	return Molecule::EdgeIterator(*this, 0);
+}
+
+Molecule::EdgeIterator Molecule::EdgeIterable::end() const {
+	return Molecule::EdgeIterator(*this, edges.size());
+}
+
+unsigned int Molecule::EdgeIterable::size() const {
+	return edges.size();
 }
 
 Molecule::Instance::Instance(const Molecule &prototype, MSD &msd, unsigned int y, unsigned int z,

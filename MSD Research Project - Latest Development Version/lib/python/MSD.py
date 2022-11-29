@@ -3,8 +3,8 @@
 # See: MSD-export.cpp
 #
 # Author: Christopher D'Angelo
-# Last Updated: November 23, 2022
-# Version: 1.0
+# Last Updated: November 29, 2022
+# Version: 1.1
 
 from ctypes import *
 from typing import *
@@ -40,11 +40,18 @@ def _sig(restype, f, argtypes):
 	f.restype = restype
 	f.argtypes = argtypes
 
+def _boundsCheck(index, max, min = 0):
+	if index < min or index > max:
+		raise IndexError(f"Index ({index}) out of bounds. Must be between {min} (inclusive) and {max} (inclusive).")
 
-# public Types exposed by MSD.py library
+
+# public Types (and Globals) exposed by MSD.py library
+PI = c_double.in_dll(msd_clib, "PI").value
+E = c_double.in_dll(msd_clib, "E").value
+
+
 class Vector(_StructWithDict):
 	'''Python version of udc::Vector class in Vector.h'''
-
 	_fields_ = [("x", c_double), ("y", c_double), ("z", c_double)]
 
 	def __init__(self, *args, **kw): super().__init__(*args, **kw)
@@ -53,13 +60,55 @@ class Vector(_StructWithDict):
 	def __len__(self): return 3
 	def __getitem__(self, idx): return (self.x, self.y, self.z)[idx]
 	def __repr__(self): return f"({self.x}, {self.y}, {self.z})"
-	
-	# TODO: add Vector operation ? Low-level??
 
-Vector.I = Vector(1.0, 0.0, 0.0)
-Vector.J = Vector(0.0, 1.0, 0.0)
-Vector.K = Vector(0.0, 0.0, 1.0)
-Vector.ZERO = Vector(0.0, 0.0, 0.0)
+	@classmethod
+	def cylindricalForm(cls, r, theta, z): return msd_clib.cylindricalForm(r, theta, z)
+
+	@classmethod
+	def polarForm(cls, r, theta): return msd_clib.polarForm(r, theta)
+
+	@classmethod
+	def sphericalForm(cls, rho, theta, phi): return msd_clib.sphericalForm(rho, theta, phi)
+
+	normSq = property(fget = lambda self: msd_clib.normSq(byref(self)))
+	norm = property(fget = lambda self: msd_clib.norm(byref(self)))
+	theta = property(fget = lambda self: msd_clib.theta(byref(self)))
+	phi = property(fget = lambda self: msd_clib.phi(byref(self)))
+
+	def __eq__(self, other): return msd_clib.eq_v(byref(self), byref(other))
+	def __ne__(self, other): return msd_clib.ne_v(byref(self), byref(other))
+
+	def __add__(self, other): return msd_clib.add_v(byref(self), byref(other))
+	def __neg__(self): return msd_clib.neg_v(byref(self))
+	def __sub__(self, other): return msd_clib.sub_v(byref(self), byref(other))
+	
+	def __mul__(self, other):
+		return self.dotProduct(other) if isinstance(other, Vector) else msd_clib.mul_v(byref(self), other)
+	
+	def distanceSq(self, other): return msd_clib.distanceSq(byref(self), byref(other))
+	def distance(self, other): return msd_clib.distance(byref(self), byref(other))
+	def dotProduct(self, other): return msd_clib.dotProduct(byref(self), byref(other))
+	def angleBetween(self, other): return msd_clib.angleBetween(byref(self), byref(other))
+	def crossProduct(self, other): return msd_clib.crossProduct(byref(self), byref(other))
+
+	def __iadd__(self, other): msd_clib.iadd_v(pointer(self), byref(other))
+	def __isub__(self, other): msd_clib.isub_v(pointer(self), byref(other))
+	def __imul__(self, other): msd_clib.imul_v(pointer(self), byref(other))
+
+	def negate(self): msd_clib.negate(pointer(self))
+	
+	def rotate(self, theta, phi = None):
+		if theta is None:
+			msd_clib.rotate_2d(pointer(self), theta)
+		else:
+			msd_clib.rotate_3d(pointer(self), theta, phi)
+	
+	def normalize(self): msd_clib.normalize(pointer(self))
+
+Vector.I = Vector.in_dll(msd_clib, "I")
+Vector.J = Vector.in_dll(msd_clib, "J")
+Vector.K = Vector.in_dll(msd_clib, "K")
+Vector.ZERO = Vector.in_dll(msd_clib, "ZERO")
 
 
 class Molecule:
@@ -81,7 +130,6 @@ class Molecule:
 			self.bm = 0.0
 			self.Dm = Vector.ZERO
 			super().__init__(*args, **kw)
-	
 
 	class NodeParameters(_MMTStruct):
 		_fields_ = [
@@ -99,13 +147,229 @@ class Molecule:
 			super().__init__(*args, **kw)
 	
 
+	class _NodeIterable:
+		'''
+		Represents an iterable collection of molecule nodes.
+		Do not construct directly!
+		Should be constructed using Molecule methods/properties, namely:
+		Molecule.nodes
+		'''
+		def __init__(self, nodes):
+			self._nodes = nodes
+			self._begin = msd_clib.createBeginNodeIter(nodes)
+			self._end = msd_clib.createEndNodeIter(nodes)
+
+		def __del__(self):
+			msd_clib.destroyNodeIter(self._end)
+			msd_clib.destroyNodeIter(self._begin)
+			msd_clib.destroyNodes(self._nodes)
+
+		begin = property(fget = lambda self: Molecule._Node(iterable = self))
+		end = property(fget = lambda self: Molecule._Node(iterable = self, start = (self._end, len(self))))
+		def __iter__(self): return self.begin
+		def __reversed__(self): return Molecule._Node(iterable = self, start = (self._end, len(self)), direction = Molecule._Node.BACKWARD)
+		def __len__(self): return msd_clib.size_n(self._nodes)
+		
+		def __getitem__(self, index):
+			index = index % len(self)
+			if index >= 0:
+				return self.begin + index
+			else:
+				return self.end - -index
+
+	class _Node:
+		'''
+		Represents a specific molecule node.
+		Also acts as a node iterator.
+		Should not be construct directly!
+		Should be constructed using Molecule._NodeIterable methods/properties.
+		'''
+		# these must be defined before __init__ since they are used as default arguments
+		def next(self):
+			print(hex(self._node), type(self._node), hex(self._iterable._end), type(self._iterable._end))
+			if msd_clib.eq_n(self._node, self._iterable._end):
+				raise StopIteration
+			
+			curr = self.clone()
+			msd_clib.next_n(self._node)
+			self._pos += 1
+			return curr
+		
+		def prev(self):
+			if msd_clib.eq_n(self._node, self._iterable._begin):
+				raise StopIteration
+			
+			msd_clib.prev_n(self._node)
+			self._pos -= 1
+			return self.clone()
+		
+		# direction = tuple(__next__)
+		FORWARD = (next,)
+		BACKWARD = (prev,)
+
+		def __init__(self, iterable, start = (None, 0), direction = FORWARD):
+			self._iterable = iterable
+			self._node = msd_clib.copyNodeIter(iterable._begin if start[0] is None else start[0])
+			self._pos = start[1]
+			
+			self._next = direction[0]
+		
+		def __del__(self): msd_clib.destroyNodeIter(self._node)
+		
+		def clone(self): return Molecule._Node(self._iterable, start = (self._node, self._pos), direction = (self._next,))
+
+		pos = property(fget = lambda self: self._pos)
+
+		index = property(fget = lambda self: msd_clib.nodeIndex_i(self._node))
+		def getParameters(self): return msd_clib.getNodeParameters_i(self._node)
+		neighbors = property(fget = lambda self: Molecule._EdgeIterable(msd_clib.getNeighbors(self._node)))
+
+		def __eq__(self, other): return msd_clib.eq_n(self._node, other._node)
+		def __ne__(self, other): return msd_clib.ne_n(self._node, other._node)
+		def __lt__(self, other): return msd_clib.lt_n(self._node, other._node)
+		def __gt__(self, other): return msd_clib.gt_n(self._node, other._node)
+		def __le__(self, other): return msd_clib.le_n(self._node, other._node)
+		def __ge__(self, other): return msd_clib.ge_n(self._node, other._node)
+		
+		def __next__(self): return self._next(self)
+
+		def __iadd__(self, offset):
+			newPos = self._pos + offset
+			_boundsCheck(newPos, len(self._iterable))
+			msd_clib.add_n(self._node, offset)
+			self._pos = newPos
+		
+		def __isub__(self, offset):
+			newPos = self._pos - offset
+			_boundsCheck(newPos, len(self._iterable))
+			msd_clib.sub_n(self._node, offset)
+			self._pos = newPos
+		
+		def __add__(self, offset):
+			copy = self.clone()
+			copy += offset
+			return copy
+		
+		def __sub__(self, offset):
+			copy = self.clone()
+			copy -= offset
+			return copy
+
+	class _EdgeIterable:
+		'''
+		Represents an iterable collection of molecule edges.
+		Do not construct directly!
+		Should be constructed using Molecule methods/properties, namely:
+		Molecule.edges and Molecule.getAdjacencyList()
+		'''
+		def __init__(self, edges):
+			self._edges = edges
+			self._begin = msd_clib.createBeginEdgeIter(edges)
+			self._end = msd_clib.createEndEdgeIter(edges)
+		
+		def __del__(self):
+			msd_clib.destroyEdgeIter(self._end)
+			msd_clib.destroyEdgeIter(self._begin)
+			msd_clib.destroyEdges(self._edges)
+		
+		begin = property(fget = lambda self: Molecule._Edge(iterable = self))
+		end = property(fget = lambda self: Molecule._Edge(iterable = self, start = (self._end, len(self))))
+		def __iter__(self): return self.begin
+		def __reversed__(self): return Molecule._Edge(iterable = self, start = (self._end, len(self)), direction = Molecule._Edge.BACKWARD)
+		def __len__(self): return msd_clib.size_e(self._edges)
+		
+		def __getitem__(self, index):
+			index = index % len(self)
+			if index >= 0:
+				return self.begin + index
+			else:
+				return self.end - -index
+
+	class _Edge:
+		'''
+		Represents a specific molecule edge.
+		Also acts as an edge iterator.
+		Should not be construct directly!
+		Should be constructed using Molecule._EdgeIterable methods/properties.
+		'''
+		def next(self):
+			if msd_clib.eq_e(self._edge, self._iterable._end):
+				raise StopIteration
+			
+			curr = self.clone()
+			msd_clib.next_e(self._edge)
+			self._pos += 1
+			return curr
+		
+		def prev(self):
+			if msd_clib.eq_e(self._edge, self._iterable._begin):
+				raise StopIteration
+			
+			msd_clib.prev_e(self._edge)
+			self._pos -= 1
+			return self.clone()
+		
+		# direction = (__next__)
+		FORWARD = (next,)
+		BACKWARD = (prev,)
+
+		def __init__(self, iterable, start = (None, 0), direction = FORWARD):
+			self._iterable = iterable
+			self._edge = msd_clib.copyEdgeIter(iterable._begin if start[0] is None else start[0])
+			self._pos = start[1]
+			
+			self._next = direction[0]
+		
+		def __del__(self): msd_clib.destroyEdgeIter(self._edge)
+
+		def clone(self): return Molecule._Edge(self._iterable, start = (self._edge, self._pos), direction = (self._next,))
+		
+		pos = property(fget = lambda self: self._pos)
+
+		index = property(fget = lambda self: msd_clib.edgeIndex_i(self._edge))
+		def getParameters(self): return msd_clib.getEdgeParameters_i(self._edge)
+		src = property(fget = lambda self: msd_clib.src_e(self._edge))
+		dest = property(fget = lambda self: msd_clib.dest_e(self._edge))
+		direction = property(fget = lambda self: msd_clib.getDirection(self._edge))
+		
+		def __eq__(self, other): return msd_clib.eq_e(self._edge, other._edge)
+		def __ne__(self, other): return msd_clib.ne_e(self._edge, other._edge)
+		def __lt__(self, other): return msd_clib.lt_e(self._edge, other._edge)
+		def __gt__(self, other): return msd_clib.gt_e(self._edge, other._edge)
+		def __le__(self, other): return msd_clib.le_e(self._edge, other._edge)
+		def __ge__(self, other): return msd_clib.ge_e(self._edge, other._edge)
+		
+		def __next__(self): return self._next(self)
+		
+		def __iadd__(self, offset):
+			newPos = self._pos + offset
+			_boundsCheck(newPos, len(self._iterable))
+			msd_clib.add_e(self._edge, offset)
+			self._pos = newPos
+		
+		def __isub__(self, offset):
+			newPos = self._pos - offset
+			_boundsCheck(newPos, len(self._iterable))
+			msd_clib.sub_e(self._edge, offset)
+			self._pos = newPos
+		
+		def __add__(self, offset):
+			copy = self.clone()
+			copy += offset
+			return copy
+		
+		def __sub__(self, offset):
+			copy = self.clone()
+			copy -= offset
+			return copy
+
 	# (export "C") Globals as static constants
 	HEADER = c_char_p.in_dll(msd_clib, "HEADER")
 	HEADER_SIZE = c_size_t.in_dll(msd_clib, "HEADER_SIZE")
 	NOT_FOUND = c_uint.in_dll(msd_clib, "NOT_FOUND")
 
 	# Molecule methods and properties
-	def __init__(self, nodeCount = None, nodeParams = None):
+	def __init__(self, nodeCount = None, nodeParams = None, _proto: c_void_p = None):
 		'''
 		Construct a new Molecule prototype.
 		An Optional nodeCount, and initial NodeParameters can be given.
@@ -113,18 +377,18 @@ class Molecule:
 		no nodes, and no edges.
 
 		Both the left and right leads are initialized to 0.
-		'''
-		self._proto: c_void_p = None
-		self._edges: dict[c_uint, tuple[c_uint, c_uint]] = {}
-		# TODO: It's redundant to store edges in both Python and C++,
-		# 	but no way to access all edge info from Python without new C++ methods.
 
-		if nodeCount is None:
-			self._proto = msd_clib.createMolProto_e()
-		elif nodeParams is None:
-			self._proto = msd_clib.createMolProto_n(nodeCount)
-		else:
-			self._proto = msd_clib.createMolProto_p(nodeCount, byref(nodeParams))
+		Note: _proto parameter is reserved for internal use only!
+		'''
+		self._proto: c_void_p = _proto
+
+		if _proto is None:
+			if nodeCount is None:
+				self._proto = msd_clib.createMolProto_e()
+			elif nodeParams is None:
+				self._proto = msd_clib.createMolProto_n(nodeCount)
+			else:
+				self._proto = msd_clib.createMolProto_p(nodeCount, byref(nodeParams))
 
 	def __del__(self): msd_clib.destroyMolProto(self._proto)
 
@@ -165,13 +429,10 @@ class Molecule:
 		If edgeParam is None, this method the uses C++ defaults for nodeParams. This should
 		have the same effect as using a default-constructed Python NodeParameter object.
 		'''
-		idx = None
 		if edgeParams is None:
-			idx = msd_clib.connectNodes_d(self._proto, nodeA, nodeB)
+			return msd_clib.connectNodes_d(self._proto, nodeA, nodeB)
 		else:
-			idx = msd_clib.connectNodes_p(self._proto, nodeA, nodeB, byref(edgeParams))
-		self._edges[idx] = (nodeA, nodeB)
-		return idx
+			return msd_clib.connectNodes_p(self._proto, nodeA, nodeB, byref(edgeParams))
 
 	def edgeIndex(self, nodeA, nodeB):
 		'''
@@ -201,21 +462,44 @@ class Molecule:
 		fset = lambda self, leads: msd_clib.setLeads(self._proto, *leads)
 		)
 	
+	nodes = property(fget = lambda self: Molecule._NodeIterable(msd_clib.createNodes(self._proto)))
+	edges = property(fget = lambda self: Molecule._EdgeIterable(msd_clib.createEdges(self._proto)))
+	def getAdjacencyList(self, nodeIndex): return Molecule._EdgeIterable(msd_clib.getAdjacencyList(self._proto, nodeIndex))
+	
+	@property
+	def edgesUnique(self):
+		'''
+		Builds and returns a list of edges which contain uniqie edgeIndexes.
+		Useful since edges are directional and edges between two different nodes will be duplicated.
+
+		The elements of the list will be Molecule._Edge objects, which are themselves iterable.
+		But iterating on these objects will return "duplicated" edges (edges with the same edgeIndex)
+		from the underlying Molecule._EdgeIterable.
+		'''
+		visited: Set[int] = set()
+		unique: List[Molecule._Edge] = []
+		for edge in self.edges:
+			edgeIndex = edge.index
+			if edgeIndex not in visited:
+				visited.add(edgeIndex)
+				unique.append(edge)
+		return unique
+
 	def mmt(self):
 		''' MMT formated string '''
 		# Nodes
-		n = self.nodeCount
-		mmt = str(n) + "\n"
-		for i in range(n):
-			mmt += self.getNodeParameters(i).mmt() + "\n"
+		nodes = self.nodes
+		mmt = str(len(nodes)) + "\n"
+		for node in nodes:
+			mmt += node.getParameters().mmt() + "\n"
 		mmt += "\n"
 
 		# Edges
-		n = len(self._edges)
-		mmt += str(n) + "\n"
-		for edge, verts in self._edges.items():
-			mmt += self.getEdgeParameters(edge).mmt()
-			mmt += f"; srcNode={verts[0]}; destNode={verts[1]}\n"
+		edges = self.edgesUnique
+		mmt += str(len(edges)) + "\n"
+		for edge in edges:
+			mmt += edge.getParameters().mmt()
+			mmt += f"; srcNode={edge.src}; destNode={edge.dest}\n"
 		mmt += "\n"
 
 		# Leads
@@ -266,7 +550,6 @@ class MSD:
 			self.DL, self.DR, self.DmL, self.DmR, self.DLR = Vector.ZERO, Vector.ZERO, Vector.ZERO, Vector.ZERO, Vector.ZERO
 			super().__init__(*args, **kw)
 
-
 	class Results(_StructWithDict):
 		_fields_ = [
 			("t", c_ulonglong),
@@ -284,6 +567,9 @@ class MSD:
 			self.U, self.UL, self.UR, self.Um, self.UmL, self.UmR, self.ULR = 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
 			super().__init__(*args, **kw)
 
+
+	class Iterator:
+		pass  #TODO
 
 	# MSD Methods and Properties
 	def __init__(self, width, height, depth, \
@@ -408,10 +694,15 @@ class MSD:
 	def setB(self, B): msd_clib.setB(self._msd, byref(B))
 	B = property(fset = setB)
 
-	def getMolProto(self): pass  #TODO
-	def setMolProto(self, molProto): pass  #TODO
+	def getMolProto(self): return Molecule(_proto = msd_clib.getMolProto(self._msd))
+	def setMolProto(self, mol: Molecule): msd_clib.setMolProto(self._msd, mol._proto)
+	molProto = property(fset = setMolProto)
+	
 	def setMolParameters(self, nodeParams = Molecule.NodeParameters(), edgeParams = Molecule.EdgeParameters()):
-		pass  #TODO
+		msd_clib.setMolParameters(self._msd, nodeParams, edgeParams)
+	
+	# params = tuple(nodeParams, edgeParams)
+	molParameters = property(fset = lambda self, params: self.setMolParameters(*params))
 
 	def getSpin(self, x, y = None, z = None):
 		if y is None:
@@ -592,6 +883,7 @@ _sig(MSD.Results, msd_clib.getResults, [c_void_p])
 _sig(None, msd_clib.set_kT, [c_void_p, c_double])
 _sig(None, msd_clib.setB, [c_void_p, POINTER(Vector)])
 
+_sig(c_void_p, msd_clib.getMolProto, [c_void_p])
 _sig(None, msd_clib.setMolProto, 2 * [c_void_p])
 _sig(None, msd_clib.setMolParameters, 3 * [c_void_p])
 
@@ -701,6 +993,111 @@ _sig(c_uint, msd_clib.getLeftLead, [c_void_p])
 _sig(c_uint, msd_clib.getRightLead, [c_void_p])
 _sig(None, msd_clib.getLeads, [c_void_p] + 2 * [POINTER(c_uint)])
 
+_sig(c_void_p, msd_clib.createBeginMSDIter, [c_void_p])
+_sig(c_void_p, msd_clib.createEndMSDIter, [c_void_p])
+_sig(c_void_p, msd_clib.copyMSDIter, [c_void_p])
+_sig(None, msd_clib.destroyMSDIter, [c_void_p])
+_sig(c_uint, msd_clib.getX, [c_void_p])
+_sig(c_uint, msd_clib.getY, [c_void_p])
+_sig(c_uint, msd_clib.getZ, [c_void_p])
+_sig(c_uint, msd_clib.msdIndex, [c_void_p])
+_sig(Vector, msd_clib.getSpin_a, [c_void_p])
+_sig(Vector, msd_clib.getFlux_a, [c_void_p])
+_sig(Vector, msd_clib.getLocalM_a, [c_void_p])
+_sig(c_bool, msd_clib.eq_a, 2 * [c_void_p])
+_sig(c_bool, msd_clib.ne_a, 2 * [c_void_p])
+_sig(c_bool, msd_clib.lt_a, 2 * [c_void_p])
+_sig(c_bool, msd_clib.gt_a, 2 * [c_void_p])
+_sig(c_bool, msd_clib.le_a, 2 * [c_void_p])
+_sig(c_bool, msd_clib.ge_a, 2 * [c_void_p])
+_sig(None, msd_clib.next_a, [c_void_p])
+_sig(None, msd_clib.prev_a, [c_void_p])
+_sig(None, msd_clib.add_a, [c_void_p, c_int])
+_sig(None, msd_clib.sub_a, [c_void_p, c_int])
+
+_sig(c_void_p, msd_clib.createNodes, [c_void_p])
+_sig(None, msd_clib.destroyNodes, [c_void_p])
+_sig(c_void_p, msd_clib.createEdges, [c_void_p])
+_sig(c_void_p, msd_clib.createAdjacencyList, [c_void_p, c_uint])
+_sig(None, msd_clib.destroyEdges, [c_void_p])
+
+_sig(c_uint, msd_clib.size_n, [c_void_p])
+_sig(c_uint, msd_clib.size_e, [c_void_p])
+
+_sig(c_void_p, msd_clib.createBeginNodeIter, [c_void_p])
+_sig(c_void_p, msd_clib.createEndNodeIter, [c_void_p])
+_sig(c_void_p, msd_clib.copyNodeIter, [c_void_p])
+_sig(None, msd_clib.destroyNodeIter, [c_void_p])
+_sig(c_uint, msd_clib.nodeIndex_i, [c_void_p])
+_sig(Molecule.NodeParameters, msd_clib.getNodeParameters_i, [c_void_p])
+_sig(c_void_p, msd_clib.getNeighbors, [c_void_p])
+_sig(c_bool, msd_clib.eq_n, 2 * [c_void_p])
+_sig(c_bool, msd_clib.ne_n, 2 * [c_void_p])
+_sig(c_bool, msd_clib.lt_n, 2 * [c_void_p])
+_sig(c_bool, msd_clib.gt_n, 2 * [c_void_p])
+_sig(c_bool, msd_clib.le_n, 2 * [c_void_p])
+_sig(c_bool, msd_clib.ge_n, 2 * [c_void_p])
+_sig(None, msd_clib.next_n, [c_void_p])
+_sig(None, msd_clib.prev_n, [c_void_p])
+_sig(None, msd_clib.add_n, [c_void_p, c_int])
+_sig(None, msd_clib.sub_n, [c_void_p, c_int])
+
+_sig(c_void_p, msd_clib.createBeginEdgeIter, [c_void_p])
+_sig(c_void_p, msd_clib.createEndEdgeIter, [c_void_p])
+_sig(c_void_p, msd_clib.copyEdgeIter, [c_void_p])
+_sig(None, msd_clib.destroyEdgeIter, [c_void_p])
+_sig(c_uint, msd_clib.edgeIndex_i, [c_void_p])
+_sig(Molecule.EdgeParameters, msd_clib.getEdgeParameters_i, [c_void_p])
+_sig(c_uint, msd_clib.src_e, [c_void_p])
+_sig(c_uint, msd_clib.dest_e, [c_void_p])
+_sig(c_double, msd_clib.getDirection, [c_void_p])
+_sig(c_bool, msd_clib.eq_e, 2 * [c_void_p])
+_sig(c_bool, msd_clib.ne_e, 2 * [c_void_p])
+_sig(c_bool, msd_clib.lt_e, 2 * [c_void_p])
+_sig(c_bool, msd_clib.gt_e, 2 * [c_void_p])
+_sig(c_bool, msd_clib.le_e, 2 * [c_void_p])
+_sig(c_bool, msd_clib.ge_e, 2 * [c_void_p])
+_sig(None, msd_clib.next_e, [c_void_p])
+_sig(None, msd_clib.prev_e, [c_void_p])
+_sig(None, msd_clib.add_e, [c_void_p, c_int])
+_sig(None, msd_clib.sub_e, [c_void_p, c_int])
+
+_sig(Vector, msd_clib.createVector_3, 3 * [c_double])
+_sig(Vector, msd_clib.createVector_2, 2 * [c_double])
+_sig(Vector, msd_clib.createVector_0, [])
+_sig(Vector, msd_clib.cylindricalForm, 3 * [c_double])
+_sig(Vector, msd_clib.polarForm, 2 * [c_double])
+_sig(Vector, msd_clib.sphericalForm, 3 * [c_double])
+
+_sig(c_double, msd_clib.normSq, [POINTER(Vector)])
+_sig(c_double, msd_clib.norm, [POINTER(Vector)])
+_sig(c_double, msd_clib.theta, [POINTER(Vector)])
+_sig(c_double, msd_clib.phi, [POINTER(Vector)])
+
+_sig(c_bool, msd_clib.eq_v, 2 * [POINTER(Vector)])
+_sig(c_bool, msd_clib.ne_v, 2 * [POINTER(Vector)])
+
+_sig(Vector, msd_clib.add_v, 2 * [POINTER(Vector)])
+_sig(Vector, msd_clib.neg_v, [POINTER(Vector)])
+_sig(Vector, msd_clib.sub_v, 2 * [POINTER(Vector)])
+_sig(Vector, msd_clib.mul_v, [POINTER(Vector), c_double])
+
+_sig(c_double, msd_clib.distanceSq, 2 * [POINTER(Vector)])
+_sig(c_double, msd_clib.distance, 2 * [POINTER(Vector)])
+_sig(c_double, msd_clib.dotProduct, 2 * [POINTER(Vector)])
+_sig(c_double, msd_clib.angleBetween, 2 * [POINTER(Vector)])
+_sig(Vector, msd_clib.crossProduct, 2 * [POINTER(Vector)])
+
+_sig(None, msd_clib.iadd_v, 2 * [POINTER(Vector)])
+_sig(None, msd_clib.isub_v, 2 * [POINTER(Vector)])
+_sig(None, msd_clib.imul_v, [POINTER(Vector), c_double])
+
+_sig(None, msd_clib.negate, [POINTER(Vector)])
+_sig(None, msd_clib.rotate_2d, [POINTER(Vector), c_double])
+_sig(None, msd_clib.rotate_3d, [POINTER(Vector), c_double, c_double])
+_sig(None, msd_clib.normalize, [POINTER(Vector)])
+
+
 
 
 # DEBUG: TESTS
@@ -743,6 +1140,13 @@ if __name__ == "__main__":
 	msd = MSD(13, 10, 10, molPosL = 5, molPosR = 7, molType = MSD.CIRCULAR_MOL, topL = 3, bottomL = 7, frontR = 3, backR = 7)
 	msd = MSD(18, 10, 10, molPosL = 5, molProto = copy_mol, topL = 3, bottomL = 7, frontR = 3, backR = 7)
 	msd.flippingAlgorithm = MSD.UP_DOWN_MODEL
+	print()
+
+	print("---- MolProto and Molecule Iterators tests ----")
+	mol = msd.getMolProto()
+	print("Node count:", len(mol.nodes))
+	print("True Edge count:", len(mol.edges))
+	print("Unique Edge count:", len(mol.edgesUnique))
 	print()
 
 	print("---- seed test ----")
@@ -809,3 +1213,14 @@ if __name__ == "__main__":
 	print("---- __del__ test ----")
 	del msd
 	print()
+
+	print("---- Vector Math test ----")
+	from math import pi
+	v1 = Vector.I * 10
+	v2 = Vector.ZERO + Vector.J + Vector.K
+	print(v1 + v2)
+	v3 = Vector.sphericalForm(1, 0, pi / 4)
+	v4 = Vector.sphericalForm(1, 0, PI / 4.0)
+	print(v4 - v3)
+	v2.normalize()
+	print(v2)

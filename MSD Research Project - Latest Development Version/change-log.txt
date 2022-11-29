@@ -139,10 +139,17 @@ Second bug fix. In MSD::setParameters()
 (10-4-2022) Added support to "iterate" app to use custom MolProto when given a .mmb file.
 (10-4-2022) Added code to MSD::MolProto for saving and loading .mmb files.
 	As well as an mmt.h header to parse .mmt files.
+(11-23-2022) Add MSD-export.cpp (extern "C" interface for MSD.h) and MSD.py (python binding of MSD.h).
+	Also updated build-all.bat to build MSD-export.dll from MSD-export.cpp which is required by MSD.py.
+
+6.2.0:
+(11-29-2022) Added Edge and Node iterators for the Molecule class.
+	Added this functionality to MSD-export.cpp and MSD.py as well.
+	Added Vector math to MSD-export.cpp and MSD.py.
+	Added E and PI global constants (for consistancy) to MSD-export.cpp and MSD.py.
 
 TODO: Fix flux != 0 on mol. that are "turned off"
 TODO: Add graph-based mol. to MSD. (including ability to create fully customizable MolProto,
 		and input them into the apps)
 		WORKING... Currently we have a GUI builder, .mmb compiler, and "iterate" support.
 		Finish other apps.
-TODO: (Maybe) Add NodeRef and EdgeRef types to Molecule (i.e. MolProto) for public/full access to Edge data.
