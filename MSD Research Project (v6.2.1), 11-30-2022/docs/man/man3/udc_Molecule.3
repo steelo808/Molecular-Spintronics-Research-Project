@@ -1,0 +1,261 @@
+.TH "udc::Molecule" 3 "Wed Nov 30 2022" "Version 6.2.1" "MSD" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+udc::Molecule \- An abstract molecule\&.  
+
+.SH SYNOPSIS
+.br
+.PP
+.PP
+\fC#include <MSD\&.h>\fP
+.SS "Classes"
+
+.in +1c
+.ti -1c
+.RI "class \fBDeserializationException\fP"
+.br
+.ti -1c
+.RI "class \fBEdgeIterable\fP"
+.br
+.ti -1c
+.RI "class \fBEdgeIterator\fP"
+.br
+.ti -1c
+.RI "struct \fBEdgeParameters\fP"
+.br
+.RI "Information about an edge between two Nodes\&. "
+.ti -1c
+.RI "class \fBNodeIterable\fP"
+.br
+.ti -1c
+.RI "class \fBNodeIterator\fP"
+.br
+.ti -1c
+.RI "struct \fBNodeParameters\fP"
+.br
+.RI "local parameters "
+.in -1c
+.SS "Public Member Functions"
+
+.in +1c
+.ti -1c
+.RI "\fBMolecule\fP ()"
+.br
+.RI "Create a default molecule with no nodes or edges\&. "
+.ti -1c
+.RI "\fBMolecule\fP (size_t \fBnodeCount\fP, const \fBNodeParameters\fP &nodeParams=\fBNodeParameters\fP())"
+.br
+.RI "Create a molecule with the given number of nodes, but no edges\&. "
+.ti -1c
+.RI "void \fBserialize\fP (unsigned char *buffer) const"
+.br
+.ti -1c
+.RI "void \fBdeserialize\fP (const unsigned char *buffer)"
+.br
+.ti -1c
+.RI "size_t \fBserializationSize\fP () const"
+.br
+.ti -1c
+.RI "istream & \fBread\fP (istream &in)"
+.br
+.ti -1c
+.RI "ostream & \fBwrite\fP (ostream &out) const"
+.br
+.ti -1c
+.RI "unsigned int \fBcreateNode\fP (const \fBNodeParameters\fP &parameters=\fBNodeParameters\fP())"
+.br
+.RI "Returns the new node's index\&. "
+.ti -1c
+.RI "unsigned int \fBnodeCount\fP () const"
+.br
+.RI "(i\&.e\&. "
+.ti -1c
+.RI "unsigned int \fBconnectNodes\fP (unsigned int nodeA, unsigned int nodeB, const \fBEdgeParameters\fP &parameters=\fBEdgeParameters\fP())"
+.br
+.RI "Creates a connection (Edge) between the two given nodes, and returns the new Edge's index\&. "
+.ti -1c
+.RI "unsigned int \fBedgeIndex\fP (unsigned int nodeA, unsigned int nodeB) const"
+.br
+.RI "Search for and return the index of the edge connecting the given nodes if one exists, or \fBMolecule::NOT_FOUND\fP if one doesn't\&. "
+.ti -1c
+.RI "\fBEdgeParameters\fP \fBgetEdgeParameters\fP (unsigned int index) const"
+.br
+.ti -1c
+.RI "void \fBsetEdgeParameters\fP (unsigned int index, const \fBEdgeParameters\fP &p)"
+.br
+.ti -1c
+.RI "\fBNodeParameters\fP \fBgetNodeParameters\fP (unsigned int index) const"
+.br
+.ti -1c
+.RI "void \fBsetNodeParameters\fP (unsigned int index, const \fBNodeParameters\fP &p)"
+.br
+.ti -1c
+.RI "void \fBsetAllParameters\fP (const \fBMolecule::NodeParameters\fP &nodeParams, const \fBMolecule::EdgeParameters\fP &edgeParams)"
+.br
+.ti -1c
+.RI "void \fBsetLeftLead\fP (unsigned int node)"
+.br
+.ti -1c
+.RI "void \fBsetRightLead\fP (unsigned int node)"
+.br
+.ti -1c
+.RI "void \fBsetLeads\fP (unsigned int left, unsigned int right)"
+.br
+.ti -1c
+.RI "unsigned int \fBgetLeftLead\fP () const"
+.br
+.ti -1c
+.RI "unsigned int \fBgetRightLead\fP () const"
+.br
+.ti -1c
+.RI "void \fBgetLeads\fP (unsigned int &left, unsigned int &right) const"
+.br
+.ti -1c
+.RI "\fBNodeIterable\fP \fBgetNodes\fP () const"
+.br
+.ti -1c
+.RI "\fBEdgeIterable\fP \fBgetEdges\fP () const"
+.br
+.ti -1c
+.RI "\fBEdgeIterable\fP \fBgetAdjacencyList\fP (unsigned int nodeIndex) const"
+.br
+.in -1c
+.SS "Static Public Member Functions"
+
+.in +1c
+.ti -1c
+.RI "static \fBMolecule\fP \fBload\fP (istream &in)"
+.br
+.in -1c
+.SS "Static Public Attributes"
+
+.in +1c
+.ti -1c
+.RI "static const char *const \fBHEADER\fP = 'MMB'"
+.br
+.ti -1c
+.RI "static const size_t \fBHEADER_SIZE\fP = 3"
+.br
+.ti -1c
+.RI "static const unsigned int \fBNOT_FOUND\fP = (unsigned int) \-1"
+.br
+.in -1c
+.SS "Friends"
+
+.in +1c
+.ti -1c
+.RI "class \fBMSD\fP"
+.br
+.ti -1c
+.RI "class \fBNodeIterable\fP"
+.br
+.ti -1c
+.RI "class \fBNodeIterator\fP"
+.br
+.ti -1c
+.RI "class \fBEdgeIterable\fP"
+.br
+.ti -1c
+.RI "class \fBEdgeIterator\fP"
+.br
+.in -1c
+.SH "Detailed Description"
+.PP 
+An abstract molecule\&. 
+
+Used in \fBMSD\fP\&. A 'Molecule' object only represents a prototype for a molecule design\&. Use the instantiate() method to create a Molecule::Instance which has a unique spin state\&. 
+.SH "Constructor & Destructor Documentation"
+.PP 
+.SS "udc::Molecule::Molecule ()"
+
+.PP
+Create a default molecule with no nodes or edges\&. Both the left and right leads are initalize to 0\&. 
+.SS "udc::Molecule::Molecule (size_t nodeCount, const \fBNodeParameters\fP & nodeParams = \fC\fBNodeParameters\fP()\fP)"
+
+.PP
+Create a molecule with the given number of nodes, but no edges\&. Both the left and right leads are initalized to 0\&.
+.PP
+May also supply a set of parameters to use for each node\&. By default, the default node parameters are used\&. 
+.SH "Member Function Documentation"
+.PP 
+.SS "unsigned int udc::Molecule::connectNodes (unsigned int nodeA, unsigned int nodeB, const \fBEdgeParameters\fP & parameters = \fC\fBEdgeParameters\fP()\fP)"
+
+.PP
+Creates a connection (Edge) between the two given nodes, and returns the new Edge's index\&. Note: this method does not check if the two nodes are already connected\&. It is possible to creates more then one edge connecting the same two nodes\&. 
+.SS "unsigned int udc::Molecule::createNode (const \fBNodeParameters\fP & parameters = \fC\fBNodeParameters\fP()\fP)"
+
+.PP
+Returns the new node's index\&. 
+.SS "void udc::Molecule::deserialize (const unsigned char * buffer)"
+
+.SS "unsigned int udc::Molecule::edgeIndex (unsigned int nodeA, unsigned int nodeB) const"
+
+.PP
+Search for and return the index of the edge connecting the given nodes if one exists, or \fBMolecule::NOT_FOUND\fP if one doesn't\&. 
+.SS "\fBMolecule::EdgeIterable\fP udc::Molecule::getAdjacencyList (unsigned int nodeIndex) const"
+
+.SS "\fBMolecule::EdgeParameters\fP udc::Molecule::getEdgeParameters (unsigned int index) const"
+
+.SS "\fBMolecule::EdgeIterable\fP udc::Molecule::getEdges () const"
+
+.SS "void udc::Molecule::getLeads (unsigned int & left, unsigned int & right) const"
+
+.SS "unsigned int udc::Molecule::getLeftLead () const"
+
+.SS "\fBMolecule::NodeParameters\fP udc::Molecule::getNodeParameters (unsigned int index) const"
+
+.SS "\fBMolecule::NodeIterable\fP udc::Molecule::getNodes () const"
+
+.SS "unsigned int udc::Molecule::getRightLead () const"
+
+.SS "\fBMolecule\fP udc::Molecule::load (istream & in)\fC [static]\fP"
+
+.SS "unsigned int udc::Molecule::nodeCount () const"
+
+.PP
+(i\&.e\&. 'n_m') Returns the number of nodes/atoms in this molecule\&. 
+.SS "istream & udc::Molecule::read (istream & in)"
+
+.SS "size_t udc::Molecule::serializationSize () const"
+
+.SS "void udc::Molecule::serialize (unsigned char * buffer) const"
+
+.SS "void udc::Molecule::setAllParameters (const \fBMolecule::NodeParameters\fP & nodeParams, const \fBMolecule::EdgeParameters\fP & edgeParams)"
+
+.SS "void udc::Molecule::setEdgeParameters (unsigned int index, const \fBEdgeParameters\fP & p)"
+
+.SS "void udc::Molecule::setLeads (unsigned int left, unsigned int right)"
+
+.SS "void udc::Molecule::setLeftLead (unsigned int node)"
+
+.SS "void udc::Molecule::setNodeParameters (unsigned int index, const \fBNodeParameters\fP & p)"
+
+.SS "void udc::Molecule::setRightLead (unsigned int node)"
+
+.SS "ostream & udc::Molecule::write (ostream & out) const"
+
+.SH "Friends And Related Function Documentation"
+.PP 
+.SS "friend class \fBEdgeIterable\fP\fC [friend]\fP"
+
+.SS "friend class \fBEdgeIterator\fP\fC [friend]\fP"
+
+.SS "friend class \fBMSD\fP\fC [friend]\fP"
+
+.SS "friend class \fBNodeIterable\fP\fC [friend]\fP"
+
+.SS "friend class \fBNodeIterator\fP\fC [friend]\fP"
+
+.SH "Member Data Documentation"
+.PP 
+.SS "const char *const udc::Molecule::HEADER = 'MMB'\fC [static]\fP"
+
+.SS "const size_t udc::Molecule::HEADER_SIZE = 3\fC [static]\fP"
+
+.SS "const unsigned int udc::Molecule::NOT_FOUND = (unsigned int) \-1\fC [static]\fP"
+
+
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for MSD from the source code\&.

@@ -1,0 +1,167 @@
+.TH "MSD.MSD._Iterator" 3 "Wed Nov 30 2022" "Version 6.2.1" "MSD" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+MSD.MSD._Iterator
+.SH SYNOPSIS
+.br
+.PP
+.SS "Public Member Functions"
+
+.in +1c
+.ti -1c
+.RI "def \fBnext\fP (self)"
+.br
+.ti -1c
+.RI "def \fBprev\fP (self)"
+.br
+.ti -1c
+.RI "def \fB__init__\fP (self, msd, start=(None, 0), direction=\fBFORWARD\fP)"
+.br
+.ti -1c
+.RI "def \fB__del__\fP (self)"
+.br
+.ti -1c
+.RI "def \fBclone\fP (self)"
+.br
+.ti -1c
+.RI "def \fB__eq__\fP (self, other)"
+.br
+.ti -1c
+.RI "def \fB__ne__\fP (self, other)"
+.br
+.ti -1c
+.RI "def \fB__lt__\fP (self, other)"
+.br
+.ti -1c
+.RI "def \fB__gt__\fP (self, other)"
+.br
+.ti -1c
+.RI "def \fB__le__\fP (self, other)"
+.br
+.ti -1c
+.RI "def \fB__ge__\fP (self, other)"
+.br
+.ti -1c
+.RI "def \fB__next__\fP (self)"
+.br
+.ti -1c
+.RI "def \fB__iadd__\fP (self, offset)"
+.br
+.ti -1c
+.RI "def \fB__isub__\fP (self, offset)"
+.br
+.ti -1c
+.RI "def \fB__add__\fP (self, offset)"
+.br
+.ti -1c
+.RI "def \fB__sub__\fP (self, offset)"
+.br
+.in -1c
+.SS "Static Public Attributes"
+
+.in +1c
+.ti -1c
+.RI "tuple \fBFORWARD\fP = (\fBnext\fP,)"
+.br
+.ti -1c
+.RI "tuple \fBBACKWARD\fP = (\fBprev\fP,)"
+.br
+.in -1c
+.SS "Properties"
+
+.in +1c
+.ti -1c
+.RI "\fBmetaIndex\fP = property(fget = lambda self: self\&._i)"
+.br
+.ti -1c
+.RI "\fBindex\fP = property(fget = lambda self: msd_clib\&.msdIndex(self\&._iter))"
+.br
+.ti -1c
+.RI "\fBx\fP = property(fget = lambda self: msd_clib\&.getX(self\&._iter))"
+.br
+.ti -1c
+.RI "\fBy\fP = property(fget = lambda self: msd_clib\&.getY(self\&._iter))"
+.br
+.ti -1c
+.RI "\fBz\fP = property(fget = lambda self: msd_clib\&.getZ(self\&._iter))"
+.br
+.ti -1c
+.RI "\fBpos\fP = property(fget = lambda self: (self\&.x, self\&.y, self\&.z))"
+.br
+.ti -1c
+.RI "\fBspin\fP = property(fget = lambda self: msd_clib\&.getSpin_a(self\&._iter))"
+.br
+.ti -1c
+.RI "\fBflux\fP = property(fget = lambda self: msd_clib\&.getFlux_a(self\&._iter))"
+.br
+.ti -1c
+.RI "\fBlocalM\fP = property(fget = lambda self: msd_clib\&.getLocalM_a(self\&._iter))"
+.br
+.in -1c
+.SH "Constructor & Destructor Documentation"
+.PP 
+.SS "def MSD\&.MSD\&._Iterator\&.__init__ ( self,  msd,  start = \fC(None, 0)\fP,  direction = \fC\fBFORWARD\fP\fP)"
+
+.SS "def MSD\&.MSD\&._Iterator\&.__del__ ( self)"
+
+.SH "Member Function Documentation"
+.PP 
+.SS "def MSD\&.MSD\&._Iterator\&.__add__ ( self,  offset)"
+
+.SS "def MSD\&.MSD\&._Iterator\&.__eq__ ( self,  other)"
+
+.SS "def MSD\&.MSD\&._Iterator\&.__ge__ ( self,  other)"
+
+.SS "def MSD\&.MSD\&._Iterator\&.__gt__ ( self,  other)"
+
+.SS "def MSD\&.MSD\&._Iterator\&.__iadd__ ( self,  offset)"
+
+.SS "def MSD\&.MSD\&._Iterator\&.__isub__ ( self,  offset)"
+
+.SS "def MSD\&.MSD\&._Iterator\&.__le__ ( self,  other)"
+
+.SS "def MSD\&.MSD\&._Iterator\&.__lt__ ( self,  other)"
+
+.SS "def MSD\&.MSD\&._Iterator\&.__ne__ ( self,  other)"
+
+.SS "def MSD\&.MSD\&._Iterator\&.__next__ ( self)"
+
+.SS "def MSD\&.MSD\&._Iterator\&.__sub__ ( self,  offset)"
+
+.SS "def MSD\&.MSD\&._Iterator\&.clone ( self)"
+
+.SS "def MSD\&.MSD\&._Iterator\&.next ( self)"
+
+.SS "def MSD\&.MSD\&._Iterator\&.prev ( self)"
+
+.SH "Member Data Documentation"
+.PP 
+.SS "tuple MSD\&.MSD\&._Iterator\&.BACKWARD = (\fBprev\fP,)\fC [static]\fP"
+
+.SS "tuple MSD\&.MSD\&._Iterator\&.FORWARD = (\fBnext\fP,)\fC [static]\fP"
+
+.SH "Property Documentation"
+.PP 
+.SS "MSD\&.MSD\&._Iterator\&.flux = property(fget = lambda self: msd_clib\&.getFlux_a(self\&._iter))\fC [static]\fP"
+
+.SS "MSD\&.MSD\&._Iterator\&.index = property(fget = lambda self: msd_clib\&.msdIndex(self\&._iter))\fC [static]\fP"
+
+.SS "MSD\&.MSD\&._Iterator\&.localM = property(fget = lambda self: msd_clib\&.getLocalM_a(self\&._iter))\fC [static]\fP"
+
+.SS "MSD\&.MSD\&._Iterator\&.metaIndex = property(fget = lambda self: self\&._i)\fC [static]\fP"
+
+.SS "MSD\&.MSD\&._Iterator\&.pos = property(fget = lambda self: (self\&.x, self\&.y, self\&.z))\fC [static]\fP"
+
+.SS "MSD\&.MSD\&._Iterator\&.spin = property(fget = lambda self: msd_clib\&.getSpin_a(self\&._iter))\fC [static]\fP"
+
+.SS "MSD\&.MSD\&._Iterator\&.x = property(fget = lambda self: msd_clib\&.getX(self\&._iter))\fC [static]\fP"
+
+.SS "MSD\&.MSD\&._Iterator\&.y = property(fget = lambda self: msd_clib\&.getY(self\&._iter))\fC [static]\fP"
+
+.SS "MSD\&.MSD\&._Iterator\&.z = property(fget = lambda self: msd_clib\&.getZ(self\&._iter))\fC [static]\fP"
+
+
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for MSD from the source code\&.
