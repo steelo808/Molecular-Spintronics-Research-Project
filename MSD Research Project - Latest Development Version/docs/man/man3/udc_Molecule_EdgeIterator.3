@@ -1,0 +1,141 @@
+.TH "udc::Molecule::EdgeIterator" 3 "Wed Nov 30 2022" "Version 6.2.1" "MSD" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+udc::Molecule::EdgeIterator
+.SH SYNOPSIS
+.br
+.PP
+.PP
+\fC#include <MSD\&.h>\fP
+.SS "Public Member Functions"
+
+.in +1c
+.ti -1c
+.RI "unsigned int \fBgetIndex\fP () const"
+.br
+.ti -1c
+.RI "\fBEdgeParameters\fP \fBgetParameters\fP () const"
+.br
+.ti -1c
+.RI "unsigned int \fBsrc\fP () const"
+.br
+.ti -1c
+.RI "unsigned int \fBdest\fP () const"
+.br
+.ti -1c
+.RI "double \fBgetDirection\fP () const"
+.br
+.ti -1c
+.RI "unsigned int \fBoperator*\fP () const"
+.br
+.ti -1c
+.RI "unsigned int \fBoperator[]\fP (int) const"
+.br
+.ti -1c
+.RI "\fBoperator unsigned int\fP () const"
+.br
+.ti -1c
+.RI "\fBEdgeIterator\fP & \fBoperator++\fP ()"
+.br
+.ti -1c
+.RI "\fBEdgeIterator\fP \fBoperator++\fP (int)"
+.br
+.ti -1c
+.RI "\fBEdgeIterator\fP & \fBoperator\-\-\fP ()"
+.br
+.ti -1c
+.RI "\fBEdgeIterator\fP \fBoperator\-\-\fP (int)"
+.br
+.ti -1c
+.RI "\fBEdgeIterator\fP & \fBoperator+=\fP (int)"
+.br
+.ti -1c
+.RI "\fBEdgeIterator\fP & \fBoperator\-=\fP (int)"
+.br
+.ti -1c
+.RI "\fBEdgeIterator\fP \fBoperator+\fP (int) const"
+.br
+.ti -1c
+.RI "\fBEdgeIterator\fP \fBoperator\-\fP (int) const"
+.br
+.ti -1c
+.RI "bool \fBoperator==\fP (const \fBEdgeIterator\fP &) const"
+.br
+.ti -1c
+.RI "bool \fBoperator!=\fP (const \fBEdgeIterator\fP &) const"
+.br
+.ti -1c
+.RI "bool \fBoperator>\fP (const \fBEdgeIterator\fP &) const"
+.br
+.ti -1c
+.RI "bool \fBoperator<\fP (const \fBEdgeIterator\fP &) const"
+.br
+.ti -1c
+.RI "bool \fBoperator>=\fP (const \fBEdgeIterator\fP &) const"
+.br
+.ti -1c
+.RI "bool \fBoperator<=\fP (const \fBEdgeIterator\fP &) const"
+.br
+.in -1c
+.SS "Friends"
+
+.in +1c
+.ti -1c
+.RI "class \fBEdgeIterable\fP"
+.br
+.in -1c
+.SH "Member Function Documentation"
+.PP 
+.SS "unsigned int udc::Molecule::EdgeIterator::dest () const"
+
+.SS "double udc::Molecule::EdgeIterator::getDirection () const"
+
+.SS "unsigned int udc::Molecule::EdgeIterator::getIndex () const"
+
+.SS "\fBMolecule::EdgeParameters\fP udc::Molecule::EdgeIterator::getParameters () const"
+
+.SS "udc::Molecule::EdgeIterator::operator unsigned int () const"
+
+.SS "bool udc::Molecule::EdgeIterator::operator!= (const \fBEdgeIterator\fP & iter) const"
+
+.SS "unsigned int udc::Molecule::EdgeIterator::operator* () const"
+
+.SS "\fBMolecule::EdgeIterator\fP udc::Molecule::EdgeIterator::operator+ (int offset) const"
+
+.SS "\fBMolecule::EdgeIterator\fP & udc::Molecule::EdgeIterator::operator++ ()"
+
+.SS "\fBMolecule::EdgeIterator\fP udc::Molecule::EdgeIterator::operator++ (int)"
+
+.SS "\fBMolecule::EdgeIterator\fP & udc::Molecule::EdgeIterator::operator+= (int offset)"
+
+.SS "\fBMolecule::EdgeIterator\fP udc::Molecule::EdgeIterator::operator\- (int offset) const"
+
+.SS "\fBMolecule::EdgeIterator\fP & udc::Molecule::EdgeIterator::operator\-\- ()"
+
+.SS "\fBMolecule::EdgeIterator\fP udc::Molecule::EdgeIterator::operator\-\- (int)"
+
+.SS "\fBMolecule::EdgeIterator\fP & udc::Molecule::EdgeIterator::operator\-= (int offset)"
+
+.SS "bool udc::Molecule::EdgeIterator::operator< (const \fBEdgeIterator\fP & iter) const"
+
+.SS "bool udc::Molecule::EdgeIterator::operator<= (const \fBEdgeIterator\fP & iter) const"
+
+.SS "bool udc::Molecule::EdgeIterator::operator== (const \fBEdgeIterator\fP & iter) const"
+
+.SS "bool udc::Molecule::EdgeIterator::operator> (const \fBEdgeIterator\fP & iter) const"
+
+.SS "bool udc::Molecule::EdgeIterator::operator>= (const \fBEdgeIterator\fP & iter) const"
+
+.SS "unsigned int udc::Molecule::EdgeIterator::operator[] (int offset) const"
+
+.SS "unsigned int udc::Molecule::EdgeIterator::src () const"
+
+.SH "Friends And Related Function Documentation"
+.PP 
+.SS "friend class \fBEdgeIterable\fP\fC [friend]\fP"
+
+
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for MSD from the source code\&.

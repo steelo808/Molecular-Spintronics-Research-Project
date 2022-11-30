@@ -1,0 +1,87 @@
+.TH "C:/Users/mathh/GitHub/Molecular-Spintronics-Research-Project/MSD Research Project - Latest Development Version/lib/python/MSD.py" 3 "Wed Nov 30 2022" "Version 6.2.1" "MSD" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+C:/Users/mathh/GitHub/Molecular-Spintronics-Research-Project/MSD Research Project - Latest Development Version/lib/python/MSD.py
+.SH SYNOPSIS
+.br
+.PP
+.SS "Classes"
+
+.in +1c
+.ti -1c
+.RI "class \fBMSD\&._StructWithDict\fP"
+.br
+.RI "Version of ctypes\&.Structure that defines \fBdict\fP and overrides \fBrepr\fP "
+.ti -1c
+.RI "class \fBMSD\&._MMTStruct\fP"
+.br
+.RI "Adds the MSD-Molecule-Text, \fBmmt()\fP method for subclasses\&. "
+.ti -1c
+.RI "class \fBMSD\&.Vector\fP"
+.br
+.RI "Python version of \fBudc::Vector\fP class in \fBVector\&.h\fP\&. "
+.ti -1c
+.RI "class \fBMSD\&.Molecule\fP"
+.br
+.ti -1c
+.RI "class \fBMSD\&.Molecule\&.EdgeParameters\fP"
+.br
+.ti -1c
+.RI "class \fBMSD\&.Molecule\&.NodeParameters\fP"
+.br
+.ti -1c
+.RI "class \fBMSD\&.Molecule\&._NodeIterable\fP"
+.br
+.RI "Represents an iterable collection of molecule nodes\&. "
+.ti -1c
+.RI "class \fBMSD\&.Molecule\&._Node\fP"
+.br
+.RI "Represents a specific molecule node\&. "
+.ti -1c
+.RI "class \fBMSD\&.Molecule\&._EdgeIterable\fP"
+.br
+.RI "Represents an iterable collection of molecule edges\&. "
+.ti -1c
+.RI "class \fBMSD\&.Molecule\&._Edge\fP"
+.br
+.RI "Represents a specific molecule edge\&. "
+.ti -1c
+.RI "class \fBMSD\&.MSD\fP"
+.br
+.ti -1c
+.RI "class \fBMSD\&.MSD\&.Parameters\fP"
+.br
+.ti -1c
+.RI "class \fBMSD\&.MSD\&.Results\fP"
+.br
+.ti -1c
+.RI "class \fBMSD\&.MSD\&._Iterator\fP"
+.br
+.in -1c
+.SS "Namespaces"
+
+.in +1c
+.ti -1c
+.RI "namespace \fBMSD\fP"
+.br
+.in -1c
+.SS "Variables"
+
+.in +1c
+.ti -1c
+.RI "\fBMSD\&.MSD_EXPORT_DLL_PATH\fP = os\&.path\&.join(os\&.path\&.realpath(os\&.path\&.dirname(__file__)), 'MSD\-export\&.dll')"
+.br
+.ti -1c
+.RI "\fBMSD\&.msd_clib\fP = CDLL(MSD_EXPORT_DLL_PATH)"
+.br
+.ti -1c
+.RI "\fBMSD\&.PI\fP = c_double\&.in_dll(msd_clib, 'PI')\&.value"
+.br
+.ti -1c
+.RI "\fBMSD\&.E\fP = c_double\&.in_dll(msd_clib, 'E')\&.value"
+.br
+.in -1c
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for MSD from the source code\&.

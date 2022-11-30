@@ -1,0 +1,216 @@
+.TH "udc::Vector" 3 "Wed Nov 30 2022" "Version 6.2.1" "MSD" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+udc::Vector
+.SH SYNOPSIS
+.br
+.PP
+.PP
+\fC#include <Vector\&.h>\fP
+.SS "Public Member Functions"
+
+.in +1c
+.ti -1c
+.RI "\fBVector\fP (double \fBx\fP, double \fBy\fP, double \fBz\fP)"
+.br
+.ti -1c
+.RI "\fBVector\fP (double \fBx\fP, double \fBy\fP)"
+.br
+.ti -1c
+.RI "\fBVector\fP ()"
+.br
+.ti -1c
+.RI "double \fBnormSq\fP () const"
+.br
+.ti -1c
+.RI "double \fBnorm\fP () const"
+.br
+.ti -1c
+.RI "double \fBtheta\fP () const"
+.br
+.ti -1c
+.RI "double \fBphi\fP () const"
+.br
+.ti -1c
+.RI "bool \fBoperator==\fP (const \fBVector\fP &) const"
+.br
+.ti -1c
+.RI "bool \fBoperator!=\fP (const \fBVector\fP &) const"
+.br
+.ti -1c
+.RI "\fBVector\fP \fBoperator+\fP (const \fBVector\fP &) const"
+.br
+.ti -1c
+.RI "\fBVector\fP \fBoperator\-\fP () const"
+.br
+.ti -1c
+.RI "\fBVector\fP \fBoperator\-\fP (const \fBVector\fP &) const"
+.br
+.ti -1c
+.RI "\fBVector\fP \fBoperator*\fP (double) const"
+.br
+.ti -1c
+.RI "double \fBoperator*\fP (const \fBVector\fP &) const"
+.br
+.ti -1c
+.RI "double \fBdistanceSq\fP (const \fBVector\fP &) const"
+.br
+.ti -1c
+.RI "double \fBdistance\fP (const \fBVector\fP &) const"
+.br
+.ti -1c
+.RI "double \fBdotProduct\fP (const \fBVector\fP &) const"
+.br
+.ti -1c
+.RI "double \fBangleBetween\fP (const \fBVector\fP &) const"
+.br
+.ti -1c
+.RI "\fBVector\fP \fBcrossProduct\fP (\fBVector\fP v) const"
+.br
+.ti -1c
+.RI "\fBVector\fP & \fBoperator+=\fP (const \fBVector\fP &)"
+.br
+.ti -1c
+.RI "\fBVector\fP & \fBoperator\-=\fP (const \fBVector\fP &)"
+.br
+.ti -1c
+.RI "\fBVector\fP & \fBoperator*=\fP (double)"
+.br
+.ti -1c
+.RI "\fBVector\fP & \fBnegate\fP ()"
+.br
+.ti -1c
+.RI "\fBVector\fP & \fBrotate\fP (double \fBtheta\fP, double \fBphi\fP)"
+.br
+.ti -1c
+.RI "\fBVector\fP & \fBrotate\fP (double \fBtheta\fP)"
+.br
+.ti -1c
+.RI "\fBVector\fP & \fBnormalize\fP ()"
+.br
+.in -1c
+.SS "Static Public Member Functions"
+
+.in +1c
+.ti -1c
+.RI "static \fBVector\fP \fBcylindricalForm\fP (double r, double \fBtheta\fP, double \fBz\fP)"
+.br
+.ti -1c
+.RI "static \fBVector\fP \fBpolarForm\fP (double r, double \fBtheta\fP)"
+.br
+.ti -1c
+.RI "static \fBVector\fP \fBsphericalForm\fP (double rho, double \fBtheta\fP, double \fBphi\fP)"
+.br
+.in -1c
+.SS "Public Attributes"
+
+.in +1c
+.ti -1c
+.RI "double \fBx\fP"
+.br
+.ti -1c
+.RI "double \fBy\fP"
+.br
+.ti -1c
+.RI "double \fBz\fP"
+.br
+.in -1c
+.SS "Static Public Attributes"
+
+.in +1c
+.ti -1c
+.RI "static const \fBVector\fP \fBZERO\fP"
+.br
+.ti -1c
+.RI "static const \fBVector\fP \fBI\fP"
+.br
+.ti -1c
+.RI "static const \fBVector\fP \fBJ\fP"
+.br
+.ti -1c
+.RI "static const \fBVector\fP \fBK\fP"
+.br
+.in -1c
+.SH "Constructor & Destructor Documentation"
+.PP 
+.SS "udc::Vector::Vector (double x, double y, double z)"
+
+.SS "udc::Vector::Vector (double x, double y)"
+
+.SS "udc::Vector::Vector ()"
+
+.SH "Member Function Documentation"
+.PP 
+.SS "double udc::Vector::angleBetween (const \fBVector\fP & v) const"
+
+.SS "\fBVector\fP udc::Vector::crossProduct (\fBVector\fP v) const"
+
+.SS "\fBVector\fP udc::Vector::cylindricalForm (double r, double theta, double z)\fC [static]\fP"
+
+.SS "double udc::Vector::distance (const \fBVector\fP & v) const"
+
+.SS "double udc::Vector::distanceSq (const \fBVector\fP & v) const"
+
+.SS "double udc::Vector::dotProduct (const \fBVector\fP & v) const"
+
+.SS "\fBVector\fP & udc::Vector::negate ()"
+
+.SS "double udc::Vector::norm () const"
+
+.SS "\fBVector\fP & udc::Vector::normalize ()"
+
+.SS "double udc::Vector::normSq () const"
+
+.SS "bool udc::Vector::operator!= (const \fBVector\fP & v) const"
+
+.SS "double udc::Vector::operator* (const \fBVector\fP & v) const"
+
+.SS "\fBVector\fP udc::Vector::operator* (double k) const"
+
+.SS "\fBVector\fP & udc::Vector::operator*= (double k)"
+
+.SS "\fBVector\fP udc::Vector::operator+ (const \fBVector\fP & v) const"
+
+.SS "\fBVector\fP & udc::Vector::operator+= (const \fBVector\fP & v)"
+
+.SS "\fBVector\fP udc::Vector::operator\- () const"
+
+.SS "\fBVector\fP udc::Vector::operator\- (const \fBVector\fP & v) const"
+
+.SS "\fBVector\fP & udc::Vector::operator\-= (const \fBVector\fP & v)"
+
+.SS "bool udc::Vector::operator== (const \fBVector\fP & v) const"
+
+.SS "double udc::Vector::phi () const"
+
+.SS "\fBVector\fP udc::Vector::polarForm (double r, double theta)\fC [static]\fP"
+
+.SS "\fBVector\fP & udc::Vector::rotate (double theta)"
+
+.SS "\fBVector\fP & udc::Vector::rotate (double theta, double phi)"
+
+.SS "\fBVector\fP udc::Vector::sphericalForm (double rho, double theta, double phi)\fC [static]\fP"
+
+.SS "double udc::Vector::theta () const"
+
+.SH "Member Data Documentation"
+.PP 
+.SS "const \fBVector\fP udc::Vector::I\fC [static]\fP"
+
+.SS "const \fBVector\fP udc::Vector::J\fC [static]\fP"
+
+.SS "const \fBVector\fP udc::Vector::K\fC [static]\fP"
+
+.SS "double udc::Vector::x"
+
+.SS "double udc::Vector::y"
+
+.SS "double udc::Vector::z"
+
+.SS "const \fBVector\fP udc::Vector::ZERO\fC [static]\fP"
+
+
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for MSD from the source code\&.

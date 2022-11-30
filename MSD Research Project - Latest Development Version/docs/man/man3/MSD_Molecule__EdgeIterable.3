@@ -1,0 +1,72 @@
+.TH "MSD.Molecule._EdgeIterable" 3 "Wed Nov 30 2022" "Version 6.2.1" "MSD" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+MSD.Molecule._EdgeIterable \- Represents an iterable collection of molecule edges\&.  
+
+.SH SYNOPSIS
+.br
+.PP
+.SS "Public Member Functions"
+
+.in +1c
+.ti -1c
+.RI "def \fB__init__\fP (self, \fBedges\fP)"
+.br
+.ti -1c
+.RI "def \fB__del__\fP (self)"
+.br
+.ti -1c
+.RI "def \fB__iter__\fP (self)"
+.br
+.ti -1c
+.RI "def \fB__reversed__\fP (self)"
+.br
+.ti -1c
+.RI "def \fB__len__\fP (self)"
+.br
+.ti -1c
+.RI "def \fB__getitem__\fP (self, index)"
+.br
+.in -1c
+.SS "Properties"
+
+.in +1c
+.ti -1c
+.RI "\fBbegin\fP = property(fget = lambda self: \fBMolecule\&._Edge\fP(iterable = self))"
+.br
+.ti -1c
+.RI "\fBend\fP = property(fget = lambda self: \fBMolecule\&._Edge\fP(iterable = self, start = (self\&._end, len(self))))"
+.br
+.in -1c
+.SH "Detailed Description"
+.PP 
+Represents an iterable collection of molecule edges\&. 
+
+Do not construct directly! Should be constructed using \fBMolecule\fP methods/properties, namely: \fBMolecule\&.edges\fP and \fBMolecule\&.getAdjacencyList()\fP 
+.SH "Constructor & Destructor Documentation"
+.PP 
+.SS "def MSD\&.Molecule\&._EdgeIterable\&.__init__ ( self,  edges)"
+
+.SS "def MSD\&.Molecule\&._EdgeIterable\&.__del__ ( self)"
+
+.SH "Member Function Documentation"
+.PP 
+.SS "def MSD\&.Molecule\&._EdgeIterable\&.__getitem__ ( self,  index)"
+
+.SS "def MSD\&.Molecule\&._EdgeIterable\&.__iter__ ( self)"
+
+.SS "def MSD\&.Molecule\&._EdgeIterable\&.__len__ ( self)"
+
+.SS "def MSD\&.Molecule\&._EdgeIterable\&.__reversed__ ( self)"
+
+.SH "Property Documentation"
+.PP 
+.SS "MSD\&.Molecule\&._EdgeIterable\&.begin = property(fget = lambda self: \fBMolecule\&._Edge\fP(iterable = self))\fC [static]\fP"
+
+.SS "MSD\&.Molecule\&._EdgeIterable\&.end = property(fget = lambda self: \fBMolecule\&._Edge\fP(iterable = self, start = (self\&._end, len(self))))\fC [static]\fP"
+
+
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for MSD from the source code\&.

@@ -149,6 +149,12 @@ Second bug fix. In MSD::setParameters()
 	Added E and PI global constants (for consistancy) to MSD-export.cpp and MSD.py.
 	Added support for MSD iterator in MSD-export.cpp and MSD.py.
 
+6.2.1:
+(11-30-2022) Fixed bug in MSD.py: MSD.getLocalM.
+	Removed DEBUG tests from MSD.py and moved them to src/tests/MSD-python-test.py
+	Added "lib/python" to .vscode/settings.json
+	Used Doxygen to generate documentation in the new "docs" folder.
+
 TODO: Fix flux != 0 on mol. that are "turned off"
 TODO: Add graph-based mol. to MSD. (including ability to create fully customizable MolProto,
 		and input them into the apps)
