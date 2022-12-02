@@ -155,6 +155,9 @@ Second bug fix. In MSD::setParameters()
 	Added "lib/python" to .vscode/settings.json
 	Used Doxygen to generate documentation in the new "docs" folder.
 
+6.2.2:
+(12-1-2022) Updated mol-creator.js to better load dynamically changes to MMT saveBtn textarea.
+
 TODO: Fix flux != 0 on mol. that are "turned off"
 TODO: Add graph-based mol. to MSD. (including ability to create fully customizable MolProto,
 		and input them into the apps)

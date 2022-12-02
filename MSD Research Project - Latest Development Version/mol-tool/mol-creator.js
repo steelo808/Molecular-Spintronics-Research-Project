@@ -4,7 +4,7 @@ class Node {
 	constructor(svg, x, y, params) {
 		this.svgCircle = svg.myCreate("circle", { cx: x, cy: y, r: R });
 
-		if (params === undefined)
+		if (params === undefined)  // default params
 			params = {
 				Sm: 1,
 				Fm: 0,
@@ -12,11 +12,14 @@ class Node {
 				Am: [0, 0, 0]
 			};
 		
+		// copy the properties from "params" object to "this" object
 		Object.assign(this, (({Sm, Fm, Je0m, Am}) => ({Sm, Fm, Je0m, Am}))(params));
 	}
 
 	get x() { return +this.svgCircle.getAttribute("cx"); }
 	get y() { return +this.svgCircle.getAttribute("cy"); }
+	set x(cx) { this.svgCircle.setAttribute("cx", cx); }
+	set y(cy) { this.svgCircle.setAttribute("cy", cy); }
 }
 
 class Edge {
@@ -80,46 +83,7 @@ class Mol {
 
 		return str;
 	}
-};
-/**
- * Construct a new mol. be configured with the given data.
- * @param {*} str A mol. data formatted string
- * @return The new mol. object
- */
-Mol.load = function(str) {
-	let mol = new Mol();
-
-	let lines = str.split("\n").map(x => x.trim()).filter(x => x.length > 0);  // trim, then remove empty lines
-	let i = 0;
-
-	let nodesRemaining = +lines[i++];
-	while (nodesRemaining-- > 0) {
-		let obj = {};
-		for (let pair of lines[i++].split(";")) {
-			let [prop, value] = pair.split("=", 2);
-			obj[prop.trim()] = +value.trim();  // values will be Number type
-		}
-		let node = new Node(svg, obj.svgX, obj.svgY, obj);
-	}
-	
-	let edgesRemaining = +lines[i++];
-	while (edgesRemaining-- > 0) {
-		let obj = {};
-		for (let pair of lines[i++].split(";")) {
-			let [prop, value] = pair.split("=", 2);
-			prop = prop.trim();
-			if (prop === "Dm")
-				obj[prop] = value.split(",", 3).map(x => +x);
-			else
-				obj[prop] = +value.trim();
-		}
-	}
-
-	mol.leftLead = mol.nodes[+lines[i++]];
-	mol.rightLead = mol.nodes[+lines[i++]];
-
-	return mol;
-};
+}
 
 
 let svg = document.querySelector("svg#mol-canvas");
@@ -545,36 +509,121 @@ document.addEventListener("keydown", function(event) {
 	if (selected === null)
 		return;
 	
+	let d = event.ctrlKey ? 10 : 1;
 	let updateInfo = null;
 	if (event.key === "ArrowUp")
-		updateInfo = { dir: "y", delta: -1, clamp: Math.max, limit: -100 };
+		updateInfo = { dir: "y", delta: -d, clamp: Math.max, limit: -100 };
 	else if (event.key === "ArrowDown")
-		updateInfo = { dir: "y", delta: 1, clamp: Math.min, limit: 100 };
+		updateInfo = { dir: "y", delta: d, clamp: Math.min, limit: 100 };
 	else if (event.key === "ArrowLeft")
-		updateInfo = { dir: "x", delta: -1, clamp: Math.max, limit: -100 };
+		updateInfo = { dir: "x", delta: -d, clamp: Math.max, limit: -100 };
 	else if (event.key === "ArrowRight")
-		updateInfo = { dir: "x", delta: 1, clamp: Math.min, limit: 100 };8
+		updateInfo = { dir: "x", delta: d, clamp: Math.min, limit: 100 };
 	if (updateInfo !== null) {
 		let { dir, delta, clamp, limit } = updateInfo;
 		event.preventDefault();
 		selected[dir] = clamp(Math.round(selected[dir]) + delta, limit);
-		selected.svgCircle.setAttribute("c" + dir, selected[dir]);
-		updateFormWithNode(selected, mol.nodes.indexOf(selected));
+
+		/*
+		 * Note: currently, updating the form currently doesn't do anything visually,
+		 * because only GUI (SVG) properties were changed, and these are not modifiable from the form.
+		 * Uncomment in case these properties do become reflected on the form.
+		 */
+		// updateFormWithNode(selected, mol.nodes.indexOf(selected));
 	}
 });
 
-const initGUI = function(mol) {
-	window.mol = mol;
+const resetGUI = function() {
+	if (selected !== null)  // don't want to clear "saveBtn" textarea
+		clearSelected();
+	
+	mol = new Mol();
 	selected = null;
 	dragging = null;
-	for (let child in svg.childNodes) {
-		if (child.classList && !child.classList.contains("init"))
+
+	console.log(svg.childNodes);
+	for (let child of svg.childNodes) {
+		if (!(child.classList && child.classList.contains("init")))
 			svg.removeChild(child);
 	}
+
 	for (let node of mol.nodes)
 		createNode(node, node);
 	for (let edge of mol.edges)
 		createEdge(edge, edge);
+};
+
+class MMTParseError extends Error {}
+
+/**
+ * Construct a new mol. be configured with the given data.
+ * New mol is stored in "global" mol variable.
+ * @param {*} str A mol. data (MMT) formatted string
+ * @throws Error: if str is not a valid MMT formatted string
+ */
+loadMol = function(str) {
+	let lines = str.split("\n").map(x => x.trim()).filter(x => x.length > 0);  // trim, then remove empty lines
+	let i = 0;
+
+	/**
+	 * Parse the given pair for a Number or Vector, then add the property to an empty object.
+	 * @param {*} line A string: key=value
+	 * @return A plain JS object containing pairs stored as properties
+	 */
+	const parseLine = function(line) {
+		let obj = {};
+		for (let pair of line.split(";")) {
+			let [prop, value] = pair.split("=", 2);
+			value = value.trim();
+
+			// values will be either type Number or "Vector" (array of numbers)
+			let num = +value;
+			if (isNaN(num)) {
+				value = value.split(",", 3).map(x => +x);
+				if (value.length != 3)
+					throw new MMTParseError(`[Line:${i}] Vectors must have 3 numbers: ${value}`);
+				if (value.some(x => isNaN(x)))
+					throw new MMTParseError(`[Line:${i}] Can't parse numbers in vector: ${value}`);
+			} else {
+				value = num;
+			}
+			obj[prop.trim()] = value;
+		}
+		return obj;
+	}
+
+	let nodesRemaining = +lines[i++];
+	while (nodesRemaining-- > 0) {
+		let obj = parseLine(lines[i++]);
+		createNode({ x: obj.svgX, y: obj.svgY }, obj);
+	}
+	
+	let edgesRemaining = +lines[i++];
+	while (edgesRemaining-- > 0) {
+		let obj = parseLine(lines[i++]);
+		let verts = {};
+		for (side of ["srcNode", "destNode"]) {
+			let node = obj[side];
+			if (node === undefined)
+				throw new MMTParseError(`[Line:${i}] Missing required property: ${side}`);
+			node = mol.nodes[node];
+			if (!node)
+				throw new MMTParseError(`[Line:${i}] Node index not found: ${side}=${node}`);
+			verts[side] = node;
+		}
+		createEdge(verts, obj);
+	}
+
+	for (let lead of ["leftLead", "rightLead"]) {
+		let line = lines[i++];
+		let node = +line;
+		if (isNaN(node))
+			throw new MMTParseError(`[Line:${i}] Lead must be a number: ${line}`);
+		node = mol.nodes[node];
+		if (!node)
+			throw new MMTParseError(`[Line:${i}] Node index for lead not found: ${lead}=${line}`);
+		mol[lead] = node;
+	}
 };
 
 // ----------------------------------------------------------------------------
@@ -589,6 +638,8 @@ sizeInput.addEventListener("keyup", onSizeChange);
 
 const saveBtn = document.querySelector("#save");
 saveBtn.addEventListener("click", function(event) {
+	clearSelected();
+
 	let section = document.querySelector("#form");
 	section.innerHTML = "";
 
@@ -600,8 +651,19 @@ saveBtn.addEventListener("click", function(event) {
 	textarea.innerHTML = mol.save();
 	textarea.cols = "80";
 	textarea.rows = "25";
+	textarea.wrap = "off";
 	const onChange = function() {
-		initGUI(Mol.load(textarea.value));
+		try {
+			resetGUI();
+			loadMol(textarea.value);
+		} catch(err) {
+			if (err instanceof MMTParseError) {
+				// do nothing if Mol.load() fails
+				// console.log(err);  // DEBUG
+			} else {
+				throw err;  // throw all other types of Errors
+			}
+		}
 	};
 	textarea.addEventListener("change", onChange);
 	textarea.addEventListener("keyup", onChange);
