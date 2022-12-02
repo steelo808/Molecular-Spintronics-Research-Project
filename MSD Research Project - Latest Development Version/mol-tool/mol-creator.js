@@ -1,4 +1,5 @@
 const R = 10;  // radius of each node in SVG units
+const MMTLocalName = "MMT";  // name of MMT data used in localStorage
 
 class Node {
 	constructor(svg, x, y, params) {
@@ -542,7 +543,8 @@ const resetGUI = function() {
 	dragging = null;
 
 	console.log(svg.childNodes);
-	for (let child of svg.childNodes) {
+	let childNodes = Array.from(svg.childNodes);  // make a copy of the array so we can modify while iterating
+	for (let child of childNodes) {
 		if (!(child.classList && child.classList.contains("init")))
 			svg.removeChild(child);
 	}
@@ -561,7 +563,7 @@ class MMTParseError extends Error {}
  * @param {*} str A mol. data (MMT) formatted string
  * @throws Error: if str is not a valid MMT formatted string
  */
-loadMol = function(str) {
+Mol.load = function(str) {
 	let lines = str.split("\n").map(x => x.trim()).filter(x => x.length > 0);  // trim, then remove empty lines
 	let i = 0;
 
@@ -640,6 +642,9 @@ const saveBtn = document.querySelector("#save");
 saveBtn.addEventListener("click", function(event) {
 	clearSelected();
 
+	let mmt = mol.save();
+	localStorage.setItem(MMTLocalName, mmt);
+
 	let section = document.querySelector("#form");
 	section.innerHTML = "";
 
@@ -648,21 +653,16 @@ saveBtn.addEventListener("click", function(event) {
 	section.append(h);
 
 	let textarea = document.createElement("textarea");
-	textarea.innerHTML = mol.save();
+	textarea.innerHTML = mmt;
 	textarea.cols = "80";
 	textarea.rows = "25";
 	textarea.wrap = "off";
 	const onChange = function() {
 		try {
 			resetGUI();
-			loadMol(textarea.value);
+			Mol.load(textarea.value);
 		} catch(err) {
-			if (err instanceof MMTParseError) {
-				// do nothing if Mol.load() fails
-				// console.log(err);  // DEBUG
-			} else {
-				throw err;  // throw all other types of Errors
-			}
+			if (!(err instanceof MMTParseError))  throw err
 		}
 	};
 	textarea.addEventListener("change", onChange);
@@ -675,3 +675,27 @@ saveBtn.addEventListener("click", function(event) {
 	a.download = "new-mol.mmt"
 	section.append(a);
 });
+
+/*
+const loadBtn = document.querySelector("#load");
+loadBtn.addEventListener("click", function(event) {
+	// TODO stub
+});
+*/
+
+const clearBtn = document.querySelector("#clear");
+clearBtn.addEventListener("click", function(event) {
+	if (confirm("Are you sure you want to clear the entire molecule and start over?")) {
+		clearSelected();
+		resetGUI();
+	}
+});
+
+// onLoad
+let mmt = localStorage.getItem(MMTLocalName);
+if (mmt !== null)
+	try {
+		Mol.load(mmt);
+	} catch(err) {
+		if (!(err instanceof MMTParseError))  throw err;
+	}

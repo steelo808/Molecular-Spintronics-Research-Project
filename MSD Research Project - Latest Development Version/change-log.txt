@@ -157,6 +157,7 @@ Second bug fix. In MSD::setParameters()
 
 6.2.2:
 (12-1-2022) Updated mol-creator.js to better load dynamically changes to MMT saveBtn textarea.
+(12-2-2022) Updated mol-tool: Fixed resetGUI bug. Added clear button. Save button now saves mol to localStorage.
 
 TODO: Fix flux != 0 on mol. that are "turned off"
 TODO: Add graph-based mol. to MSD. (including ability to create fully customizable MolProto,
