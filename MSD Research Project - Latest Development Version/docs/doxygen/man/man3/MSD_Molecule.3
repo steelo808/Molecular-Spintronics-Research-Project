@@ -1,0 +1,254 @@
+.TH "MSD.Molecule" 3 "Wed Nov 30 2022" "Version 6.2.1" "MSD" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+MSD.Molecule
+.SH SYNOPSIS
+.br
+.PP
+.SS "Classes"
+
+.in +1c
+.ti -1c
+.RI "class \fB_Edge\fP"
+.br
+.RI "Represents a specific molecule edge\&. "
+.ti -1c
+.RI "class \fB_EdgeIterable\fP"
+.br
+.RI "Represents an iterable collection of molecule edges\&. "
+.ti -1c
+.RI "class \fB_Node\fP"
+.br
+.RI "Represents a specific molecule node\&. "
+.ti -1c
+.RI "class \fB_NodeIterable\fP"
+.br
+.RI "Represents an iterable collection of molecule nodes\&. "
+.ti -1c
+.RI "class \fBEdgeParameters\fP"
+.br
+.ti -1c
+.RI "class \fBNodeParameters\fP"
+.br
+.in -1c
+.SS "Public Member Functions"
+
+.in +1c
+.ti -1c
+.RI "def \fB__init__\fP (self, \fBnodeCount\fP=None, nodeParams=None, c_void_p _proto=None)"
+.br
+.RI "Construct a new \fBMolecule\fP prototype\&. "
+.ti -1c
+.RI "def \fB__del__\fP (self)"
+.br
+.ti -1c
+.RI "def \fB__repr__\fP (self)"
+.br
+.ti -1c
+.RI "def \fBserialize\fP (self, bytearray buffer)"
+.br
+.ti -1c
+.RI "def \fBdeserialize\fP (self, bytearray buffer)"
+.br
+.ti -1c
+.RI "def \fBread\fP (self, istream)"
+.br
+.ti -1c
+.RI "def \fBwrite\fP (self, ostream)"
+.br
+.ti -1c
+.RI "def \fBload\fP (istream)"
+.br
+.ti -1c
+.RI "def \fBcreateNode\fP (self, nodeParams=None)"
+.br
+.RI "Creates a new node in the molecule prototype, and returns its index\&. "
+.ti -1c
+.RI "def \fBconnectNodes\fP (self, nodeA, nodeB, edgeParams=None)"
+.br
+.RI "Connects the two given nodes (by index), and returns an edge index of the newly constructed edge\&. "
+.ti -1c
+.RI "def \fBedgeIndex\fP (self, nodeA, nodeB)"
+.br
+.RI "Search for and return the index of the edge connecting the given nodes if one exists, or \fBMolecule\&.NOT_FOUND\fP if one doesn't\&. "
+.ti -1c
+.RI "def \fBgetEdgeParameters\fP (self, index)"
+.br
+.ti -1c
+.RI "def \fBsetEdgeParamters\fP (self, index, edgeParams)"
+.br
+.ti -1c
+.RI "def \fBgetNodeParameters\fP (self, index)"
+.br
+.ti -1c
+.RI "def \fBsetNodeParamters\fP (self, index, nodeParams)"
+.br
+.ti -1c
+.RI "def \fBsetAllParameters\fP (self, nodeParams, edgeParams)"
+.br
+.ti -1c
+.RI "def \fBgetAdjacencyList\fP (self, nodeIndex)"
+.br
+.ti -1c
+.RI "def \fBedgesUnique\fP (self)"
+.br
+.RI "Builds and returns a list of edges which contain uniqie edgeIndexes\&. "
+.ti -1c
+.RI "def \fBmmt\fP (self)"
+.br
+.RI "MMT formated string\&. "
+.in -1c
+.SS "Static Public Attributes"
+
+.in +1c
+.ti -1c
+.RI "\fBHEADER\fP = c_char_p\&.in_dll(\fBmsd_clib\fP, 'HEADER')"
+.br
+.ti -1c
+.RI "\fBHEADER_SIZE\fP = c_size_t\&.in_dll(\fBmsd_clib\fP, 'HEADER_SIZE')"
+.br
+.ti -1c
+.RI "\fBNOT_FOUND\fP = c_uint\&.in_dll(\fBmsd_clib\fP, 'NOT_FOUND')"
+.br
+.in -1c
+.SS "Properties"
+
+.in +1c
+.ti -1c
+.RI "\fBserializationSize\fP = property(fget = lambda self: msd_clib\&.serializationSize(self\&._proto))"
+.br
+.ti -1c
+.RI "\fBnodeCount\fP = property(fget = lambda self: msd_clib\&.nodeCount(self\&._proto))"
+.br
+.ti -1c
+.RI "\fBleftLead\fP"
+.br
+.ti -1c
+.RI "\fBrightLead\fP"
+.br
+.ti -1c
+.RI "\fBleads\fP"
+.br
+.ti -1c
+.RI "\fBnodes\fP = property(fget = lambda self: \fBMolecule\&._NodeIterable\fP(msd_clib\&.createNodes(self\&._proto)))"
+.br
+.ti -1c
+.RI "\fBedges\fP = property(fget = lambda self: \fBMolecule\&._EdgeIterable\fP(msd_clib\&.createEdges(self\&._proto)))"
+.br
+.in -1c
+.SH "Constructor & Destructor Documentation"
+.PP 
+.SS "def MSD\&.Molecule\&.__init__ ( self,  nodeCount = \fCNone\fP,  nodeParams = \fCNone\fP, c_void_p  _proto = \fCNone\fP)"
+
+.PP
+Construct a new \fBMolecule\fP prototype\&. An Optional nodeCount, and initial \fBNodeParameters\fP can be given\&. If nodeCount is None, an empty prototype is created with no nodes, and no edges\&.
+.PP
+Both the left and right leads are initialized to 0\&.
+.PP
+Note: _proto parameter is reserved for internal use only! 
+.SS "def MSD\&.Molecule\&.__del__ ( self)"
+
+.SH "Member Function Documentation"
+.PP 
+.SS "def MSD\&.Molecule\&.__repr__ ( self)"
+
+.SS "def MSD\&.Molecule\&.connectNodes ( self,  nodeA,  nodeB,  edgeParams = \fCNone\fP)"
+
+.PP
+Connects the two given nodes (by index), and returns an edge index of the newly constructed edge\&. Optional \fBEdgeParameters\fP can be given\&.
+.PP
+Note: this method does not check if the two nodes are already connected\&. It is possible to creates more then one edge connecting the same two nodes\&.
+.PP
+If edgeParam is None, this method the uses C++ defaults for nodeParams\&. This should have the same effect as using a default-constructed Python NodeParameter object\&. 
+.SS "def MSD\&.Molecule\&.createNode ( self,  nodeParams = \fCNone\fP)"
+
+.PP
+Creates a new node in the molecule prototype, and returns its index\&. Optional \fBNodeParameters\fP can be given\&. Returns the new node's index\&.
+.PP
+If nodeParam is None, this method uses C++ defaults for nodeParams\&. This should have the same effect as using a default-constructed Python NodeParameter object\&. 
+.SS "def MSD\&.Molecule\&.deserialize ( self, bytearray buffer)"
+
+.SS "def MSD\&.Molecule\&.edgeIndex ( self,  nodeA,  nodeB)"
+
+.PP
+Search for and return the index of the edge connecting the given nodes if one exists, or \fBMolecule\&.NOT_FOUND\fP if one doesn't\&. 
+.SS "def MSD\&.Molecule\&.edgesUnique ( self)"
+
+.PP
+Builds and returns a list of edges which contain uniqie edgeIndexes\&. Useful since edges are directional and edges between two different nodes will be duplicated\&.
+.PP
+The elements of the list will be \fBMolecule\&._Edge\fP objects, which are themselves iterable\&. But iterating on these objects will return 'duplicated' edges (edges with the same edgeIndex) from the underlying \fBMolecule\&._EdgeIterable\fP\&. 
+.SS "def MSD\&.Molecule\&.getAdjacencyList ( self,  nodeIndex)"
+
+.SS "def MSD\&.Molecule\&.getEdgeParameters ( self,  index)"
+
+.SS "def MSD\&.Molecule\&.getNodeParameters ( self,  index)"
+
+.SS "def MSD\&.Molecule\&.load ( istream)"
+
+.SS "def MSD\&.Molecule\&.mmt ( self)"
+
+.PP
+MMT formated string\&. 
+.SS "def MSD\&.Molecule\&.read ( self,  istream)"
+
+.SS "def MSD\&.Molecule\&.serialize ( self, bytearray buffer)"
+
+.SS "def MSD\&.Molecule\&.setAllParameters ( self,  nodeParams,  edgeParams)"
+
+.SS "def MSD\&.Molecule\&.setEdgeParamters ( self,  index,  edgeParams)"
+
+.SS "def MSD\&.Molecule\&.setNodeParamters ( self,  index,  nodeParams)"
+
+.SS "def MSD\&.Molecule\&.write ( self,  ostream)"
+
+.SH "Member Data Documentation"
+.PP 
+.SS "MSD\&.Molecule\&.HEADER = c_char_p\&.in_dll(\fBmsd_clib\fP, 'HEADER')\fC [static]\fP"
+
+.SS "MSD\&.Molecule\&.HEADER_SIZE = c_size_t\&.in_dll(\fBmsd_clib\fP, 'HEADER_SIZE')\fC [static]\fP"
+
+.SS "MSD\&.Molecule\&.NOT_FOUND = c_uint\&.in_dll(\fBmsd_clib\fP, 'NOT_FOUND')\fC [static]\fP"
+
+.SH "Property Documentation"
+.PP 
+.SS "MSD\&.Molecule\&.edges = property(fget = lambda self: \fBMolecule\&._EdgeIterable\fP(msd_clib\&.createEdges(self\&._proto)))\fC [static]\fP"
+
+.SS "MSD\&.Molecule\&.leads\fC [static]\fP"
+\fBInitial value:\fP
+.PP
+.nf
+=  property(
+        fget = lambda self: _tupler(msd_clib\&.getLeads, self\&._proto, 2 * [c_uint]),
+        fset = lambda self, leads: msd_clib\&.setLeads(self\&._proto, *leads)
+        )
+.fi
+.SS "MSD\&.Molecule\&.leftLead\fC [static]\fP"
+\fBInitial value:\fP
+.PP
+.nf
+=  property(
+        fget = lambda self: msd_clib\&.getLeftLead(self\&._proto),
+        fset = lambda self, node: msd_clib\&.setLeftLead(self\&._proto, node)
+        )
+.fi
+.SS "MSD\&.Molecule\&.nodeCount = property(fget = lambda self: msd_clib\&.nodeCount(self\&._proto))\fC [static]\fP"
+
+.SS "MSD\&.Molecule\&.nodes = property(fget = lambda self: \fBMolecule\&._NodeIterable\fP(msd_clib\&.createNodes(self\&._proto)))\fC [static]\fP"
+
+.SS "MSD\&.Molecule\&.rightLead\fC [static]\fP"
+\fBInitial value:\fP
+.PP
+.nf
+=  property(
+        fget = lambda self: msd_clib\&.getRightLead(self\&._proto),
+        fset = lambda self, node: msd_clib\&.setRightLead(self\&._proto, node)
+        )
+.fi
+.SS "MSD\&.Molecule\&.serializationSize = property(fget = lambda self: msd_clib\&.serializationSize(self\&._proto))\fC [static]\fP"
+
+
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for MSD from the source code\&.

@@ -1,0 +1,594 @@
+.TH "udc::MSD" 3 "Wed Nov 30 2022" "Version 6.2.1" "MSD" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+udc::MSD \- An abstract Molecular Spintronic Device\&.  
+
+.SH SYNOPSIS
+.br
+.PP
+.PP
+\fC#include <MSD\&.h>\fP
+.SS "Classes"
+
+.in +1c
+.ti -1c
+.RI "class \fBIterator\fP"
+.br
+.ti -1c
+.RI "class \fBMoleculeException\fP"
+.br
+.ti -1c
+.RI "struct \fBParameters\fP"
+.br
+.ti -1c
+.RI "struct \fBResults\fP"
+.br
+.in -1c
+.SS "Public Types"
+
+.in +1c
+.ti -1c
+.RI "typedef \fBMolecule\fP \fBMolProto\fP"
+.br
+.ti -1c
+.RI "typedef Molecule::Instance \fBMol\fP"
+.br
+.ti -1c
+.RI "typedef function< \fBMolProto\fP(unsigned int)> \fBMolProtoFactory\fP"
+.br
+.ti -1c
+.RI "typedef function< \fBVector\fP(const \fBVector\fP &, function< double()>)> \fBFlippingAlgorithm\fP"
+.br
+.in -1c
+.SS "Public Member Functions"
+
+.in +1c
+.ti -1c
+.RI "\fBMSD\fP (unsigned int width, unsigned int height, unsigned int depth, const \fBMolProto\fP &molProto, unsigned int molPosL, unsigned int topL, unsigned int bottomL, unsigned int frontR, unsigned int backR)"
+.br
+.ti -1c
+.RI "\fBMSD\fP (unsigned int width, unsigned int height, unsigned int depth, const \fBMolProtoFactory\fP &molType, unsigned int molPosL, unsigned int molPosR, unsigned int topL, unsigned int bottomL, unsigned int frontR, unsigned int backR)"
+.br
+.ti -1c
+.RI "\fBMSD\fP (unsigned int width, unsigned int height, unsigned int depth, unsigned int molPosL, unsigned int molPosR, unsigned int topL, unsigned int bottomL, unsigned int frontR, unsigned int backR)"
+.br
+.ti -1c
+.RI "\fBMSD\fP (unsigned int width, unsigned int height, unsigned int depth, unsigned int heightL, unsigned depthR)"
+.br
+.ti -1c
+.RI "\fBMSD\fP (unsigned int width, unsigned int height, unsigned int depth)"
+.br
+.ti -1c
+.RI "\fBParameters\fP \fBgetParameters\fP () const"
+.br
+.ti -1c
+.RI "void \fBsetParameters\fP (const \fBParameters\fP &)"
+.br
+.ti -1c
+.RI "\fBResults\fP \fBgetResults\fP () const"
+.br
+.ti -1c
+.RI "void \fBset_kT\fP (double kT)"
+.br
+.ti -1c
+.RI "void \fBsetB\fP (const \fBVector\fP &B)"
+.br
+.ti -1c
+.RI "\fBMolProto\fP \fBgetMolProto\fP () const"
+.br
+.ti -1c
+.RI "void \fBsetMolProto\fP (const \fBMolProto\fP &proto)"
+.br
+.ti -1c
+.RI "void \fBsetMolParameters\fP (const \fBMolProto::NodeParameters\fP &, const \fBMolProto::EdgeParameters\fP &)"
+.br
+.ti -1c
+.RI "\fBVector\fP \fBgetSpin\fP (unsigned int a) const"
+.br
+.ti -1c
+.RI "\fBVector\fP \fBgetSpin\fP (unsigned int x, unsigned int y, unsigned int z) const"
+.br
+.ti -1c
+.RI "\fBVector\fP \fBgetFlux\fP (unsigned int a) const"
+.br
+.ti -1c
+.RI "\fBVector\fP \fBgetFlux\fP (unsigned int x, unsigned int y, unsigned int z) const"
+.br
+.ti -1c
+.RI "\fBVector\fP \fBgetLocalM\fP (unsigned int a) const"
+.br
+.ti -1c
+.RI "\fBVector\fP \fBgetLocalM\fP (unsigned int x, unsigned int y, unsigned int z) const"
+.br
+.ti -1c
+.RI "void \fBsetSpin\fP (unsigned int a, const \fBVector\fP &)"
+.br
+.ti -1c
+.RI "void \fBsetSpin\fP (unsigned int x, unsigned int y, unsigned int z, const \fBVector\fP &)"
+.br
+.ti -1c
+.RI "void \fBsetFlux\fP (unsigned int a, const \fBVector\fP &)"
+.br
+.ti -1c
+.RI "void \fBsetFlux\fP (unsigned int x, unsigned int y, unsigned int z, const \fBVector\fP &)"
+.br
+.ti -1c
+.RI "void \fBsetLocalM\fP (unsigned int a, const \fBVector\fP &, const \fBVector\fP &)"
+.br
+.ti -1c
+.RI "void \fBsetLocalM\fP (unsigned int x, unsigned int y, unsigned int z, const \fBVector\fP &, const \fBVector\fP &)"
+.br
+.ti -1c
+.RI "unsigned int \fBgetN\fP () const"
+.br
+.ti -1c
+.RI "unsigned int \fBgetNL\fP () const"
+.br
+.ti -1c
+.RI "unsigned int \fBgetNR\fP () const"
+.br
+.ti -1c
+.RI "unsigned int \fBgetNm\fP () const"
+.br
+.ti -1c
+.RI "unsigned int \fBgetNmL\fP () const"
+.br
+.ti -1c
+.RI "unsigned int \fBgetNmR\fP () const"
+.br
+.ti -1c
+.RI "unsigned int \fBgetNLR\fP () const"
+.br
+.ti -1c
+.RI "unsigned int \fBgetWidth\fP () const"
+.br
+.ti -1c
+.RI "unsigned int \fBgetHeight\fP () const"
+.br
+.ti -1c
+.RI "unsigned int \fBgetDepth\fP () const"
+.br
+.ti -1c
+.RI "void \fBgetDimensions\fP (unsigned int &width, unsigned int &height, unsigned int &depth) const"
+.br
+.ti -1c
+.RI "unsigned int \fBgetMolPosL\fP () const"
+.br
+.ti -1c
+.RI "unsigned int \fBgetMolPosR\fP () const"
+.br
+.ti -1c
+.RI "void \fBgetMolPos\fP (unsigned int &molPosL, unsigned int &molPosR) const"
+.br
+.ti -1c
+.RI "unsigned int \fBgetTopL\fP () const"
+.br
+.ti -1c
+.RI "unsigned int \fBgetBottomL\fP () const"
+.br
+.ti -1c
+.RI "unsigned int \fBgetFrontR\fP () const"
+.br
+.ti -1c
+.RI "unsigned int \fBgetBackR\fP () const"
+.br
+.ti -1c
+.RI "void \fBgetInnerBounds\fP (unsigned int &topL, unsigned int &bottomL, unsigned int &frontR, unsigned int &backR) const"
+.br
+.ti -1c
+.RI "bool \fBgetFM_L_exists\fP () const"
+.br
+.ti -1c
+.RI "bool \fBgetFM_R_exists\fP () const"
+.br
+.ti -1c
+.RI "bool \fBgetMol_exists\fP () const"
+.br
+.ti -1c
+.RI "void \fBgetRegions\fP (bool &FM_L_exists, bool &FM_R_exists, bool &mol_exists) const"
+.br
+.ti -1c
+.RI "void \fBsetSeed\fP (unsigned long seed)"
+.br
+.ti -1c
+.RI "unsigned long \fBgetSeed\fP () const"
+.br
+.ti -1c
+.RI "void \fBreinitialize\fP (bool reseed=true)"
+.br
+.ti -1c
+.RI "void \fBrandomize\fP (bool reseed=true)"
+.br
+.ti -1c
+.RI "void \fBmetropolis\fP (unsigned long long N)"
+.br
+.ti -1c
+.RI "void \fBmetropolis\fP (unsigned long long N, unsigned long long freq)"
+.br
+.ti -1c
+.RI "double \fBspecificHeat\fP () const"
+.br
+.ti -1c
+.RI "double \fBspecificHeat_L\fP () const"
+.br
+.ti -1c
+.RI "double \fBspecificHeat_R\fP () const"
+.br
+.ti -1c
+.RI "double \fBspecificHeat_m\fP () const"
+.br
+.ti -1c
+.RI "double \fBspecificHeat_mL\fP () const"
+.br
+.ti -1c
+.RI "double \fBspecificHeat_mR\fP () const"
+.br
+.ti -1c
+.RI "double \fBspecificHeat_LR\fP () const"
+.br
+.ti -1c
+.RI "double \fBmagneticSusceptibility\fP () const"
+.br
+.ti -1c
+.RI "double \fBmagneticSusceptibility_L\fP () const"
+.br
+.ti -1c
+.RI "double \fBmagneticSusceptibility_R\fP () const"
+.br
+.ti -1c
+.RI "double \fBmagneticSusceptibility_m\fP () const"
+.br
+.ti -1c
+.RI "\fBVector\fP \fBmeanM\fP () const"
+.br
+.ti -1c
+.RI "\fBVector\fP \fBmeanML\fP () const"
+.br
+.ti -1c
+.RI "\fBVector\fP \fBmeanMR\fP () const"
+.br
+.ti -1c
+.RI "\fBVector\fP \fBmeanMm\fP () const"
+.br
+.ti -1c
+.RI "\fBVector\fP \fBmeanMS\fP () const"
+.br
+.ti -1c
+.RI "\fBVector\fP \fBmeanMSL\fP () const"
+.br
+.ti -1c
+.RI "\fBVector\fP \fBmeanMSR\fP () const"
+.br
+.ti -1c
+.RI "\fBVector\fP \fBmeanMSm\fP () const"
+.br
+.ti -1c
+.RI "\fBVector\fP \fBmeanMF\fP () const"
+.br
+.ti -1c
+.RI "\fBVector\fP \fBmeanMFL\fP () const"
+.br
+.ti -1c
+.RI "\fBVector\fP \fBmeanMFR\fP () const"
+.br
+.ti -1c
+.RI "\fBVector\fP \fBmeanMFm\fP () const"
+.br
+.ti -1c
+.RI "double \fBmeanU\fP () const"
+.br
+.ti -1c
+.RI "double \fBmeanUL\fP () const"
+.br
+.ti -1c
+.RI "double \fBmeanUR\fP () const"
+.br
+.ti -1c
+.RI "double \fBmeanUm\fP () const"
+.br
+.ti -1c
+.RI "double \fBmeanUmL\fP () const"
+.br
+.ti -1c
+.RI "double \fBmeanUmR\fP () const"
+.br
+.ti -1c
+.RI "double \fBmeanULR\fP () const"
+.br
+.ti -1c
+.RI "\fBIterator\fP \fBbegin\fP () const"
+.br
+.ti -1c
+.RI "\fBIterator\fP \fBend\fP () const"
+.br
+.in -1c
+.SS "Public Attributes"
+
+.in +1c
+.ti -1c
+.RI "std::vector< \fBResults\fP > \fBrecord\fP"
+.br
+.ti -1c
+.RI "\fBFlippingAlgorithm\fP \fBflippingAlgorithm\fP"
+.br
+.in -1c
+.SS "Static Public Attributes"
+
+.in +1c
+.ti -1c
+.RI "static const \fBFlippingAlgorithm\fP \fBUP_DOWN_MODEL\fP"
+.br
+.ti -1c
+.RI "static const \fBFlippingAlgorithm\fP \fBCONTINUOUS_SPIN_MODEL\fP"
+.br
+.ti -1c
+.RI "static const \fBMolProtoFactory\fP \fBLINEAR_MOL\fP"
+.br
+.ti -1c
+.RI "static const \fBMolProtoFactory\fP \fBCIRCULAR_MOL\fP"
+.br
+.in -1c
+.SS "Friends"
+
+.in +1c
+.ti -1c
+.RI "void \fBMol::setLocalM\fP (unsigned int a, const \fBVector\fP &spin, const \fBVector\fP &flux)"
+.br
+.ti -1c
+.RI "void \fBMol::setSpin\fP (unsigned int a, const \fBVector\fP &spin)"
+.br
+.ti -1c
+.RI "void \fBMol::setFlux\fP (unsigned int a, const \fBVector\fP &flux)"
+.br
+.in -1c
+.SH "Detailed Description"
+.PP 
+An abstract Molecular Spintronic Device\&. 
+.SH "Member Typedef Documentation"
+.PP 
+.SS "typedef function<\fBVector\fP (const \fBVector\fP &, function<double()>)> \fBudc::MSD::FlippingAlgorithm\fP"
+
+.SS "typedef Molecule::Instance \fBudc::MSD::Mol\fP"
+
+.SS "typedef \fBMolecule\fP \fBudc::MSD::MolProto\fP"
+
+.SS "typedef function<\fBMolProto\fP (unsigned int)> \fBudc::MSD::MolProtoFactory\fP"
+
+.SH "Constructor & Destructor Documentation"
+.PP 
+.SS "udc::MSD::MSD (unsigned int width, unsigned int height, unsigned int depth, const \fBMolProto\fP & molProto, unsigned int molPosL, unsigned int topL, unsigned int bottomL, unsigned int frontR, unsigned int backR)"
+
+.SS "udc::MSD::MSD (unsigned int width, unsigned int height, unsigned int depth, const \fBMolProtoFactory\fP & molType, unsigned int molPosL, unsigned int molPosR, unsigned int topL, unsigned int bottomL, unsigned int frontR, unsigned int backR)"
+
+.SS "udc::MSD::MSD (unsigned int width, unsigned int height, unsigned int depth, unsigned int molPosL, unsigned int molPosR, unsigned int topL, unsigned int bottomL, unsigned int frontR, unsigned int backR)"
+
+.SS "udc::MSD::MSD (unsigned int width, unsigned int height, unsigned int depth, unsigned int heightL, unsigned depthR)"
+
+.SS "udc::MSD::MSD (unsigned int width, unsigned int height, unsigned int depth)"
+
+.SH "Member Function Documentation"
+.PP 
+.SS "\fBMSD::Iterator\fP udc::MSD::begin () const"
+
+.SS "\fBMSD::Iterator\fP udc::MSD::end () const"
+
+.SS "unsigned int udc::MSD::getBackR () const"
+
+.SS "unsigned int udc::MSD::getBottomL () const"
+
+.SS "unsigned int udc::MSD::getDepth () const"
+
+.SS "void udc::MSD::getDimensions (unsigned int & width, unsigned int & height, unsigned int & depth) const"
+
+.SS "\fBVector\fP udc::MSD::getFlux (unsigned int a) const"
+
+.SS "\fBVector\fP udc::MSD::getFlux (unsigned int x, unsigned int y, unsigned int z) const"
+
+.SS "bool udc::MSD::getFM_L_exists () const"
+
+.SS "bool udc::MSD::getFM_R_exists () const"
+
+.SS "unsigned int udc::MSD::getFrontR () const"
+
+.SS "unsigned int udc::MSD::getHeight () const"
+
+.SS "void udc::MSD::getInnerBounds (unsigned int & topL, unsigned int & bottomL, unsigned int & frontR, unsigned int & backR) const"
+
+.SS "\fBVector\fP udc::MSD::getLocalM (unsigned int a) const"
+
+.SS "\fBVector\fP udc::MSD::getLocalM (unsigned int x, unsigned int y, unsigned int z) const"
+
+.SS "bool udc::MSD::getMol_exists () const"
+
+.SS "void udc::MSD::getMolPos (unsigned int & molPosL, unsigned int & molPosR) const"
+
+.SS "unsigned int udc::MSD::getMolPosL () const"
+
+.SS "unsigned int udc::MSD::getMolPosR () const"
+
+.SS "\fBMSD::MolProto\fP udc::MSD::getMolProto () const"
+
+.SS "unsigned int udc::MSD::getN () const"
+
+.SS "unsigned int udc::MSD::getNL () const"
+
+.SS "unsigned int udc::MSD::getNLR () const"
+
+.SS "unsigned int udc::MSD::getNm () const"
+
+.SS "unsigned int udc::MSD::getNmL () const"
+
+.SS "unsigned int udc::MSD::getNmR () const"
+
+.SS "unsigned int udc::MSD::getNR () const"
+
+.SS "\fBMSD::Parameters\fP udc::MSD::getParameters () const"
+
+.SS "void udc::MSD::getRegions (bool & FM_L_exists, bool & FM_R_exists, bool & mol_exists) const"
+
+.SS "\fBMSD::Results\fP udc::MSD::getResults () const"
+
+.SS "unsigned long udc::MSD::getSeed () const"
+
+.SS "\fBVector\fP udc::MSD::getSpin (unsigned int a) const"
+
+.SS "\fBVector\fP udc::MSD::getSpin (unsigned int x, unsigned int y, unsigned int z) const"
+
+.SS "unsigned int udc::MSD::getTopL () const"
+
+.SS "unsigned int udc::MSD::getWidth () const"
+
+.SS "double udc::MSD::magneticSusceptibility () const"
+
+.SS "double udc::MSD::magneticSusceptibility_L () const"
+
+.SS "double udc::MSD::magneticSusceptibility_m () const"
+
+.SS "double udc::MSD::magneticSusceptibility_R () const"
+
+.SS "\fBVector\fP udc::MSD::meanM () const"
+
+.SS "\fBVector\fP udc::MSD::meanMF () const"
+
+.SS "\fBVector\fP udc::MSD::meanMFL () const"
+
+.SS "\fBVector\fP udc::MSD::meanMFm () const"
+
+.SS "\fBVector\fP udc::MSD::meanMFR () const"
+
+.SS "\fBVector\fP udc::MSD::meanML () const"
+
+.SS "\fBVector\fP udc::MSD::meanMm () const"
+
+.SS "\fBVector\fP udc::MSD::meanMR () const"
+
+.SS "\fBVector\fP udc::MSD::meanMS () const"
+
+.SS "\fBVector\fP udc::MSD::meanMSL () const"
+
+.SS "\fBVector\fP udc::MSD::meanMSm () const"
+
+.SS "\fBVector\fP udc::MSD::meanMSR () const"
+
+.SS "double udc::MSD::meanU () const"
+
+.SS "double udc::MSD::meanUL () const"
+
+.SS "double udc::MSD::meanULR () const"
+
+.SS "double udc::MSD::meanUm () const"
+
+.SS "double udc::MSD::meanUmL () const"
+
+.SS "double udc::MSD::meanUmR () const"
+
+.SS "double udc::MSD::meanUR () const"
+
+.SS "void udc::MSD::metropolis (unsigned long long N)"
+
+.SS "void udc::MSD::metropolis (unsigned long long N, unsigned long long freq)"
+
+.SS "void udc::MSD::randomize (bool reseed = \fCtrue\fP)"
+
+.SS "void udc::MSD::reinitialize (bool reseed = \fCtrue\fP)"
+
+.SS "void udc::MSD::set_kT (double kT)"
+
+.SS "void udc::MSD::setB (const \fBVector\fP & B)"
+
+.SS "void \fBudc::MSD::setFlux\fP (unsigned int a, const \fBVector\fP & flux)"
+
+.SS "void \fBudc::MSD::setFlux\fP (unsigned int x, unsigned int y, unsigned int z, const \fBVector\fP & flux)"
+
+.SS "void \fBudc::MSD::setLocalM\fP (unsigned int a, const \fBVector\fP & spin, const \fBVector\fP & flux)"
+
+.SS "void \fBudc::MSD::setLocalM\fP (unsigned int x, unsigned int y, unsigned int z, const \fBVector\fP & spin, const \fBVector\fP & flux)"
+
+.SS "void udc::MSD::setMolParameters (const \fBMolProto::NodeParameters\fP & nodeParams, const \fBMolProto::EdgeParameters\fP & edgeParams)"
+
+.SS "void udc::MSD::setMolProto (const \fBMolProto\fP & proto)"
+
+.SS "void udc::MSD::setParameters (const \fBParameters\fP & p)"
+
+.SS "void udc::MSD::setSeed (unsigned long seed)"
+
+.SS "void \fBudc::MSD::setSpin\fP (unsigned int a, const \fBVector\fP & spin)"
+
+.SS "void \fBudc::MSD::setSpin\fP (unsigned int x, unsigned int y, unsigned int z, const \fBVector\fP & spin)"
+
+.SS "double udc::MSD::specificHeat () const"
+
+.SS "double udc::MSD::specificHeat_L () const"
+
+.SS "double udc::MSD::specificHeat_LR () const"
+
+.SS "double udc::MSD::specificHeat_m () const"
+
+.SS "double udc::MSD::specificHeat_mL () const"
+
+.SS "double udc::MSD::specificHeat_mR () const"
+
+.SS "double udc::MSD::specificHeat_R () const"
+
+.SH "Friends And Related Function Documentation"
+.PP 
+.SS "void Mol::setFlux (unsigned int a, const \fBVector\fP & flux)\fC [friend]\fP"
+
+.SS "void Mol::setLocalM (unsigned int a, const \fBVector\fP & spin, const \fBVector\fP & flux)\fC [friend]\fP"
+
+.SS "void Mol::setSpin (unsigned int a, const \fBVector\fP & spin)\fC [friend]\fP"
+
+.SH "Member Data Documentation"
+.PP 
+.SS "const \fBMSD::MolProtoFactory\fP udc::MSD::CIRCULAR_MOL\fC [static]\fP"
+\fBInitial value:\fP
+.PP
+.nf
+= [](unsigned int nodeCount) {
+    MolProto mol(nodeCount);
+    for (unsigned int i = 1; i < nodeCount; i++)
+        mol\&.connectNodes(i - 1, i);
+    if (nodeCount >= 2)
+        mol\&.connectNodes(nodeCount - 1, 0);
+    mol\&.setLeads(0, nodeCount / 2);
+    return mol;
+}
+.fi
+.SS "const \fBMSD::FlippingAlgorithm\fP udc::MSD::CONTINUOUS_SPIN_MODEL\fC [static]\fP"
+\fBInitial value:\fP
+.PP
+.nf
+= [](const Vector &spin, function<double()> rand) {
+    return Vector::sphericalForm( spin\&.norm(), 2 * PI * rand(), asin(2 * rand() - 1) );
+}
+.fi
+.SS "\fBFlippingAlgorithm\fP udc::MSD::flippingAlgorithm"
+
+.SS "const \fBMSD::MolProtoFactory\fP udc::MSD::LINEAR_MOL\fC [static]\fP"
+\fBInitial value:\fP
+.PP
+.nf
+= [](unsigned int nodeCount) {
+    MolProto mol(nodeCount);
+    for (unsigned int i = 1; i < nodeCount; i++)
+        mol\&.connectNodes(i - 1, i);
+    mol\&.setLeads(0, nodeCount - 1);
+    return mol;
+}
+.fi
+.SS "std::vector<\fBResults\fP> udc::MSD::record"
+
+.SS "const \fBMSD::FlippingAlgorithm\fP udc::MSD::UP_DOWN_MODEL\fC [static]\fP"
+\fBInitial value:\fP
+.PP
+.nf
+= [](const Vector &spin, function<double()> rand) {
+    return -spin;
+}
+.fi
+
+
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for MSD from the source code\&.

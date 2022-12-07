@@ -1,0 +1,87 @@
+.TH "udc::SparseArray< T >" 3 "Wed Nov 30 2022" "Version 6.2.1" "MSD" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+udc::SparseArray< T >
+.SH SYNOPSIS
+.br
+.PP
+.PP
+\fC#include <SparseArray\&.h>\fP
+.SS "Public Member Functions"
+
+.in +1c
+.ti -1c
+.RI "\fBSparseArray\fP ()"
+.br
+.ti -1c
+.RI "\fBSparseArray\fP (unsigned int \fBcapacity\fP)"
+.br
+.ti -1c
+.RI "\fB~SparseArray\fP ()"
+.br
+.ti -1c
+.RI "\fBSparseArray\fP (const \fBSparseArray\fP< T > &)"
+.br
+.ti -1c
+.RI "\fBSparseArray\fP< T > & \fBoperator=\fP (const \fBSparseArray\fP< T > &)"
+.br
+.ti -1c
+.RI "unsigned int \fBcapacity\fP () const"
+.br
+.ti -1c
+.RI "void \fBresize\fP (unsigned int \fBcapacity\fP)"
+.br
+.ti -1c
+.RI "T & \fBoperator[]\fP (unsigned int index)"
+.br
+.ti -1c
+.RI "const T & \fBoperator[]\fP (unsigned int index) const"
+.br
+.ti -1c
+.RI "void \fBclear\fP (unsigned int index)"
+.br
+.ti -1c
+.RI "T & \fBat\fP (unsigned int index)"
+.br
+.ti -1c
+.RI "const T & \fBat\fP (unsigned int index) const"
+.br
+.ti -1c
+.RI "void \fBclearAt\fP (unsigned int index)"
+.br
+.in -1c
+.SH "Constructor & Destructor Documentation"
+.PP 
+.SS "template<typename T > \fBudc::SparseArray\fP< T >::SparseArray ()\fC [inline]\fP"
+
+.SS "template<typename T > \fBudc::SparseArray\fP< T >::SparseArray (unsigned int capacity)\fC [inline]\fP"
+
+.SS "template<typename T > \fBudc::SparseArray\fP< T >::~\fBSparseArray\fP ()\fC [inline]\fP"
+
+.SS "template<typename T > \fBudc::SparseArray\fP< T >::SparseArray (const \fBSparseArray\fP< T > &)"
+
+.SH "Member Function Documentation"
+.PP 
+.SS "template<typename T > T & \fBudc::SparseArray\fP< T >::at (unsigned int index)"
+
+.SS "template<typename T > const T & \fBudc::SparseArray\fP< T >::at (unsigned int index) const"
+
+.SS "template<typename T > unsigned int \fBudc::SparseArray\fP< T >::capacity () const\fC [inline]\fP"
+
+.SS "template<typename T > void \fBudc::SparseArray\fP< T >::clear (unsigned int index)\fC [inline]\fP"
+
+.SS "template<typename T > void \fBudc::SparseArray\fP< T >::clearAt (unsigned int index)"
+
+.SS "template<typename T > \fBSparseArray\fP< T > & \fBudc::SparseArray\fP< T >::operator= (const \fBSparseArray\fP< T > &)"
+
+.SS "template<typename T > T & \fBudc::SparseArray\fP< T >::operator[] (unsigned int index)\fC [inline]\fP"
+
+.SS "template<typename T > const T & \fBudc::SparseArray\fP< T >::operator[] (unsigned int index) const\fC [inline]\fP"
+
+.SS "template<typename T > void \fBudc::SparseArray\fP< T >::resize (unsigned int capacity)"
+
+
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for MSD from the source code\&.

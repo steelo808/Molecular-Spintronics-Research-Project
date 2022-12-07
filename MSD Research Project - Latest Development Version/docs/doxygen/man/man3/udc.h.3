@@ -1,0 +1,70 @@
+.TH "C:/Users/mathh/GitHub/Molecular-Spintronics-Research-Project/MSD Research Project - Latest Development Version/src/udc.h" 3 "Wed Nov 30 2022" "Version 6.2.1" "MSD" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+C:/Users/mathh/GitHub/Molecular-Spintronics-Research-Project/MSD Research Project - Latest Development Version/src/udc.h
+.SH SYNOPSIS
+.br
+.PP
+\fC#include <cstring>\fP
+.br
+\fC#include <exception>\fP
+.br
+
+.SS "Classes"
+
+.in +1c
+.ti -1c
+.RI "class \fBudc::UDCException\fP"
+.br
+.in -1c
+.SS "Namespaces"
+
+.in +1c
+.ti -1c
+.RI "namespace \fBudc\fP"
+.br
+.in -1c
+.SS "Functions"
+
+.in +1c
+.ti -1c
+.RI "double \fBudc::sq\fP (double x)"
+.br
+.RI "square a number fast "
+.ti -1c
+.RI "double \fBudc::cube\fP (double x)"
+.br
+.RI "cube a number fast "
+.ti -1c
+.RI "void \fBudc::bread\fP (void *destination, size_t dSize, const unsigned char *&buffer)"
+.br
+.RI "Buffer/Binary Read: "
+.ti -1c
+.RI "template<typename T > void \fBudc::bread\fP (T &destination, const unsigned char *&buffer)"
+.br
+.RI "Templated version: determines the approprate number of bytes by calling 'sizeof(T)'\&. "
+.ti -1c
+.RI "void \fBudc::bwrite\fP (const void *source, size_t sSize, unsigned char *&buffer)"
+.br
+.RI "Buffer/Binary Write: "
+.ti -1c
+.RI "template<typename T > void \fBudc::bwrite\fP (const T &source, unsigned char *&buffer)"
+.br
+.RI "Templated version: determines the approprate number of bytes by calling 'sizeof(T)'\&. "
+.in -1c
+.SS "Variables"
+
+.in +1c
+.ti -1c
+.RI "const double \fBudc::E\fP = 2\&.71828182845904523536"
+.br
+.RI "Mathematical constant: Euler's Number\&. "
+.ti -1c
+.RI "const double \fBudc::PI\fP = 3\&.14159265358979323846"
+.br
+.RI "Mathematical constant\&. "
+.in -1c
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for MSD from the source code\&.
