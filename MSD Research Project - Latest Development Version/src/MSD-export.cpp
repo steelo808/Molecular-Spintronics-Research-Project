@@ -3,8 +3,8 @@
  * @author Christopher D'Angelo
  * @brief The extern "C" version of MSD. May not contain the full functionality of MSD.h.
  * 	To be used for Python3 (ctypes) binding, as well as any future bindings that require a C (cdecl) DLL.
- * @version 1.1
- * @date 2022-11-29
+ * @version 1.1a
+ * @date 2022-12-6
  * 
  * @copyright Copyright (c) 2022
  */
