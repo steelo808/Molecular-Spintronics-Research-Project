@@ -154,7 +154,7 @@ C DLL void setSeed(MSD *msd, ulong seed) { msd->setSeed(seed); }
 C DLL ulong getSeed(const MSD *msd) { return msd->getSeed(); }
 
 C DLL void reinitialize(MSD *msd, bool reseed) { msd->reinitialize(reseed); }
-C DLL void randomize(MSD *msd, bool reseed) { msd->reinitialize(reseed); }
+C DLL void randomize(MSD *msd, bool reseed) { msd->randomize(reseed); }
 C DLL void metropolis_o(MSD *msd, ulonglong N) { msd->metropolis(N); }
 C DLL void metropolis_r(MSD *msd, ulonglong N, ulonglong freq) { msd->metropolis(N, freq); }
 
