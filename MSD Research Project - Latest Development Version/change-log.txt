@@ -163,6 +163,8 @@ Second bug fix. In MSD::setParameters()
 	Restructured mol-tool, now called "mol-builder": .html file moved to ~, .css and .js files moved to ~/src, mol-tool folder deleted.
 	Created MSD-export.h.
 	Deleted some unused folders: ~/misc, ~/src/unfinished.
+(12-8-2022) Moved mmb_inspector.exe to new ~/dev-tools folder.
+
 
 TODO: Fix flux != 0 on mol. that are "turned off"
 TODO: Add graph-based mol. to MSD. (including ability to create fully customizable MolProto,
