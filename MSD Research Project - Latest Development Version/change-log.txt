@@ -164,7 +164,7 @@ Second bug fix. In MSD::setParameters()
 	Created MSD-export.h.
 	Deleted some unused folders: ~/misc, ~/src/unfinished.
 (12-8-2022) Moved mmb_inspector.exe to new ~/dev-tools folder.
-
+(12-12-2022) Removed man page docs because of long file name issue with github. Can be rebuilt later if needed.
 
 TODO: Fix flux != 0 on mol. that are "turned off"
 TODO: Add graph-based mol. to MSD. (including ability to create fully customizable MolProto,
