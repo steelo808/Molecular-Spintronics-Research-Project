@@ -1,4 +1,4 @@
-out\metropolis, CONTINUOUS_SPIN_MODEL, 02-04-2015, 4.xml
+out\metropolis, 12-15-2022, 1.xml
 kT
 JmL
 JmR
@@ -31,5 +31,6 @@ xL
 xR
 xm
 
+kT = 0.1
 
-out\metropolis, CONTINUOUS_SPIN_MODEL, 02-04-2015, 4 - extract_kT=0.1,F=0.csv
+out\metropolis, 12-15-2022, 1 - extract_kT=0.1.csv
