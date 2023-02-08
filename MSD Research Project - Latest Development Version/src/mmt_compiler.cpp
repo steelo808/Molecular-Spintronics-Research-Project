@@ -16,7 +16,7 @@ using namespace udc;
  * @return string The new filename with appended with the new extension
  */
 string replaceExtention(const string &filename, const string &replacement) {
-	size_t ext = filename.find(".");
+	size_t ext = filename.rfind(".");
 	if (ext == string::npos)
 		ext = filename.length();
 	return filename.substr(0, ext) + replacement; 

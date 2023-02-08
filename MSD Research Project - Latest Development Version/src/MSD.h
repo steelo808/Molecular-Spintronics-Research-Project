@@ -58,6 +58,8 @@ using udc::bread;
 using udc::bwrite;
 
 
+class MSD;
+
 /**
  * An abstract molecule. Used in MSD.
  * A "Molecule" object only represents a prototype for a molecule design.

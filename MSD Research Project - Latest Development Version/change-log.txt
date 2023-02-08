@@ -166,6 +166,9 @@ Second bug fix. In MSD::setParameters()
 (12-8-2022) Moved mmb_inspector.exe to new ~/dev-tools folder.
 (12-12-2022) Removed man page docs because of long file name issue with github. Can be rebuilt later if needed.
 
+6.2.3:
+(2-8-2023) Fixed bug in mmt_compiler.cpp: used find(".") instead of rfind(".") for automatic file name.
+
 TODO: Fix flux != 0 on mol. that are "turned off"
 TODO: Add graph-based mol. to MSD. (including ability to create fully customizable MolProto,
 		and input them into the apps)

@@ -21,7 +21,7 @@
 @cl /EHsc /Fe"bin/mfm_aggregator.exe" src/mfm_aggregator.cpp
 @cl /EHsc /LD /Fe"lib/python/MSD-export.dll" src/MSD-export.cpp
 @cl /EHsc src/mmt_compiler.cpp
-@cl /EHsc src/mmb_inspector.cpp
+@cl /EHsc /Fe"dev-tools/mmb_inspector.exe" src/mmb_inspector.cpp
 
 @rem Compile 32-bit versions
 @set VSCMD_START_DIR=%CD%
