@@ -3,9 +3,9 @@
  * @file iterate.cpp
  * @author Christopher D'Angelo
  * @brief App that runs a single MSD simulation and reports results over time.
- * @date 2022-10-04
+ * @date 2023-02-16
  * 
- * @copyright Copyright (c) 2022
+ * @copyright Copyright (c) 2023
  */
 
 #include <fstream>
@@ -408,7 +408,73 @@ int main(int argc, char *argv[]) {
 	
 		//print stability info
 		cout << "Saving data...\n";
+		
 		MSD::Iterator msdIter = msd.begin();
+		
+		signed int mmtLine = -2;  // used as iterator to convert msd::molProto to MMT and add to CSV output, line by line
+		auto nodes = msd.getMolProto().getNodes();
+		const signed int nodesSize = nodes.size();
+		auto nodeIter = nodes.begin();
+		auto allEdges = msd.getMolProto().getEdges();
+		vector<MSD::MolProto::EdgeIterator> uniqueEdges;
+		uniqueEdges.reserve(allEdges.size() / 2);
+		for (auto edgeIter = allEdges.begin(); edgeIter != allEdges.end(); ++edgeIter)
+			if (edgeIter.getDirection() >= 0)
+				uniqueEdges.push_back(edgeIter);
+		auto edgeIter = uniqueEdges.begin();
+		const signed int uniqueEdgesSize = uniqueEdges.size();
+		auto notDonePrintingMMT = [&]() {
+			return usingMMB && mmtLine <= 1 + nodesSize + 1 + 1 + uniqueEdgesSize + 2;
+		};
+		auto printMMT = [&](size_t padding) {
+			if (mmtLine >= 0) {
+				while (padding-- > 0)
+					file << ",,,,,,,,,,,";  // padding for missing MSD snapshot or data section(s)
+				file << ",,,";
+
+				if (mmtLine == 0) {
+					// Node-count header
+					file << "Nodes:," << nodes.size();
+				
+				} else if (mmtLine - 1 < nodesSize) {
+					// Node parameters
+					auto nP = nodeIter.getParameters();
+					file << ",Sm=" << nP.Sm << ",Fm=" << nP.Fm << ",Je0m=" << nP.Je0m
+					     << ",\"Am=" << nP.Am.x << ',' << nP.Am.y << ',' << nP.Am.z << '"';
+					++nodeIter;
+				
+				} else if (mmtLine == 1 + nodesSize) {
+					// blank line
+					
+				} else if (mmtLine == 1 + nodesSize + 1) {
+					// Egde-count header
+					file << "Edges:," << uniqueEdges.size();
+				
+				} else if (mmtLine - 1 - nodesSize - 1 < uniqueEdgesSize) {
+					// Edge info
+					auto eP = edgeIter->getParameters();
+					file << ",Jm=" << eP.Jm << ",Je1m=" << eP.Je1m << ",Jeem=" << eP.Jeem << ",bm=" << eP.bm
+						<< ",\"Dm=" << eP.Dm.x << ',' << eP.Dm.y << ',' << eP.Dm.z << '"'
+						<< ",srcNode=" << edgeIter->src() << ",destNode=" << edgeIter->dest();
+					++edgeIter;
+				
+				} else if (mmtLine == 1 + nodesSize + 1 + 1 + uniqueEdgesSize) {
+					// blank line
+					
+				} else if (mmtLine == 1 + nodesSize + 1 + 1 + uniqueEdgesSize + 1) {
+					// Left lead
+					file << "Left Lead:," << molProto.getLeftLead();
+				
+				} else if (mmtLine == 1 + nodesSize + 1 + 1 + uniqueEdgesSize + 2) {
+					// Right lead
+					file << "Right Lead:," << molProto.getRightLead();
+				
+				}
+			}
+
+			++mmtLine;
+		};
+
 		for( auto iter = msd.record.begin(); iter != msd.record.end(); iter++ ) {
 			file << iter->t << ",,"
 			     << iter->M.x  << ',' << iter->M.y  << ',' << iter->M.z  << ',' << iter->M.norm()  << ',' << iter->M.theta()  << ',' << iter->M.phi()  << ",,"
@@ -432,6 +498,9 @@ int main(int argc, char *argv[]) {
 					 << f.x << ',' << f.y << ',' << f.z;
 				++msdIter;
 			}
+			if (notDonePrintingMMT())
+				printMMT(msdIter == msd.end() ? 11 : 0);
+
 			file << '\n';
 		}
 		for( ; msdIter != msd.end(); ++msdIter ) {
@@ -440,7 +509,14 @@ int main(int argc, char *argv[]) {
 			     << msdIter.getX() << ',' << msdIter.getY() << ',' << msdIter.getZ() << ','
 			     << m.x << ',' << m.y << ',' << m.z << ','
 			     << s.x << ',' << s.y << ',' << s.z << ','
-			     << f.x << ',' << f.y << ',' << f.z << '\n';
+			     << f.x << ',' << f.y << ',' << f.z;
+			if (notDonePrintingMMT())
+				printMMT(0);
+			file << '\n';
+		}
+		while(notDonePrintingMMT()) {
+			printMMT(95 + 11);
+			file << '\n';
 		}
 			
 	} catch(const ios::failure &e) {

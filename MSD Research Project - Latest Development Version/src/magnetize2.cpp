@@ -2,9 +2,9 @@
  * @file magnetize2.cpp
  * @author Christopher D'Angelo
  * @brief App used for simulating a continuous change in B over time.
- * @date 2022-01-24
+ * @date 2023-02-16
  * 
- * @copyright Copyright (c) 2022
+ * @copyright Copyright (c) 2023
  */
 
 #include <fstream>
@@ -58,6 +58,8 @@ int main(int argc, char *argv[]) {
 	} else
 		cout << "Defaulting to 'CONTINUOUS_SPIN_MODEL'.\n";
 	
+	bool usingMMB = false;
+	MSD::MolProto molProto;  // iff usingMMB
 	MSD::MolProtoFactory molType = MSD::LINEAR_MOL;
 	if (argc > 5) {
 		string s(argv[5]);
@@ -65,8 +67,15 @@ int main(int argc, char *argv[]) {
 			molType = MSD::LINEAR_MOL;
 		else if (s == "CIRCULAR")
 			molType = MSD::CIRCULAR_MOL;
-		else
-			cout << "Unrecognized MOL_TYPE! (Note: custom mol. are not supported yet. Only LINEAR or CIRCULAR.) Defaulting to 'LINEAR'.\n";
+		else {
+			try {
+				molProto = MSD::MolProto::load(ifstream(argv[5], istream::binary));
+				usingMMB = true;
+			} catch(Molecule::DeserializationException &ex) {
+				cerr << "Unrecognized MOL_TYPE, and invalid .mmb file!";
+				return 2;
+			}
+		}
 	} else
 		cout << "Defaulting to 'LINEAR'.\n";
 	
@@ -89,6 +98,11 @@ int main(int argc, char *argv[]) {
 		cout << '\n';
 		ask("> molPosL = ", molPosL);
 		ask("> molPosR = ", molPosR);
+		unsigned int molLen = molPosR + 1 - molPosL;
+		if (usingMMB && molLen != molProto.nodeCount()) {
+			cerr << "Using .mmb file, but molLen=" << molLen << " doesn't equal mmb nodeCount=" << molProto.nodeCount() << '\n';
+			return 2;
+		}
 		cout << '\n';
 		ask("> topL    = ", topL);
 		ask("> bottomL = ", bottomL);
@@ -108,50 +122,50 @@ int main(int argc, char *argv[]) {
 		cout << '\n';
 		ask("> SL = ", p.SL);
 		ask("> SR = ", p.SR);
-		ask("> Sm = ", p_node.Sm);
+		if (!usingMMB)  ask("> Sm = ", p_node.Sm);
 		ask("> FL = ", p.FL);
 		ask("> FR = ", p.FR);
-		ask("> Fm = ", p_node.Fm);
+		if (!usingMMB)  ask("> Fm = ", p_node.Fm);
 		cout << '\n';
 		ask("> JL  = ", p.JL);
 		ask("> JR  = ", p.JR);
-		ask("> Jm  = ", p_edge.Jm);
+		if (!usingMMB)  ask("> Jm  = ", p_edge.Jm);
 		ask("> JmL = ", p.JmL);
 		ask("> JmR = ", p.JmR);
 		ask("> JLR = ", p.JLR);
 		cout << '\n';
 		ask("> Je0L  = ", p.Je0L);
 		ask("> Je0R  = ", p.Je0R);
-		ask("> Je0m  = ", p_node.Je0m);
+		if (!usingMMB)  ask("> Je0m  = ", p_node.Je0m);
 		cout << '\n';
 		ask("> Je1L  = ", p.Je1L);
 		ask("> Je1R  = ", p.Je1R);
-		ask("> Je1m  = ", p_edge.Je1m);
+		if (!usingMMB)  ask("> Je1m  = ", p_edge.Je1m);
 		ask("> Je1mL = ", p.Je1mL);
 		ask("> Je1mR = ", p.Je1mR);
 		ask("> Je1LR = ", p.Je1LR);
 		cout << '\n';
 		ask("> JeeL  = ", p.JeeL);
 		ask("> JeeR  = ", p.JeeR);
-		ask("> Jeem  = ", p_edge.Jeem);
+		if (!usingMMB)  ask("> Jeem  = ", p_edge.Jeem);
 		ask("> JeemL = ", p.JeemL);
 		ask("> JeemR = ", p.JeemR);
 		ask("> JeeLR = ", p.JeeLR);
 		cout << '\n';
 		ask("> AL = ", p.AL);
 		ask("> AR = ", p.AR);
-		ask("> Am = ", p_node.Am);
+		if (!usingMMB)  ask("> Am = ", p_node.Am);
 		cout << '\n';
 		ask("> bL  = ", p.bL);
 		ask("> bR  = ", p.bR);
-		ask("> bm  = ", p_edge.bm);
+		if (!usingMMB)  ask("> bm  = ", p_edge.bm);
 		ask("> bmL = ", p.bmL);
 		ask("> bmR = ", p.bmR);
 		ask("> bLR = ", p.bLR);
 		cout << '\n';
 		ask("> DL  = ", p.DL);
 		ask("> DR  = ", p.DR);
-		ask("> Dm  = ", p_edge.Dm);
+		if (!usingMMB)  ask("> Dm  = ", p_edge.Dm);
 		ask("> DmL = ", p.DmL);
 		ask("> DmR = ", p.DmR);
 		ask("> DLR = ", p.DLR);
@@ -165,7 +179,10 @@ int main(int argc, char *argv[]) {
 	MSD msd(width, height, depth, molType, molPosL, molPosR, topL, bottomL, frontR, backR);
 	msd.flippingAlgorithm = arg2;
 	msd.setParameters(p);
-	msd.setMolParameters(p_node, p_edge);
+	if (usingMMB)
+		msd.setMolProto(molProto);
+	else
+		msd.setMolParameters(p_node, p_edge);
 	
 	try {
 		//print info/headings
@@ -201,45 +218,45 @@ int main(int argc, char *argv[]) {
 			 << ",B_theta = " << B_theta
 			 << ",B_phi = " << B_phi
 			 << ",SL = " << p.SL
-			 << ",SR = " << p.SR
-			 << ",Sm = " << p_node.Sm
-			 << ",FL = " << p.FL
-			 << ",FR = " << p.FR
-			 << ",Fm = " << p_node.Fm
-			 << ",JL = " << p.JL
-			 << ",JR = " << p.JR
-			 << ",Jm = " << p_edge.Jm
-			 << ",JmL = " << p.JmL
+			 << ",SR = " << p.SR;
+		if (!usingMMB)  file << ",Sm = " << p_node.Sm;
+		file << ",FL = " << p.FL
+			 << ",FR = " << p.FR;
+		if (!usingMMB)  file << ",Fm = " << p_node.Fm;
+		file << ",JL = " << p.JL
+			 << ",JR = " << p.JR;
+		if (!usingMMB)  file << ",Jm = " << p_edge.Jm;
+		file << ",JmL = " << p.JmL
 			 << ",JmR = " << p.JmR
 			 << ",JLR = " << p.JLR
 			 << ",Je0L = " << p.Je0L
-			 << ",Je0R = " << p.Je0R
-			 << ",Je0m = " << p_node.Je0m
-			 << ",Je1L = " << p.Je1L
-			 << ",Je1R = " << p.Je1R
-			 << ",Je1m = " << p_edge.Je1m
-			 << ",Je1mL = " << p.Je1mL
+			 << ",Je0R = " << p.Je0R;
+		if (!usingMMB)  file << ",Je0m = " << p_node.Je0m;
+		file << ",Je1L = " << p.Je1L
+			 << ",Je1R = " << p.Je1R;
+		if (!usingMMB)  file << ",Je1m = " << p_edge.Je1m;
+		file << ",Je1mL = " << p.Je1mL
 			 << ",Je1mR = " << p.Je1mR
 			 << ",Je1LR = " << p.Je1LR
 			 << ",JeeL = " << p.JeeL
-			 << ",JeeR = " << p.JeeR
-			 << ",Jeem = " << p_edge.Jeem
-			 << ",JeemL = " << p.JeemL
+			 << ",JeeR = " << p.JeeR;
+		if (!usingMMB)  file << ",Jeem = " << p_edge.Jeem;
+		file << ",JeemL = " << p.JeemL
 			 << ",JeemR = " << p.JeemR
 			 << ",JeeLR = " << p.JeeLR
 			 << ",\"AL = " << p.AL << '"'
-			 << ",\"AR = " << p.AR << '"'
-			 << ",\"Am = " << p_node.Am << '"'
-			 << ",bL = " << p.bL
-			 << ",bR = " << p.bR
-			 << ",bm = " << p_edge.bm
-			 << ",bmL = " << p.bmL
+			 << ",\"AR = " << p.AR << '"';
+		if (!usingMMB)  file << ",\"Am = " << p_node.Am << '"';
+		file << ",bL = " << p.bL
+			 << ",bR = " << p.bR;
+		if (!usingMMB)  file << ",bm = " << p_edge.bm;
+		file << ",bmL = " << p.bmL
 			 << ",bmR = " << p.bmR
 			 << ",bLR = " << p.bLR
 			 << ",\"DL = " << p.DL << '"'
-			 << ",\"DR = " << p.DR << '"'
-			 << ",\"Dm = " << p_edge.Dm << '"'
-			 << ",\"DmL = " << p.DmL << '"'
+			 << ",\"DR = " << p.DR << '"';
+		if (!usingMMB)  file << ",\"Dm = " << p_edge.Dm << '"';
+		file << ",\"DmL = " << p.DmL << '"'
 			 << ",\"DmR = " << p.DmR << '"'
 			 << ",\"DLR = " << p.DLR << '"'
 			 << ",molType = " << argv[5]

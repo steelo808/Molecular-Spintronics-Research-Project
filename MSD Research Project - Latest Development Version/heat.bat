@@ -1,14 +1,14 @@
 @rem /** ---- Docs ----
 @rem  * model=CONTINUOUS_SPIN_MODEL|UP_DOWN_MODEL
 @rem  * reset=noop|reinitialize|randomize
-@rem  * mol_type=LINEAR|CIRCULAR
+@rem  * mol_type=LINEAR|CIRCULAR|__PATH__.mmb
 @rem  */
 
 
 @rem // ---- Edit Here ----
 @set model=CONTINUOUS_SPIN_MODEL
 @set reset=noop
-@set mol_type=LINEAR
+@set mol_type=mol/hex.mmb
 
 @set out_head=heat
 

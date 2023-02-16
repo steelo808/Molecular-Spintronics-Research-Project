@@ -2,14 +2,14 @@
 @rem  * model=CONTINUOUS_SPIN_MODEL|UP_DOWN_MODEL
 @rem  * randomize=0|1
 @rem  * startAtMaxB=0|1
-@rem  * mol_type=LINEAR|CIRCULAR
+@rem  * mol_type=LINEAR|CIRCULAR|__PATH__.mmb
 @rem  */
 
 @rem // ---- Edit Here ----
 @set model=CONTINUOUS_SPIN_MODEL
 @set randomize=0
 @set startAtMaxB=0
-@set mol_type=LINEAR
+@set mol_type=mol/hex.mmb
 
 @set out_head=magnetization2
 

@@ -169,6 +169,12 @@ Second bug fix. In MSD::setParameters()
 6.2.3:
 (2-8-2023) Fixed bug in mmt_compiler.cpp: used find(".") instead of rfind(".") for automatic file name.
 
+6.2.4:
+(2-16-2023) Fixed potential bug/anti-pattern: MSD::getMolProto now returns a const reference instead of a copy
+	Added MMT output to CSV when using custom molecule
+	Added custom molecule support to heat, magnetize, and magnetize2
+TODO: add custom molecule support metropolis
+
 TODO: Fix flux != 0 on mol. that are "turned off"
 TODO: Add graph-based mol. to MSD. (including ability to create fully customizable MolProto,
 		and input them into the apps)

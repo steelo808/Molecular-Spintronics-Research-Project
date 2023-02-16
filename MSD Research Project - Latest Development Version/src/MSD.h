@@ -12,7 +12,7 @@
 #ifndef UDC_MSD
 #define UDC_MSD
 
-#define UDC_MSD_VERSION "6.2"
+#define UDC_MSD_VERSION "6.2a"
 
 #include <cstdlib>
 #include <cmath>
@@ -562,7 +562,7 @@ class MSD {
 	void set_kT(double kT);
 	void setB(const Vector &B);
 
-	MolProto getMolProto() const;
+	const MolProto & getMolProto() const;
 	void setMolProto(const MolProto &proto);  // Note: the new MolProto must have the same "size" (number of nodes) as the previous MolProto.
 	void setMolParameters(const MolProto::NodeParameters &, const MolProto::EdgeParameters &);  // uniformally updates all mol. parameters
 
@@ -2068,7 +2068,7 @@ void MSD::setB(const Vector &B) {
 }
 
 
-MSD::MolProto MSD::getMolProto() const {
+const MSD::MolProto & MSD::getMolProto() const {
 	return molProto;
 }
 

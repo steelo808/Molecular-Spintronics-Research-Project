@@ -45,3 +45,4 @@ Version history (see ~/change-log.txt for more details):
 (11-29-2022) Version 6.2.0 Added mol-tool, MMT/MMB utilities, python binding, and Molecule iterators 
 (11-30-2022) Version 6.2.1 Bug fix in MSD.py. Added docs.
 (12-7-2022) Version 6.2.2 Updated mol-builder (previously mol-tool), and fixed bug
+(2-8-2023) Fixed bug in mmt_compiler
