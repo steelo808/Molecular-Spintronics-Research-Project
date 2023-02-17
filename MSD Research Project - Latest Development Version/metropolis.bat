@@ -1,7 +1,7 @@
 @rem /** ---- Docs ----
 @rem  * model=CONTINUOUS_SPIN_MODEL|UP_DOWN_MODEL
 @rem  * mode=RANDOMIZE|REINITIALIZE
-@rem  * mol_type=LINEAR|CIRCULAR
+@rem  * mol_type=LINEAR|CIRCULAR|__PATH__.mmb
 @rem  * threadCount=<uint32 >= 1>
 @rem  */
 
@@ -9,7 +9,7 @@
 @rem // ---- Edit Here ----
 @set model=CONTINUOUS_SPIN_MODEL
 @set mode=RANDOMIZE
-@set mol_type=LINEAR
+@set mol_type=mol/hex.mmb
 @set threadCount=3
 
 @set paramFile=parameters-metropolis.txt

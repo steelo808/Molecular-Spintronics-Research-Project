@@ -173,7 +173,7 @@ Second bug fix. In MSD::setParameters()
 (2-16-2023) Fixed potential bug/anti-pattern: MSD::getMolProto now returns a const reference instead of a copy
 	Added MMT output to CSV when using custom molecule
 	Added custom molecule support to heat, magnetize, and magnetize2
-TODO: add custom molecule support metropolis
+(2-17-2023) Added custom molecule support to metropolis, the last of the apps. They all now support custom molecules via MMB files.
 
 TODO: Fix flux != 0 on mol. that are "turned off"
 TODO: Add graph-based mol. to MSD. (including ability to create fully customizable MolProto,

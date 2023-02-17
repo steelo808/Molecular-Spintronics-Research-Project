@@ -2,9 +2,9 @@
  * @file metropolis.cpp
  * @author Christopher D'Angelo
  * @brief App for simulating numerous MSD's in paralell, each with different independent parameters.
- * @date 2022-01-24
+ * @date 2023-02-17
  * 
- * @copyright Copyright (c) 2022
+ * @copyright Copyright (c) 2023
  */
 
 #include <cstdlib>
@@ -87,7 +87,8 @@ struct Info {
 	ARG4 initMode;
 	MSD::Parameters parameters;
 
-	// TODO: replace these three lines with MSD::MolProto when ready
+	bool usingMMB;
+	MSD::MolProto molProto;  // iff usingMMB
 	Molecule::NodeParameters nodeParameters;
 	Molecule::EdgeParameters edgeParameters;
 	MSD::MolProtoFactory molType;
@@ -104,7 +105,18 @@ Info algorithm(Info info) {
 			info.topL, info.bottomL, info.frontR, info.backR );
 	
 	msd.setParameters(info.parameters);
-	msd.setMolParameters(info.nodeParameters, info.edgeParameters);
+	if (info.usingMMB) {
+		try {
+			msd.setMolProto(info.molProto);
+		} catch(MSD::MoleculeException &ex) {
+			cerr << "MSD::MoleculeException: " << ex.what() << '\n';
+			cerr << "Most likely cause: molLen (" << info.molProto.nodeCount()
+			     << ") != molPosR (" << info.molPosR << ") - molPosL (" << info.molPosL << ") + 1\n";
+			exit(-10);
+		}
+	}
+	else
+		msd.setMolParameters(info.nodeParameters, info.edgeParameters);
 	msd.flippingAlgorithm = info.flippingAlgorithm;
 	
 	for (const Spin &s : info.spins) {  // custom spins
@@ -230,6 +242,8 @@ int main(int argc, char *argv[]) {
 		return -5;
 	}
 
+	bool usingMMB = false;
+	MSD::MolProto molProto;  // iff usingMMB
 	MSD::MolProtoFactory molType = MSD::LINEAR_MOL;
 	s = string(argv[5]);
 	if (s == "LINEAR") {
@@ -237,8 +251,13 @@ int main(int argc, char *argv[]) {
 	} else if (s == "CIRCULAR") {
 		molType = MSD::CIRCULAR_MOL;
 	} else {
-		// TODO: allow for custom MolProto or MolProtoFactory
-		cout << "Unrecognized MOL_TYPE! (Note: custom mol. are not supported yet. Only LINEAR or CIRCULAR.) Defaulting to 'LINEAR'.\n";
+		try {
+			molProto = MSD::MolProto::load(ifstream(argv[5], istream::binary));
+			usingMMB = true;
+		} catch(Molecule::DeserializationException &ex) {
+			cerr << "Unrecognized MOL_TYPE, and invalid .mmb file!";
+			return -9;
+		}
 	}
 
 	ofstream fout;
@@ -408,7 +427,7 @@ int main(int argc, char *argv[]) {
 			
 			xml_node<> *version = doc.allocate_node( node_element, "xml_version" );
 			version->append_attribute( doc.allocate_attribute("major", "1") );
-			version->append_attribute( doc.allocate_attribute("minor", "7") );
+			version->append_attribute( doc.allocate_attribute("minor", "8") );
 			root->append_node(version);
 			
 			root->append_node( doc.allocate_node(node_element, "msd_version", UDC_MSD_VERSION) );
@@ -433,6 +452,11 @@ int main(int argc, char *argv[]) {
 			parg4->append_attribute(doc.allocate_attribute("name", "initMode"));
 			parg4->append_attribute(doc.allocate_attribute("value", argv[4]));
 			pargs->append_node(parg4);
+			xml_node<> *parg5 = doc.allocate_node(node_element, "parg", "");
+			parg5->append_attribute(doc.allocate_attribute("index", "5"));
+			parg5->append_attribute(doc.allocate_attribute("name", "molType"));
+			parg5->append_attribute(doc.allocate_attribute("value", argv[5]));
+			root->append_node(parg5);
 			root->append_node(pargs);
 			
 			xml_node<> *global = doc.allocate_node( node_element, "global", "" );
@@ -491,6 +515,91 @@ int main(int argc, char *argv[]) {
 				spins_node->append_node(spin_node);
 			}
 			global->append_node(spins_node);
+
+			// record decompiled MMT as both XML and plaintext: MMT (iff usingMMB)
+			xml_node<> *molProto_node = doc.allocate_node(node_element, "molProto", "");
+			string mmt = "";
+			// -- 1st nodes
+			auto nodes = molProto.getNodes();
+			xml_node<> *nodes_node = doc.allocate_node(node_element, "nodes", "");
+			const string nodesSize = to_string(nodes.size());
+			nodes_node->append_attribute( doc.allocate_attribute("count", doc.allocate_string(nodesSize.c_str())) );
+			mmt += nodesSize + "\n";
+			const auto NODES_END = nodes.end();
+			for (auto nodeIter = nodes.begin(); nodeIter != NODES_END; ++nodeIter) {
+				auto nP = nodeIter.getParameters();
+				const string Sm = to_string(nP.Sm), Fm = to_string(nP.Fm), Je0m = to_string(nP.Je0m),
+						Am_x = to_string(nP.Am.x), Am_y = to_string(nP.Am.y), Am_z = to_string(nP.Am.z);
+				xml_node<> *node_node = doc.allocate_node(node_element, "node", "");
+				node_node->append_attribute( doc.allocate_attribute("Sm", doc.allocate_string(Sm.c_str())) );
+				node_node->append_attribute( doc.allocate_attribute("Fm", doc.allocate_string(Fm.c_str())) );
+				node_node->append_attribute( doc.allocate_attribute("Je0m", doc.allocate_string(Je0m.c_str())) );
+				node_node->append_attribute( doc.allocate_attribute("Am_x", doc.allocate_string(Am_x.c_str())) );
+				node_node->append_attribute( doc.allocate_attribute("Am_y", doc.allocate_string(Am_y.c_str())) );
+				node_node->append_attribute( doc.allocate_attribute("Am_z", doc.allocate_string(Am_z.c_str())) );
+				nodes_node->append_node(node_node);
+				mmt += "Sm=" + Sm + "; ";
+				mmt += "Fm=" + Fm + "; ";
+				mmt += "Je0m=" + Je0m + "; ";
+				mmt += "Am=" + Am_x + "," + Am_y + "," + Am_z + "\n";
+			}
+			molProto_node->append_node(nodes_node);
+			mmt += "\n";
+			// -- 2nd Edges
+			auto edges = molProto.getEdges();
+			std::vector<MSD::MolProto::EdgeIterator> uniqueEdges;
+			uniqueEdges.reserve(edges.size());
+			const auto EDGES_END = edges.end();
+			for (auto edgeIter = edges.begin(); edgeIter != EDGES_END; ++edgeIter)
+				if (edgeIter.getDirection() >= 0)
+					uniqueEdges.push_back(edgeIter);
+			xml_node<> *edges_node = doc.allocate_node(node_element, "edges", "");
+			const string uEdgesSize = to_string(uniqueEdges.size());
+			edges_node->append_attribute( doc.allocate_attribute("count", doc.allocate_string(uEdgesSize.c_str())) );
+			mmt += uEdgesSize + "\n";
+			for (const auto &edgeIter : uniqueEdges) {
+				auto eP = edgeIter.getParameters();
+				const string Jm = to_string(eP.Jm), Je1m = to_string(eP.Je1m), Jeem = to_string(eP.Jeem), bm = to_string(eP.bm),
+						Dm_x = to_string(eP.Dm.x), Dm_y = to_string(eP.Dm.y), Dm_z = to_string(eP.Dm.z),
+						srcNode = to_string(edgeIter.src()), destNode = to_string(edgeIter.dest());
+				xml_node<> *edge_node = doc.allocate_node(node_element, "node", "");
+				edge_node->append_attribute( doc.allocate_attribute("Jm", doc.allocate_string(Jm.c_str())) );
+				edge_node->append_attribute( doc.allocate_attribute("Je1m", doc.allocate_string(Je1m.c_str())) );
+				edge_node->append_attribute( doc.allocate_attribute("Jeem", doc.allocate_string(Jeem.c_str())) );
+				edge_node->append_attribute( doc.allocate_attribute("bm", doc.allocate_string(bm.c_str())) );
+				edge_node->append_attribute( doc.allocate_attribute("Dm_x", doc.allocate_string(Dm_x.c_str())) );
+				edge_node->append_attribute( doc.allocate_attribute("Dm_y", doc.allocate_string(Dm_y.c_str())) );
+				edge_node->append_attribute( doc.allocate_attribute("Dm_z", doc.allocate_string(Dm_z.c_str())) );
+				edge_node->append_attribute( doc.allocate_attribute("srcNode", doc.allocate_string(srcNode.c_str())) );
+				edge_node->append_attribute( doc.allocate_attribute("destNode", doc.allocate_string(destNode.c_str())) );
+				mmt += "Jm=" + Jm + "; ";
+				mmt += "Je1m=" + Je1m + "; ";
+				mmt += "Jeem=" + Jeem + "; ";
+				mmt += "bm=" + bm + "; ";
+				mmt += "Dm=" + Dm_x + "," + Dm_y + "," + Dm_z + "; ";
+				mmt += "srcNode=" + srcNode + "; ";
+				mmt += "destNode=" + destNode + "\n";
+				edges_node->append_node(edge_node);
+			}
+			molProto_node->append_node(edges_node);
+			mmt += "\n";
+			// -- 3rd Leads
+			const string leftLead = to_string(molProto.getLeftLead()), rightLead = to_string(molProto.getRightLead());
+			xml_node<> *leads_node = doc.allocate_node(node_element, "leads", "");
+			xml_node<> *leftLead_node = doc.allocate_node(node_element, "lead");
+			leftLead_node->append_attribute( doc.allocate_attribute("dir", "left") );
+			leftLead_node->append_attribute( doc.allocate_attribute("nodeIndex", doc.allocate_string(leftLead.c_str())) );
+			leads_node->append_node(leftLead_node);
+			xml_node<> *rightLead_node = doc.allocate_node(node_element, "lead", "");
+			rightLead_node->append_attribute( doc.allocate_attribute("dir", "right") );
+			rightLead_node->append_attribute( doc.allocate_attribute("nodeIndex", doc.allocate_string(rightLead.c_str())) );
+			leads_node->append_node(rightLead_node);
+			molProto_node->append_node(leads_node);
+			mmt += leftLead + "\n";
+			mmt += rightLead + "\n";
+			// -- plaintext MMT as <mmt>
+			molProto_node->append_node( doc.allocate_node(node_element, "mmt", doc.allocate_string(mmt.c_str())) );
+			global->append_node(molProto_node);
 
 			root->append_node(global);
 		}
@@ -797,6 +906,8 @@ int main(int argc, char *argv[]) {
 			preInfo.flippingAlgorithm = flippingAlgorithm;
 			preInfo.initMode = initMode;
 			preInfo.molType = molType;
+			preInfo.usingMMB = usingMMB;
+			preInfo.molProto = molProto;
 
 			preInfo.width = p.at("width")[0];
 			preInfo.height = p.at("height")[0];
