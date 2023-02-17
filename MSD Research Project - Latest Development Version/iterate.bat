@@ -8,7 +8,7 @@
 
 @rem // ---- Edit Here ---- 
 @set model=CONTINUOUS_SPIN_MODEL
-@set mol_type=mol/hex.mmb
+@set mol_type=LINEAR
 @set randomize=1
 @set seed=unique
 

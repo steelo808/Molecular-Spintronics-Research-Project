@@ -8,7 +8,7 @@
 @rem // ---- Edit Here ----
 @set model=CONTINUOUS_SPIN_MODEL
 @set reset=noop
-@set mol_type=mol/hex.mmb
+@set mol_type=LINEAR
 
 @set out_head=heat
 

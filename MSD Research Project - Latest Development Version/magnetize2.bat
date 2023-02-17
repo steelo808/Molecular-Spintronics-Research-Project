@@ -9,7 +9,7 @@
 @set model=CONTINUOUS_SPIN_MODEL
 @set randomize=0
 @set startAtMaxB=0
-@set mol_type=mol/hex.mmb
+@set mol_type=LINEAR
 
 @set out_head=magnetization2
 

@@ -9,7 +9,7 @@
 @rem // ---- Edit Here ----
 @set model=CONTINUOUS_SPIN_MODEL
 @set mode=RANDOMIZE
-@set mol_type=mol/hex.mmb
+@set mol_type=LINEAR
 @set threadCount=3
 
 @set paramFile=parameters-metropolis.txt
