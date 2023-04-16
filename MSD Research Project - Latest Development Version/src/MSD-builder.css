@@ -1,3 +1,25 @@
+body {
+	text-align: center;
+}
+
 #msdBuilder canvas {
-	outline: 1px solid black;
+	margin: auto;
+}
+
+form {
+	display: flex;
+	align-items: top;
+	justify-content: center;
+	width: 1200px;
+	margin: 1em auto;
+}
+
+form fieldset {
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	margin: 1em;
+}
+
+form h2 {
+	grid-column: 1 / 3;
 }

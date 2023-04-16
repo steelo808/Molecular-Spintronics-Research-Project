@@ -12,6 +12,57 @@
 <body>
 	<main id="msdBuilder"></main>
 
+	<form onsubmit="event.preventDefault(); return false;">
+		<fieldset>
+			<h2> FML </h2>
+
+			<label for="FML-width"> Width: </label>
+			<input id="FML-width" type="number" min="0" value="1">
+
+			<label for="FML-height"> Height: </label>
+			<input id="FML-height" type="number" min="0" value="1">
+			
+			<label for="FML-depth"> Depth: </label>
+			<input id="FML-depth" type="number" min="0" value="1">
+
+			<label for="FML-y"> y-Offset: </label>
+			<input id="FML-y" type="number" min="0" value="0">
+		</fieldset>
+		<fieldset>
+			<h2> mol. </h2>
+
+			<label for="mol-width"> Width: </label>
+			<input id="mol-width" type="number" min="0" value="1">
+
+			<label for="mol-height"> Height: </label>
+			<input id="mol-height" type="number" value="1">
+			
+			<label for="mol-depth"> Depth: </label>
+			<input id="mol-depth" type="number" value="1">
+
+			<label for="mol-y"> y-Offset: </label>
+			<input id="mol-y" type="number" value="0">
+
+			<label for="mol-z"> z-Offset: </label>
+			<input id="mol-z" type="number" value="0">
+		</fieldset>
+		<fieldset>
+			<h2> FMR </h2>
+
+			<label for="FMR-width"> Width: </label>
+			<input id="FMR-width" type="number" value="1">
+
+			<label for="FMR-height"> Height: </label>
+			<input id="FMR-height" type="number" value="1">
+			
+			<label for="FMR-depth"> Depth: </label>
+			<input id="FMR-depth" type="number" value="1">
+
+			<label for="FMR-z"> z-Offset: </label>
+			<input id="FMR-z" type="number" value="0">
+		</fieldset>
+	</form>
+	
 	<!-- TODO: Canvas to build macro-view MSD -->
 	<!-- TODO: Ability to set parameters and output iterate-parameters file -->
 	<!-- TODO: Load iterate-parameters file -->

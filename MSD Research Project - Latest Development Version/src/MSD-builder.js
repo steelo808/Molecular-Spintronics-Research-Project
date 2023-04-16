@@ -1,20 +1,15 @@
 // ---- Imports: --------------------------------------------------------------
 const {
 	Scene, PerspectiveCamera, WebGLRenderer,
-	Geometry, BoxGeometry,
-	Mesh, MeshBasicMaterial,
-	Group
+	BufferGeometry, BoxGeometry,
+	MeshBasicMaterial,
+	Mesh, Group
 } = window.Three;
 
 
 // ---- Classes: --------------------------------------------------------------
 class MSDRegion {
-	constructor({ x = 0, y = 0, z = 0, width = 1, height = 1, depth = 1, color = 0xffffff }) {
-		// init. state
-		let geometry = new BoxGeometry(width, height, depth, width, height, depth);  // dim(3), segments(3)
-		let material = new MeshBasicMaterial({ color: color });
-		this.mesh = new Mesh(geometry, material);
-
+	constructor({ x = 0, y = 0, z = 0, width = 1, height = 1, depth = 1, color = 0xffffff, wireframe = true }) {
 		this._x = x;
 		this._y = y;
 		this._z = z;
@@ -22,14 +17,29 @@ class MSDRegion {
 		this._height = height;
 		this._depth = depth;
 		this._color = color;
+		this._wireframe = wireframe;
+
+		this.mesh = new Mesh();
+		this.mesh.material = new MeshBasicMaterial({
+			color: color,
+			wireframe: MSDRegion._hasVolume(width, height, depth) && wireframe });
+		this._updateGeometry();
+	}
+
+	static _hasVolume(w, h, d) {
+		return w > 0 && h > 0 && d > 0;
+	}
+
+	_hasVolume() {
+		return MSDRegion._hasVolume(this.width, this.height, this.depth);
 	}
 
 	_updateGeometry() {
-		this.mesh.geometry = new BoxGeometry(this.width, this.height, this.depth, this.width, this.height, this.depth);
-	}
-
-	_updateMaterial() {
-		this.mesh.material = new MeshBasicMaterial({ color: this.color });
+		const [w, h, d] = [this.width, this.height, this.depth];
+		const hasVolume = MSDRegion._hasVolume(w, h, d);
+		this.mesh.material.wireframe = hasVolume && this.wireframe;
+		this.mesh.geometry = hasVolume ? new BoxGeometry(w, h, d, w, h, d) : new BufferGeometry();
+		// console.log(this.width, this.height, this.depth, this.mesh.geometry)
 	}
 
 	set x(x) {
@@ -64,7 +74,12 @@ class MSDRegion {
 
 	set color(color) {
 		this._color = color;
-		this._updateMaterial();
+		this.mesh.material.color = color;
+	}
+
+	set wireframe(wireframe) {
+		this._wireframe = wireframe;
+		this.mesh.material.wireframe = this._hasVolume() && wireframe;
 	}
 
 	get x() { return this._x; }
@@ -73,6 +88,8 @@ class MSDRegion {
 	get width() { return this._width; }
 	get height() { return this._height; }
 	get depth() { return this._depth; }
+	get color() { return this._color; }
+	get wireframe() { return this._wireframe; }
 }
 
 class MSDView {
@@ -88,9 +105,6 @@ class MSDView {
 
 		this.FML._updateX();
 		this.FMR._updateX();
-
-		for (let r of [this.FML, this.mol, this.FMR])
-			console.log(r.name, r.x, r.y, r.z, r.width, r.height, r.depth);
 	}
 
 	get FML() {
@@ -98,7 +112,7 @@ class MSDView {
 	 return {
 		name: "FML",
 
-		_updateX() { self._FML.x = -(self.mol.width / 2 + self.FML.width); },
+		_updateX() { self._FML.x = -(self.mol.width + this.width) / 2; },
 
 		set width(width) {
 			self._FML.width = width;
@@ -137,11 +151,11 @@ class MSDView {
 	 return {
 		name: "FMR",
 
-		_updateX() { self._FMR.x = self.mol.width + self.FMR.width; },
+		_updateX() { self._FMR.x = (self.mol.width + this.width) / 2; },
 
 		set width(width) {
 			self._FMR.width = width;
-			self.FMR._updateX();
+			this._updateX();
 		},
 
 		set height(height) {
@@ -275,21 +289,24 @@ class AnimationLoop {
 
 // ---- Main: -----------------------------------------------------------------
 const main = () => {
+	const canvasWidth = 900;
+	const canvasHeight = 450;
 	const scene = new Scene();
-	const camera = new PerspectiveCamera(75, 1 / 1, 0.1, 1000);  // params: fov, aspect ratio, near and far clipping plane
+	const camera = new PerspectiveCamera(75, canvasWidth / canvasHeight, 0.1, 1000);  // params: fov, aspect ratio, near and far clipping plane
 	const renderer = new WebGLRenderer();
-	renderer.setSize(500, 500 /*, false */);
+	renderer.setSize(canvasWidth, canvasHeight /*, false */);
 	document.querySelector("#msdBuilder").append(renderer.domElement);
 
 	let msd = new MSDView();
+	msd.objects.rotation.x = Math.PI / 2;
 	scene.add(msd.objects);
 
-	camera.position.z = 25;
+	camera.position.z = 20;
 
 	const loop = new AnimationLoop(renderer, scene, camera);
 	const update = () => {
-		msd.objects.rotation.y += 0.001 * loop.deltaTime;
-		console.log(loop.time, loop.deltaTime);
+		// msd.objects.rotation.y += 0.0001 * loop.deltaTime;
+		// console.log(loop.time, loop.deltaTime);
 	};
 	loop.start(update);
 	renderer.domElement.addEventListener("click", (event) => {
@@ -297,7 +314,27 @@ const main = () => {
 			loop.stop();
 		else
 			loop.start(update);
-	})
+	});
+
+	for (let id of [
+			"FML-width", "FML-height", "FML-depth", "FML-y",
+			"FMR-width", "FMR-height", "FMR-depth", "FMR-z",
+			"mol-width", "mol-height", "mol-depth", "mol-y", "mol-z" ])
+	{
+		let [region, prop] = id.split("-", 2);
+		const input = document.querySelector(`#${id}`);
+		input.value = msd[region][prop];
+		input.addEventListener("change", (event) => {
+			let { value } = event.currentTarget;
+			// console.log(`${id}:`, value);
+			try {
+				msd[region][prop] = value;
+			} catch(ex) {
+				console.log(ex);
+				alert(ex);
+			}
+		});
+	}
 };
 
 document.addEventListener("DOMContentLoaded", main);
