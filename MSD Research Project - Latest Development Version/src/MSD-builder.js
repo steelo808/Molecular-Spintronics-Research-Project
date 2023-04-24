@@ -94,9 +94,10 @@ class MSDRegion {
 
 class MSDView {
 	constructor() {
-		this._FML = new MSDRegion({ width: 5, height: 10, depth: 10, color: 0x0000FF });
-		this._FMR = new MSDRegion({ width: 5, height: 10, depth: 10, color: 0xFF0000 });
-		this._mol = new MSDRegion({ width: 1, height: 4, depth: 4, color: 0xFF00FF });
+		const wireframe = true;
+		this._FML = new MSDRegion({ width: 5, height: 4, depth: 10, color: 0x0000FF, wireframe: wireframe });
+		this._FMR = new MSDRegion({ width: 5, height: 10, depth: 4, color: 0xFF0000, wireframe: wireframe });
+		this._mol = new MSDRegion({ width: 1, height: 4, depth: 4, color: 0xFF00FF, wireframe: wireframe });
 
 		this.objects = new Group();
 		this.objects.add(this._FML.mesh);
@@ -112,11 +113,11 @@ class MSDView {
 	 return {
 		name: "FML",
 
-		_updateX() { self._FML.x = -(self.mol.width + this.width) / 2; },
+		_updateX() { self._FML.x = -(this.width + self.mol.width) / 2; },
 
 		set width(width) {
 			self._FML.width = width;
-			self.FML._updateX();
+			this._updateX();
 		},
 
 		set height(height) {
@@ -124,11 +125,12 @@ class MSDView {
 				throw new Error(`Height of FML (${height}) must not exceed height of FMR (${self.height})`);
 			self._FML.height = height;
 			self._mol.height = height;
+			self.mol.justifyY();
 		},
 
 		set depth(depth) {
-			if (depth < self.depth)
-				throw new Error(`Depth of FML (${depth}) must at least equal depth of FMR (${self.depth})`);
+			if (depth < self.FMR.depth)
+				throw new Error(`Depth of FML (${depth}) must at least equal depth of FMR (${self.FMR.depth})`);
 			self._FML.depth = depth;
 		},
 
@@ -165,10 +167,11 @@ class MSDView {
 		},
 
 		set depth(depth) {
-			if (depth > self.FML.depth)
-				throw new Error(`Depth of FMR (${depth}) must not exceed depth of FML (${self.FML.height})`);
+			if (depth > self.depth)	
+				throw new Error(`Depth of FMR (${depth}) must not exceed depth of FML (${self.depth})`);
 			self._FMR.depth = depth;
 			self._mol.depth = depth;
+			self.mol.justifyZ();
 		},
 
 		set x(x) { throw new Error("Can't set x-offset of individual MSD regions. Set MSDView.objects.position.x instead?"); },
@@ -190,6 +193,21 @@ class MSDView {
 	 return {
 		name: "mol",
 
+		get _maxYOffset() { return (self.height - self.mol.height) / 2; },
+		get _maxZOffset() { return (self.depth - self.mol.depth) / 2; },
+		
+		_isWhole(n) { return (n * 2) % 2 == 0; },
+
+		justifyY() {
+			self._mol.y = self._FML.y = Math.floor(this.y) +
+					(this._isWhole(this._maxYOffset) ? 0 : 0.5);
+		},
+
+		justifyZ() {
+			self._mol.z = self._FMR.z = Math.floor(this.z) +
+					(this._isWhole(this._maxZOffset) ? 0 : 0.5);
+		},
+
 		set width(width) {
 			self._mol.width = width;
 			self.FML._updateX();
@@ -201,6 +219,7 @@ class MSDView {
 				throw new Error(`Height of mol. (${height}) must not exceed height of FMR (${self.FMR.height})`);
 			self._mol.height = height;
 			self._FML.height = height;
+			this.justifyY();
 		},
 
 		set depth(depth) {
@@ -208,6 +227,7 @@ class MSDView {
 				throw new Error(`Depth of mol. (${depth}) must not exceed depth of FML (${self.FML.depth})`);
 			self._mol.depth = depth;
 			self._FMR.depth = depth;
+			this.justifyZ();
 		},
 
 		set x(x) {
@@ -215,19 +235,27 @@ class MSDView {
 		},
 
 		set y(y) {
-			const maxOffset = self.height - self.mol.height;
-			if (Math.abs(y) > maxOffset)
-				throw new Error(`Given the current dimensions, y-offset can't exceed ${maxOffset}`);
+			let max = this._maxYOffset;
+			let min = -max;
+			max = Math.floor(max);
+			min = Math.floor(min);
+			if (y > max || y < min)
+				throw new Error(`Given the current dimensions, y-offset must be between [${min}, and ${max}]`);
 			self._mol.y = y;
 			self._FML.y = y;
+			this.justifyY();
 		},
 
 		set z(z) {
-			const maxOffset = self.depth - self.mol.depth;
-			if (Math.abs(z) > maxOffset)
-				throw new Error(`Given the current dimension, z-offset can't exceed ${maxOffset}`);
+			let max = this._maxZOffset;
+			let min = -max;
+			max = Math.floor(max);
+			min = Math.floor(min);
+			if (z > max || z < min)
+				throw new Error(`Given the current dimension, z-offset must be between [${min}, and ${max}]`);
 			self._mol.z = z;
-			self._FML.z = z;
+			self._FMR.z = z;
+			this.justifyZ();
 		},
 
 		get width() { return self._mol.width; },
@@ -298,37 +326,38 @@ const main = () => {
 	document.querySelector("#msdBuilder").append(renderer.domElement);
 
 	let msd = new MSDView();
-	msd.objects.rotation.x = Math.PI / 2;
+	msd.objects.rotation.x = Math.PI / 6;
+	msd.objects.rotation.y = -Math.PI / 24;
 	scene.add(msd.objects);
 
-	camera.position.z = 20;
+	camera.position.z = 15;
 
 	const loop = new AnimationLoop(renderer, scene, camera);
-	const update = () => {
-		// msd.objects.rotation.y += 0.0001 * loop.deltaTime;
-		// console.log(loop.time, loop.deltaTime);
-	};
-	loop.start(update);
-	renderer.domElement.addEventListener("click", (event) => {
-		if (loop.isRunning)
-			loop.stop();
-		else
-			loop.start(update);
-	});
+	// const update = () => {
+	// 	msd.objects.rotation.y += 0.0001 * loop.deltaTime;
+	// 	console.log(loop.time, loop.deltaTime);
+	// };
+	loop.start(/* update */);
+	// renderer.domElement.addEventListener("click", (event) => {
+	// 	if (loop.isRunning)
+	// 		loop.stop();
+	// 	else
+	// 		loop.start(update);
+	// });
 
 	for (let id of [
 			"FML-width", "FML-height", "FML-depth", "FML-y",
 			"FMR-width", "FMR-height", "FMR-depth", "FMR-z",
 			"mol-width", "mol-height", "mol-depth", "mol-y", "mol-z" ])
 	{
-		let [region, prop] = id.split("-", 2);
+		let [region, prop] = id.split("-", 2);	
 		const input = document.querySelector(`#${id}`);
 		input.value = msd[region][prop];
 		input.addEventListener("change", (event) => {
 			let { value } = event.currentTarget;
 			// console.log(`${id}:`, value);
 			try {
-				msd[region][prop] = value;
+				msd[region][prop] = Number(value);
 			} catch(ex) {
 				console.log(ex);
 				alert(ex);
