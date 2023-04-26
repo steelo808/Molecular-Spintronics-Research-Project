@@ -14,7 +14,10 @@
 
 	<form onsubmit="event.preventDefault(); return false;">
 		<fieldset>
-			<h2> FML </h2>
+			<input id="reset-btn" type="reset" value="Reset">
+		</fieldset>
+		<fieldset>
+			<legend id="FML-legend"> FML </legend>
 
 			<label for="FML-width"> Width: </label>
 			<input id="FML-width" type="number" min="0" value="1">
@@ -29,7 +32,7 @@
 			<input id="FML-y" type="number" value="0">
 		</fieldset>
 		<fieldset>
-			<h2> mol. </h2>
+			<legend id="mol-legend"> mol. </legend>
 
 			<label for="mol-width"> Width: </label>
 			<input id="mol-width" type="number" min="0" value="1">
@@ -47,7 +50,7 @@
 			<input id="mol-z" type="number" value="0">
 		</fieldset>
 		<fieldset>
-			<h2> FMR </h2>
+			<legend id="FMR-legend"> FMR </legend>
 
 			<label for="FMR-width"> Width: </label>
 			<input id="FMR-width" type="number" value="1">

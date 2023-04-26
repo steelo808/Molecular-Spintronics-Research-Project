@@ -108,6 +108,24 @@ class MSDView {
 		this.FMR._updateX();
 	}
 
+	_genNonNegError({ name }, dim) {
+		return `${dim} of ${name} must be non-negative`;
+	}
+
+	_ensureBound(bounds, val) {
+		if (val < bounds.min)
+			throw new Error(`${bounds.minError}: ${val}`);
+		if (val > bounds.max)
+			throw new Error(`${bounds.maxError}: ${val}`);
+	}
+
+	_ensureWidth({ bounds }, width) { this._ensureBound(bounds.width, width); }
+	_ensureHeight({ bounds }, height) { this._ensureBound(bounds.height, height); }
+	_ensureDepth({ bounds }, depth) { this._ensureBound(bounds.depth, depth); }
+	_ensureX({ bounds }, x) { this._ensureBound(bounds.x, x); }
+	_ensureY({ bounds }, y) { this._ensureBound(bounds.y, y); }
+	_ensureZ({ bounds }, z) { this._ensureBound(bounds.z, z); }
+
 	get FML() {
 	 const self = this;
 	 return {
@@ -115,23 +133,55 @@ class MSDView {
 
 		_updateX() { self._FML.x = -(this.width + self.mol.width) / 2; },
 
+		get bounds() {
+		 const fml = this;
+		 const fmr = self.FMR;
+		 const mol = self.mol;
+
+		 return {
+			width: {
+				min: 0,
+				max: Infinity,
+
+				minError: self._genNonNegError(fml, "Width")
+			},
+
+			height: {
+				min: 0,
+				max: fmr.height,
+
+				minError: self._genNonNegError(fml, "Height"),
+				maxError: `Height of ${fml.name} must non exceed height of ${fmr.name} (${fmr.height})`
+			},
+
+			depth: {
+				min: fmr.depth,
+				max: Infinity,
+
+				minError: `Depth of FML must at least equal depth of FMR (${fmr.depth})`,
+			},
+
+			x: {},
+			y: mol.bounds.y,
+			z: {}
+		 }
+		},
+
 		set width(width) {
+			self._ensureWidth(this, width);
 			self._FML.width = width;
 			this._updateX();
 		},
 
 		set height(height) {
-			if (height > self.height)
-				throw new Error(`Height of FML (${height}) must not exceed height of FMR (${self.height})`);
-			self._FML.height = height;
-			self._mol.height = height;
-			self.mol.justifyY();
+			self._ensureHeight(this, height);
+			self.mol.height = height;
 		},
 
 		set depth(depth) {
-			if (depth < self.FMR.depth)
-				throw new Error(`Depth of FML (${depth}) must at least equal depth of FMR (${self.FMR.depth})`);
+			self._ensureDepth(this, depth);
 			self._FML.depth = depth;
+			self.mol.justifyZ();
 		},
 
 		set x(x) { throw new Error("Can't set x-offset of individual MSD regions. Set MSDView.objects.position.x instead?"); },
@@ -155,23 +205,55 @@ class MSDView {
 
 		_updateX() { self._FMR.x = (self.mol.width + this.width) / 2; },
 
+		get bounds() {
+		 const fmr = this;
+		 const fml = self.FML;
+		 const mol = self.mol;
+
+		 return { 
+			width: {
+				min: 0,
+				max: Infinity,
+
+				minError: self._genNonNegError(fmr, "Width"),
+			},
+
+			height: {
+				min: fml.height,
+				max: Infinity,
+
+				minError: `Height of ${fmr.name} must at least equal height of ${fml.name} (${fml.height})`
+			},
+
+			depth: {
+				min: 0,
+				max: fml.depth,
+
+				minError: self._genNonNegError(fmr, "Depth"),
+				maxError: `Depth of FMR must not exceed depth of ${fml.name} (${fml.depth})`,
+			},
+
+			x: {},
+			y: {},
+			z: mol.bounds.z
+		 }
+		},
+
 		set width(width) {
+			self._ensureWidth(this, width);
 			self._FMR.width = width;
 			this._updateX();
 		},
 
 		set height(height) {
-			if (height < self.FML.height)
-				throw new Error(`Height of FMR (${height}) must at least equal height of FML (${self.FML.height})`);
+			self._ensureHeight(this, height);
 			self._FMR.height = height;
+			self.mol.justifyY();
 		},
 
 		set depth(depth) {
-			if (depth > self.depth)	
-				throw new Error(`Depth of FMR (${depth}) must not exceed depth of FML (${self.depth})`);
-			self._FMR.depth = depth;
-			self._mol.depth = depth;
-			self.mol.justifyZ();
+			self._ensureDepth(this, depth);
+			self.mol.depth = depth;
 		},
 
 		set x(x) { throw new Error("Can't set x-offset of individual MSD regions. Set MSDView.objects.position.x instead?"); },
@@ -191,40 +273,112 @@ class MSDView {
 	get mol() {
 	 const self = this;
 	 return {
-		name: "mol",
-
+		name: "mol.",
+		
 		get _maxYOffset() { return (self.height - self.mol.height) / 2; },
 		get _maxZOffset() { return (self.depth - self.mol.depth) / 2; },
-		
+
 		_isWhole(n) { return (n * 2) % 2 == 0; },
 
 		justifyY() {
+			const { y } = this;
+			try {
+				self._ensureY(this, y);
+			} catch(ex) {
+				const { min, max } = self.mol.bounds.y;
+				const distMin = Math.abs(y - min);
+				const distMax = Math.abs(max - y);
+				self._mol.y = (distMin <= distMax ? min : max);
+			}
 			self._mol.y = self._FML.y = Math.floor(this.y) +
 					(this._isWhole(this._maxYOffset) ? 0 : 0.5);
 		},
 
 		justifyZ() {
+			const { z } = this;
+			try {
+				self._ensureZ(this, z);
+			} catch(ex) {
+				const { min, max } = self.mol.bounds.z;
+				const distMin = Math.abs(z - min);
+				const distMax = Math.abs(max - z);
+				self._mol.z = (distMin <= distMax ? min : max);
+			}
 			self._mol.z = self._FMR.z = Math.floor(this.z) +
 					(this._isWhole(this._maxZOffset) ? 0 : 0.5);
 		},
 
+		get bounds() {
+		 const mol = this;
+		 const fml = self.FML;
+		 const fmr = self.FMR;
+		 
+		 return { 
+			width: {
+				min: 0,
+				max: Infinity,
+
+				minError: self._genNonNegError(mol, "Width"),
+			},
+
+			height: {
+				min: 0,
+				max: fmr.height,
+
+				minError: self._genNonNegError(mol, "Height"),
+				maxError: `Height of ${mol.name} must not exceed height of ${fmr.name} (${fmr.height})`
+			},
+
+			depth: {
+				min: 0,
+				max: fml.depth,
+
+				minError: self._genNonNegError(mol, "Depth"),
+				maxError: `Depth of ${mol.name} must not exceed depth of ${fml.name} (${fml.depth})`,
+			},
+
+			x: {},
+
+			get y() {
+				const { _maxYOffset } = mol;
+				let obj = {
+					min: Math.floor(-_maxYOffset),
+					max: Math.floor(_maxYOffset)
+				};
+				obj.minError = `Given the current dimensions, y-offset must be between [${obj.min}, and ${obj.max}]`;
+				obj.maxError = `Given the current dimensions, y-offset must be between [${obj.min}, and ${obj.max}]`;
+				return obj;
+			},
+
+			get z() {
+				const { _maxZOffset } = mol;
+				let obj = {
+					min: Math.floor(-_maxZOffset),
+					max: Math.floor(_maxZOffset)
+				};
+				obj.minError = `Given the current dimensions, z-offset must be between [${obj.min}, and ${obj.max}]`;
+				obj.maxError = `Given the current dimensions, z-offset must be between [${obj.min}, and ${obj.max}]`;
+				return obj;
+			}
+		 }
+		},
+
 		set width(width) {
+			self._ensureWidth(this, width);
 			self._mol.width = width;
 			self.FML._updateX();
 			self.FMR._updateX();
 		},
 
 		set height(height) {
-			if (height > self.FMR.height)
-				throw new Error(`Height of mol. (${height}) must not exceed height of FMR (${self.FMR.height})`);
+			self._ensureHeight(this, height);
 			self._mol.height = height;
 			self._FML.height = height;
 			this.justifyY();
 		},
 
 		set depth(depth) {
-			if (depth > self.FML.depth)
-				throw new Error(`Depth of mol. (${depth}) must not exceed depth of FML (${self.FML.depth})`);
+			self._ensureDepth(this, depth);
 			self._mol.depth = depth;
 			self._FMR.depth = depth;
 			this.justifyZ();
@@ -235,24 +389,14 @@ class MSDView {
 		},
 
 		set y(y) {
-			let max = this._maxYOffset;
-			let min = -max;
-			max = Math.floor(max);
-			min = Math.floor(min);
-			if (y > max || y < min)
-				throw new Error(`Given the current dimensions, y-offset must be between [${min}, and ${max}]`);
+			self._ensureY(this, y);
 			self._mol.y = y;
 			self._FML.y = y;
 			this.justifyY();
 		},
 
 		set z(z) {
-			let max = this._maxZOffset;
-			let min = -max;
-			max = Math.floor(max);
-			min = Math.floor(min);
-			if (z > max || z < min)
-				throw new Error(`Given the current dimension, z-offset must be between [${min}, and ${max}]`);
+			self._ensureZ(this, z);
 			self._mol.z = z;
 			self._FMR.z = z;
 			this.justifyZ();
@@ -320,17 +464,39 @@ const main = () => {
 	const canvasWidth = 900;
 	const canvasHeight = 450;
 	const scene = new Scene();
-	const camera = new PerspectiveCamera(75, canvasWidth / canvasHeight, 0.1, 1000);  // params: fov, aspect ratio, near and far clipping plane
+	const camera = new PerspectiveCamera(90, canvasWidth / canvasHeight);  // params: fov, aspect ratio
 	const renderer = new WebGLRenderer();
 	renderer.setSize(canvasWidth, canvasHeight /*, false */);
 	document.querySelector("#msdBuilder").append(renderer.domElement);
 
-	let msd = new MSDView();
-	msd.objects.rotation.x = Math.PI / 6;
-	msd.objects.rotation.y = -Math.PI / 24;
-	scene.add(msd.objects);
+	const DIM_FIELDS = new Map([
+		["FML-width", 5], ["FML-height", 4], ["FML-depth", 10], ["FML-y", 0],
+		["FMR-width", 5], ["FMR-height", 10], ["FMR-depth", 4], ["FMR-z", 0],
+		["mol-width", 1], ["mol-height", 4], ["mol-depth", 4], ["mol-y", 0], ["mol-z", 0]
+	]);
 
-	camera.position.z = 15;
+	let msd = new MSDView();
+	const reset = () => {
+		msd.FML.width = DIM_FIELDS.get("FML-width");
+		msd.FMR.width = DIM_FIELDS.get("FMR-width");
+		msd.mol.width = DIM_FIELDS.get("mol-width");
+
+		msd.FML.height = 0;
+		msd.FMR.height = DIM_FIELDS.get("FMR-height");
+		msd.FML.height = DIM_FIELDS.get("FML-height");
+
+		msd.FMR.depth = 0;
+		msd.FML.depth = DIM_FIELDS.get("FML-depth");
+		msd.FMR.depth = DIM_FIELDS.get("FMR-depth");
+
+		msd.mol.y = DIM_FIELDS.get("mol-y");
+		msd.mol.z = DIM_FIELDS.get("mol-z");
+
+		msd.objects.rotation.x = Math.PI / 6;
+		msd.objects.rotation.y = -Math.PI / 24;
+	};
+	reset();
+	scene.add(msd.objects);
 
 	const loop = new AnimationLoop(renderer, scene, camera);
 	// const update = () => {
@@ -345,25 +511,125 @@ const main = () => {
 	// 		loop.start(update);
 	// });
 
-	for (let id of [
-			"FML-width", "FML-height", "FML-depth", "FML-y",
-			"FMR-width", "FMR-height", "FMR-depth", "FMR-z",
-			"mol-width", "mol-height", "mol-depth", "mol-y", "mol-z" ])
-	{
-		let [region, prop] = id.split("-", 2);	
-		const input = document.querySelector(`#${id}`);
-		input.value = msd[region][prop];
+	const forEachDimField = (f) => {
+		for(let id of DIM_FIELDS.keys())
+		{
+			const [region, prop] = id.split("-", 2);	
+			const input = document.getElementById(id);
+			f({ id, input, region, prop });
+		}
+	};
+
+	class SavedMap extends Map {
+		/**
+		 * @param storage Either localStorage or sessionStorage, or similar object.
+		 * @param {String} name Key for saving this object in given storage.
+		 */ 
+		constructor(storage, name, { autoSave = true, autoLoad = true } = {}) {
+			super();
+			this.storage = storage;
+			this.name = name;
+			this.autoSave = autoSave;
+			if (autoLoad)
+				this.load();
+		}
+
+		save() {
+			this.storage.setItem(this.name, JSON.stringify([...this]));
+		}
+
+		load() {
+			const map = this.storage.getItem(this.name);
+			if (map !== null)
+				JSON.parse(map)?.forEach(([ key, value ]) => { super.set(key, value) });
+		}
+
+		clear() {
+			super.clear();
+			if (this.autoSave)
+				this.save();
+		}
+
+		set(key, value) {
+			super.set(key, value);
+			if (this.autoSave)
+				this.save();
+		}
+
+		delete(key) {
+			super.delete(key);
+			if (this.autoSave)
+				this.save();
+		}
+	};
+	const valueCache = new SavedMap(localStorage, "valueCache");
+
+	// Update the msd object with previously saved info in the valueCache.
+	// (First reset dims so setting props. out-of-order doesn't cause errors.)
+	msd.FML.width = msd.FMR.width = msd.mol.width = 0; 
+	msd.FMR.depth = msd.FML.height = 0;
+	msd.mol.y = msd.mol.z = 0;
+	forEachDimField(({ id, region, prop }) => {
+		value = valueCache.get(id);
+		if (value !== undefined && value !== null)
+			msd[region][prop] = value;
+		else
+			msd[region][prop] = DIM_FIELDS.get(id);
+	});
+
+	// update HTML (dimension) fields with info in msd object 
+	const updateDimFields = () => {
+		forEachDimField(({ input, region, prop }) => {
+			input.value = Math.floor(msd[region][prop]);
+			input.min = msd[region].bounds[prop]?.min;
+			input.max = msd[region].bounds[prop]?.max;
+		})
+	};
+	updateDimFields();
+
+	// Event Listeners
+	forEachDimField(({ id, input, region, prop }) => {
+		// onfocus: Store values of each field before they are changed,
+		// 	so they can be reverted incase invalid values are entered.
+		input.addEventListener("focus", (event) => {
+			let value = +event.currentTarget.value;
+			valueCache.set(id, value);
+		});
+
+		// onchange:
 		input.addEventListener("change", (event) => {
-			let { value } = event.currentTarget;
-			// console.log(`${id}:`, value);
+			const input = event.currentTarget;
+			let value = Math.round(+input.value);
+
+			input.value = value;
 			try {
-				msd[region][prop] = Number(value);
+				msd[region][prop] = value;
+				valueCache.set(id, value);
+				updateDimFields();
+				updateCamera();
 			} catch(ex) {
+				document.querySelector(`#${id}`).value = valueCache.get(id)
 				console.log(ex);
 				alert(ex);
 			}
 		});
-	}
+	});
+
+	document.getElementById("reset-btn").addEventListener("click", (event) => {
+		event.preventDefault();
+		reset();
+		updateDimFields();
+		valueCache.clear();
+	});
+
+	document.getElementById("FML-legend").innerText = msd.FML.name;
+	document.getElementById("FMR-legend").innerText = msd.FMR.name;
+	document.getElementById("mol-legend").innerText = msd.mol.name;
+
+	const updateCamera = () => {
+		camera.position.z = 0.85 * Math.max(msd.width, msd.height, msd.depth);
+	};
+	updateCamera();
 };
 
 document.addEventListener("DOMContentLoaded", main);
