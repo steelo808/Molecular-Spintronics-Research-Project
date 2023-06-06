@@ -523,17 +523,17 @@ const main = () => {
 	scene.add(msd.objects);
 
 	const loop = new AnimationLoop(renderer, scene, camera);
-	const update = () => {
-		msd.objects.rotation.y += 0.0001 * loop.deltaTime;
-		console.log(loop.time, loop.deltaTime);
-	};
-	loop.start(update);
-	renderer.domElement.addEventListener("click", (event) => {
-		if (loop.isRunning)
-			loop.stop();
-		else
-			loop.start(update);
-	});
+	// const update = () => {
+	// 	msd.objects.rotation.y += 0.0001 * loop.deltaTime;
+	// 	console.log(loop.time, loop.deltaTime);
+	// };
+	loop.start(/* update */);
+	// renderer.domElement.addEventListener("click", (event) => {
+	// 	if (loop.isRunning)
+	// 		loop.stop();
+	// 	else
+	// 		loop.start(update);
+	// });
 
 	const forEachDimField = (f) => {
 		for(let id of DIM_FIELDS.keys())
