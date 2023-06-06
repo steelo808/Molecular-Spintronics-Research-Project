@@ -474,8 +474,32 @@ const main = () => {
 		["FMR-width", 5], ["FMR-height", 10], ["FMR-depth", 4], ["FMR-z", 0],
 		["mol-width", 1], ["mol-height", 4], ["mol-depth", 4], ["mol-y", 0], ["mol-z", 0]
 	]);
+	const PARAM_FIELDS = new Map([
+		["kT", 0.1],
+		["B_x", 0], ["B_y", 0], ["B_z", 0],
+		
+		["SL", 1], ["Sm", 1], ["SR", 1],
+		["FL", 1], ["Fm", 0], ["FR", 0],
+
+		["JL", 1], ["JmL", 1], ["Jm", 1], ["JmR", -1], ["JR", 1], ["JLR", 0],
+		["Je0L", 0], ["Je0m", 0], ["Je0R", 0],
+		["Je1L", 0], ["Je1m", 0], ["Je1R", 0], ["Je1mL", 0], ["Je1mR", 0], ["Je1LR", 0],
+		["JeeL", 0], ["Jeem", 0], ["JeeR", 0], ["JeemL", 0], ["JeemR", 0], ["JeeLR", 0],
+
+		["bL", 0], ["bm", 0], ["bR", 0], ["bmL", 0], ["bmR", 0], ["bLR", 0],
+		
+		["AL_x", 0], ["Am_x", 0], ["AR_x", 0],
+		["AL_y", 0], ["Am_y", 0], ["AR_y", 0],
+		["AL_z", 0], ["Am_z", 0], ["AR_z", 0],
+
+		["DL_x", 0], ["Dm_x", 0], ["DR_x", 0], ["DmL_x", 0], ["DmR_x", 0], ["DLR_x", 0],
+		["DL_y", 0], ["Dm_y", 0], ["DR_y", 0], ["DmL_y", 0], ["DmR_y", 0], ["DLR_y", 0],
+		["DL_z", 0], ["Dm_z", 0], ["DR_z", 0], ["DmL_z", 0], ["DmR_z", 0], ["DLR_z", 0],
+	]);
 
 	let msd = new MSDView();
+
+	// resets the 3D scene and msd object
 	const reset = () => {
 		msd.FML.width = DIM_FIELDS.get("FML-width");
 		msd.FMR.width = DIM_FIELDS.get("FMR-width");
@@ -499,17 +523,17 @@ const main = () => {
 	scene.add(msd.objects);
 
 	const loop = new AnimationLoop(renderer, scene, camera);
-	// const update = () => {
-	// 	msd.objects.rotation.y += 0.0001 * loop.deltaTime;
-	// 	console.log(loop.time, loop.deltaTime);
-	// };
-	loop.start(/* update */);
-	// renderer.domElement.addEventListener("click", (event) => {
-	// 	if (loop.isRunning)
-	// 		loop.stop();
-	// 	else
-	// 		loop.start(update);
-	// });
+	const update = () => {
+		msd.objects.rotation.y += 0.0001 * loop.deltaTime;
+		console.log(loop.time, loop.deltaTime);
+	};
+	loop.start(update);
+	renderer.domElement.addEventListener("click", (event) => {
+		if (loop.isRunning)
+			loop.stop();
+		else
+			loop.start(update);
+	});
 
 	const forEachDimField = (f) => {
 		for(let id of DIM_FIELDS.keys())
@@ -519,6 +543,34 @@ const main = () => {
 			f({ id, input, region, prop });
 		}
 	};
+
+	// update _x, _y, _z fields for a parameter given _phi, _theta, _rho. Inverse of updateRhoThetaPhi.
+	// Note: using ISO standard definitions for phi, theta, rho
+	const updateXYZ = (prefix) => {
+		let [ rho, theta, phi ] = ["rho", "theta", "phi"].map(suffix =>
+			+document.getElementById(`${prefix}_${suffix}`).value );
+		let r = rho * Math.sin(theta);
+		document.getElementById(`${prefix}_x`).value = r * Math.cos(phi);
+		document.getElementById(`${prefix}_y`).value = r * Math.sin(phi);
+		document.getElementById(`${prefix}_z`).value = rho * Math.cos(theta);
+	};
+
+	// Update _rho, _theta, _phi fields for a parameter given _x, _y, _z. Inverse of updateXYZ.
+	// Note: using ISO standard definitions for phi, theta, rho
+	const updateRhoThetaPhi = (prefix) => {
+		let [ x, y, z ] = ["x", "y", "z"].map(suffix =>
+			+document.getElementById(`${prefix}_${suffix}`).value );
+		let r2 = x*x + y*y;
+		let rho = Math.sqrt(r2 + z*z);
+		document.getElementById(`${prefix}_rho`).value = rho;
+		document.getElementById(`${prefix}_theta`).value = Math.acos(z / rho) * 180 / Math.PI;
+		document.getElementById(`${prefix}_phi`).value = Math.sign(y) * Math.acos(x / Math.sqrt(r2)) * 180 / Math.PI;
+	};
+
+	// Given a key from PARAM_FIELDS,
+	// returns the prefix if the parameter is a vector (ends with _x, _y, or _z),
+	// or return null.
+	const splitParam = (param_name) => param_name.split("_", 2);
 
 	class SavedMap extends Map {
 		/**
@@ -570,7 +622,7 @@ const main = () => {
 	msd.FMR.depth = msd.FML.height = 0;
 	msd.mol.y = msd.mol.z = 0;
 	forEachDimField(({ id, region, prop }) => {
-		value = valueCache.get(id);
+		let value = valueCache.get(id);
 		if (value !== undefined && value !== null)
 			msd[region][prop] = value;
 		else
@@ -586,6 +638,22 @@ const main = () => {
 		})
 	};
 	updateDimFields();
+	
+	// update HTML (param) inputs with cached or default info
+	const updateParamFields = () => {
+		PARAM_FIELDS.forEach((default_value, param_name) => {
+			console.log(param_name);
+			let value = valueCache.get(param_name);
+			document.getElementById(param_name).value =
+				(value !== undefined && value != null ? value : default_value);
+
+			// TODO: handle _rho, _theta, _phi fields because they are not in PARAM_FIELDS
+			// let [ prefix, suffix ] = splitParam(param_name);
+			// if (suffix)
+			// 	updateRhoThetaPhi(prefix);
+		});
+	};
+	updateParamFields();
 
 	// Event Listeners
 	forEachDimField(({ id, input, region, prop }) => {
@@ -615,21 +683,44 @@ const main = () => {
 		});
 	});
 
-	document.getElementById("reset-btn").addEventListener("click", (event) => {
-		event.preventDefault();
-		reset();
-		updateDimFields();
-		valueCache.clear();
-	});
-
-	document.getElementById("FML-legend").innerText = msd.FML.name;
-	document.getElementById("FMR-legend").innerText = msd.FMR.name;
-	document.getElementById("mol-legend").innerText = msd.mol.name;
+	for (let param_name of PARAM_FIELDS.keys()) {
+		// let [ prefix, suffix ] = splitParam(param_name);
+		// if (!suffix) {
+			document.getElementById(param_name).addEventListener("change", (event) => {
+				valueCache.set(param_name, +event.currentTarget.value);
+			});
+		// } else {
+			// TODO: How to save Vectors, and how do we update vectors as one represntation is modified?
+		// }
+	};
 
 	const updateCamera = () => {
 		camera.position.z = 0.85 * Math.max(msd.width, msd.height, msd.depth);
 	};
 	updateCamera();
+
+	const paramsForm = document.getElementById("msd-params-form");
+	paramsForm.addEventListener("submit", (event) => {
+		event.preventDefault();
+		// TODO: export data as iterate parameters file
+	});
+	paramsForm.addEventListener("reset", (event) => {
+		event.preventDefault();
+		if (confirm("Reset all parameters to a default state?")) {
+			reset();
+			updateDimFields();
+			updateParamFields();
+			updateCamera();
+			valueCache.clear();
+		}
+	});
+
+	document.getElementById("FML-legend").innerText = `[${msd.FML.name}]`;
+	document.getElementById("FMR-legend").innerText = `[${msd.FMR.name}]`;
+	document.getElementById("mol-legend").innerText = `[${msd.mol.name}]`;
+	document.getElementById("LR-legend").innerText = `[${msd.FML.name}~~${msd.FMR.name}]`;
+	document.getElementById("mL-legend").innerText = `[${msd.FML.name}~~${msd.mol.name}]`;
+	document.getElementById("mR-legend").innerText = `[${msd.mol.name}~~${msd.FMR.name}]`;
 };
 
 document.addEventListener("DOMContentLoaded", main);
