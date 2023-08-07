@@ -186,7 +186,6 @@ class Molecule:
 		'''
 		# these must be defined before __init__ since they are used as default arguments
 		def next(self):
-			print(hex(self._node), type(self._node), hex(self._iterable._end), type(self._iterable._end))
 			if msd_clib.eq_n(self._node, self._iterable._end):
 				raise StopIteration
 			

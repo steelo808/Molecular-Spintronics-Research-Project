@@ -1723,7 +1723,8 @@ void MSD::init(const MolProtoFactory *molProtoFactory) {
 MSD::MSD(unsigned int width, unsigned int height, unsigned int depth,
 		const MolProto &molProto, unsigned int molPosL,
 		unsigned int topL, unsigned int bottomL, unsigned int frontR, unsigned int backR)
-: width(width), height(height), depth(depth), molPosL(molPosL), molPosR(molProto.nodeCount() - 1),
+: width(width), height(height), depth(depth),
+		molPosL(molPosL), molPosR(molPosL + molProto.nodeCount() - 1),
 		topL(topL), bottomL(bottomL), frontR(frontR), backR(backR), molProto(molProto)
 {
 	init();
@@ -1732,7 +1733,8 @@ MSD::MSD(unsigned int width, unsigned int height, unsigned int depth,
 MSD::MSD(unsigned int width, unsigned int height, unsigned int depth,
 			const MolProtoFactory &molType, unsigned int molPosL, unsigned int molPosR,
 			unsigned int topL, unsigned int bottomL, unsigned int frontR, unsigned int backR)
-: width(width), height(height), depth(depth), molPosL(molPosL), molPosR(molPosR),
+: width(width), height(height), depth(depth),
+		molPosL(molPosL), molPosR(molPosR),
 		topL(topL), bottomL(bottomL), frontR(frontR), backR(backR)
 {
 	init(&molType);
@@ -1741,7 +1743,8 @@ MSD::MSD(unsigned int width, unsigned int height, unsigned int depth,
 MSD::MSD(unsigned int width, unsigned int height, unsigned int depth,
 		unsigned int molPosL, unsigned int molPosR,
 		unsigned int topL, unsigned int bottomL, unsigned int frontR, unsigned int backR)
-: width(width), height(height), depth(depth), molPosL(molPosL), molPosR(molPosR),
+: width(width), height(height), depth(depth),
+		molPosL(molPosL), molPosR(molPosR),
 		topL(topL), bottomL(bottomL), frontR(frontR), backR(backR)
 {
 	init(&LINEAR_MOL);
