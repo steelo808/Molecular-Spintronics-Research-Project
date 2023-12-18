@@ -8,7 +8,7 @@ const { updateCamera } = MSDBuilder.render;
 // ---- Classes: --------------------------------------------------------------
 class SavedMap extends Map {
 	/**
-	 * @param storage Either localStorage or sessionStorage, or similar object.
+	 * @param {Storage} storage Either localStorage or sessionStorage, or similar object.
 	 * @param {String} name Key for saving this object in given storage.
 	 */ 
 	constructor(storage, name, { autoSave = true, autoLoad = true } = {}) {

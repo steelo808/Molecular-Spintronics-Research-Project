@@ -109,6 +109,8 @@ Vector.I = Vector.in_dll(msd_clib, "I")
 Vector.J = Vector.in_dll(msd_clib, "J")
 Vector.K = Vector.in_dll(msd_clib, "K")
 Vector.ZERO = Vector.in_dll(msd_clib, "ZERO")
+# TODO: ^^ These are not actually const.
+# 	Will this cause problems? Testing needed.
 
 
 class Molecule:
