@@ -164,6 +164,156 @@ const syncHTMLDimFields = (msd) => {
 	})
 };
 
+// Robert J.
+function replaceValues(template, name, value, x, y, z) {
+	let regex = new RegExp(`(${name}\\s*=\\s*)([^\\n]*)`);
+	
+	if(x,y,z != null) {
+		template = template.replace(regex, `${name} = ${x} ${y} ${z}`);
+	} else {
+		template = template.replace(regex, `$1${value}`);
+	}
+	return template;
+  }
+
+
+// Robert J.
+function loadFileContent(msd) {
+	msd_width = msd.FML.width + msd.FMR.width + msd.mol.width;
+	// height of FML can never exceed depth of FMR (making it automatically the maximum)
+	msd_height = msd.FMR.height;
+	// depth of FMR can never exceed depth of FML
+	msd_depth = msd.FML.depth;
+
+	topL = (msd_height - msd.mol.depth) < 0 ? (Math.floor((msd_height - msd.mol.depth) / 2)) + 1 - msd.FML.y : (Math.floor((msd_height - msd.mol.depth) / 2)) - msd.FML.y;
+	console.log(msd.FML.y)
+	bottomL = topL + msd.FML.height - 1
+	
+	molPosL = msd.FML.width;
+	molPosR = molPosL + msd.mol.width - 1;
+	
+	frontR = (msd_depth - msd.mol.depth) < 0 ? (Math.floor((msd_depth - msd.mol.depth) / 2)) + 1 - msd.mol.z : (Math.floor((msd_depth - msd.mol.depth) / 2)) - Math.floor(msd.mol.z);
+	backR = frontR + msd.FMR.depth - 1
+
+	let content = `simCount = 10000000
+freq = 50000
+
+# dimensions of bounding box
+width = ${msd_width}
+height = ${msd_height}
+depth = ${msd_depth}
+
+# boundaries which define the exact dimensions of FM_L, FM_R, and mol.
+molPosL = ${molPosL}
+molPosR = ${molPosR}
+topL = ${topL}
+bottomL = ${bottomL}
+frontR = ${frontR}
+backR = ${backR}
+
+# turn off front edge of mol.
+# [5 11 10] = 0
+# [5 12 10] = 0
+# [5 13 10] = 0
+# [5 14 10] = 0
+
+# turn off back edge of mol.
+# [5 11 15] = 0
+# [5 12 15] = 0
+# [5 13 15] = 0
+# [5 14 15] = 0
+
+
+# Tempurature
+kT = 0.2
+
+# External Magnetic Field
+B = 0.1 0 0
+
+# Magnetude of spin vectors
+SL = 1
+SR = 1
+Sm = 1
+
+# Maximum Magnetude of spin fluctuation ("flux") vectors
+FL = 0.25
+FR = 0.25
+Fm = 0.25
+
+# Heisenberg exchange coupling between two neighboring spins
+JL = 1
+JR = 1
+Jm = 0.1
+JmL = 0.5
+JmR = -0.5
+JLR = 0.05
+
+# exchange coupling between a spin and its local flux
+Je0L = 0.1
+Je0R = 0.1
+Je0m = 0.2
+
+# exchange coupling between a spin and its neighboring flux (and vice versa)
+Je1L = 0.02
+Je1R = 0.02
+Je1m = 0.02
+Je1mL = 0.02
+Je1mR = 0.02
+Je1LR = 0.001
+
+# exchange coupling between two neighboring fluxes
+JeeL = 0.05
+JeeR = 0.05
+Jeem = -0.25
+JeemL = 0.05
+JeemR = -0.05
+JeeLR = 0.01
+
+# Anisotropy constant(s), as vectors 
+AL = 0.1 0 0
+AR = 0.1 0 0
+Am = 0 0.2 0
+
+# Biquadratic coupling
+bL = 0.01
+bR = 0.01
+bm = 0.01
+bmL = 0.01
+bmR = 0.01
+bLR = 0.001
+
+# Dzyaloshinskii-Moriya (i.e. Skyrmion) interaction, as vectors
+DL = 0.002 0 0
+DR = 0.002 0 0
+Dm = 0.002 0 0
+DmL = 0.002 0 0
+DmR = 0.002 0 0
+DLR = 0.0002 0 0
+	`
+
+	for(let id of DEFAULTS.PARAM_FIELDS.keys())
+	{	
+		const Uinput = document.getElementById(id);
+		content = replaceValues(content, Uinput.id, Uinput.value);
+	}
+
+	vectors = ["AL", "Am", "AR", "DL", "Dm", "DR", "DmL", "DmR", "DLR", "B"]
+
+	for(let id of vectors)
+	{	
+		console.log(id)
+		const id_x = document.getElementById(id + "_x");
+		const id_y = document.getElementById(id + "_y");
+		const id_z = document.getElementById(id + "_z");
+		content = replaceValues(content, id, null, id_x.value, id_y.value, id_z.value);
+	}
+
+	
+
+	
+	return content;
+}
+
 
 // ---- TODO: Unused ----------------------------------------------------------
 const splitParam = (param_name) => param_name.split("_", 2);
@@ -241,8 +391,16 @@ const initForm = ({ camera, msdView }) => {
 	const paramsForm = document.getElementById("msd-params-form");
 	paramsForm.addEventListener("submit", (event) => {
 		event.preventDefault();
-		// TODO: export data as iterate parameters file
+		let content = loadFileContent(msdView);
+		let blob = new Blob([content], { type: 'text/plain' });
+		let link = document.createElement('a');
+		link.download = 'parameters-iterate.txt';
+		link.href = window.URL.createObjectURL(blob);
+		link.click();
+		window.URL.revokeObjectURL(link.href);
 	});
+
+
 	paramsForm.addEventListener("reset", (event) => {
 		event.preventDefault();
 		if (confirm("Reset all parameters to a default state?")) {
