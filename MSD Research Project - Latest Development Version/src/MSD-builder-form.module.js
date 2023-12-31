@@ -186,13 +186,12 @@ function loadFileContent(msd) {
 	msd_depth = msd.FML.depth;
 
 	topL = (msd_height - msd.mol.depth) < 0 ? (Math.floor((msd_height - msd.mol.depth) / 2)) + 1 - msd.FML.y : (Math.floor((msd_height - msd.mol.depth) / 2)) - msd.FML.y;
-	console.log(msd.FML.y)
 	bottomL = topL + msd.FML.height - 1
 	
 	molPosL = msd.FML.width;
 	molPosR = molPosL + msd.mol.width - 1;
 	
-	frontR = (msd_depth - msd.mol.depth) < 0 ? (Math.floor((msd_depth - msd.mol.depth) / 2)) + 1 - msd.mol.z : (Math.floor((msd_depth - msd.mol.depth) / 2)) - Math.floor(msd.mol.z);
+	frontR = (msd_depth - msd.mol.depth) < 0 ? (Math.floor((msd_depth - msd.mol.depth) / 2)) + 1 - Math.floor(msd.mol.z) : (Math.floor((msd_depth - msd.mol.depth) / 2)) - Math.floor(msd.mol.z);
 	backR = frontR + msd.FMR.depth - 1
 
 	let content = `simCount = 10000000
