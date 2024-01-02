@@ -6,7 +6,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class WorkerPool {
 	private ConcurrentHashMap<UUID, MSDWorker> workers = new ConcurrentHashMap<>();
-	private Object createWorkerLock = new Object();
+	private final Object createWorkerLock = new Object();
 
 	public UUID createWorker(String json) throws IOException {
 		// create worker

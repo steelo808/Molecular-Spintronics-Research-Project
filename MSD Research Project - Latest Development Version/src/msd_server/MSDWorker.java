@@ -4,8 +4,8 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
+import java.util.AbstractList;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 public class MSDWorker implements AutoCloseable {
@@ -14,6 +14,8 @@ public class MSDWorker implements AutoCloseable {
 	private PrintWriter out;  // streams for python sub-process
 	private BufferedReader err;  // streams for python sub-process
 	private boolean shutdown = false;
+	// TODO: remember to change  "record" to a different object on reset/reinitialize
+	// so the old view doesn't get affected or locked
 	private ArrayList<String> record = new ArrayList<>(0);
 	private StringBuilder errLog = new StringBuilder();
 	private Thread errLogReader = new Thread(() -> {
@@ -35,14 +37,15 @@ public class MSDWorker implements AutoCloseable {
 	 * @throws IOException
 	 */
 	public MSDWorker(String args) throws IOException {
-		proc = new ProcessBuilder("python", "msd_server/MSDWorker.py").start();
-		System.out.println("Worker pid=" + proc.pid());
+		proc = new ProcessBuilder("python", "src/msd_server/MSDWorker.py").start();
+		System.out.println("Worker pid=" + proc.pid());  // DEBUG
 		in = new BufferedReader(new InputStreamReader(proc.getInputStream()));
 		out = new PrintWriter(proc.getOutputStream(), true);
 		err = new BufferedReader(new InputStreamReader(proc.getErrorStream()));
 		errLogReader.start();
 
-		out.println(collapse(args));
+		args = collapse(args);
+		out.println(args);
 		confirmResponse("READY");
 	}
 
@@ -53,6 +56,7 @@ public class MSDWorker implements AutoCloseable {
 	 * 	<code>{ simCount, freq, dkT, dB }</code>
 	 */
 	public void run(String args) throws IOException {
+		args = collapse(args);
 		synchronized(proc) {
 			out.println("RUN");
 			out.println(args);
@@ -62,12 +66,15 @@ public class MSDWorker implements AutoCloseable {
 				state = requireLine();
 				if ("DONE".equalsIgnoreCase(state))
 					break;
-				record.add(state);
+				synchronized(record) {
+					record.add(state);
+				}
 
 				// is the worker trying to exit?
 				if (shutdown) {
 					out.println("CANCEL");
 					confirmResponse("DONE");
+					shutdown = false;
 					break;
 				} else {
 					out.println("CONTINUE");
@@ -87,6 +94,7 @@ public class MSDWorker implements AutoCloseable {
 	 * @param parameters Compact JSON string containing MSD parameters
 	 */
 	public void setParameters(String parameters) throws IOException {
+		parameters = collapse(parameters);
 		synchronized(proc) {
 			out.println("SET");
 			out.println(parameters);
@@ -94,16 +102,16 @@ public class MSDWorker implements AutoCloseable {
 		}
 	}
 
+	public void cancel() {
+		shutdown = true;
+	}
+
 	public void exit() throws IOException {
-		shutdown = true;  // flag signals the run() method in case a simulation is running
+		cancel();  // flag signals the run() method in case a simulation is running
 		synchronized(proc) {
 			out.println("EXIT");
 			confirmResponse("GOODBYE");
 		}
-	}
-
-	public List<String> getRecord() {
-		return Collections.unmodifiableList(record);
 	}
 
 	public String errLog() {
@@ -122,6 +130,29 @@ public class MSDWorker implements AutoCloseable {
 			errLogReader.interrupt();
 			proc.destroy();
 		}
+	}
+
+	/**
+	 * @return A synchronized List backed by the underlying MSDWorker.
+	 *         The list size is potentially volutile, but should never decrease.
+	 */
+	public List<String> getRecord() {
+		var record = this.record;  // copy reference in-case of reset/reinitialize
+		return new AbstractList<>() {
+			@Override
+			public int size() {
+				synchronized(record) {
+					return record.size();
+				}
+			}
+
+			@Override
+			public String get(int index) {
+				synchronized(record) {
+					return record.get(index);
+				}
+			}
+		};
 	}
 
 	/**
