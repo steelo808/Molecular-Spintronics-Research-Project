@@ -22,7 +22,21 @@ class _StructWithDict(Structure):
 	''' Version of ctypes.Structure that defines __dict__ and overrides __repr__ '''
 	def __init__(self, *args, **kw): super().__init__(*args, **kw)
 	__dict__ = property(fget = lambda self: {k: getattr(self, k) for k, _ in self._fields_})
+	__iter__ = lambda self: iter([getattr(self, k) for k,_ in self._fields_])
 	__repr__ = lambda self: str(vars(self))
+	
+	# https://python-list.python.narkive.com/JjDfqgnK/iterable-ctypes-struct
+	def __getitem__(self, idx):
+		if isinstance(idx, str):
+			return getattr(self, idx)
+		else:
+			return getattr(self, self._fields_[idx][0])
+	
+	def __setitem__(self, idx, val):
+		if isinstance(idx, str):
+			setattr(self, idx, val)
+		else:
+			setattr(self, self._fields_[idx][0], val)
 
 class _MMTStruct(_StructWithDict):
 	''' Adds the MSD-Molecule-Text, mmt() method for subclasses '''
@@ -56,9 +70,7 @@ class Vector(_StructWithDict):
 
 	def __init__(self, *args, **kw): super().__init__(*args, **kw)
 
-	def __iter__(self): return (self.x, self.y, self.z)
 	def __len__(self): return 3
-	def __getitem__(self, idx): return (self.x, self.y, self.z)[idx]
 	def __repr__(self): return f"({self.x}, {self.y}, {self.z})"
 
 	@classmethod
@@ -470,7 +482,7 @@ class Molecule:
 	@property
 	def edgesUnique(self):
 		'''
-		Builds and returns a list of edges which contain uniqie edgeIndexes.
+		Generator of edges which contain uniqie edgeIndexes.
 		Useful since edges are directional and edges between two different nodes will be duplicated.
 
 		The elements of the list will be Molecule._Edge objects, which are themselves iterable.
@@ -478,13 +490,11 @@ class Molecule:
 		from the underlying Molecule._EdgeIterable.
 		'''
 		visited: Set[int] = set()
-		unique: List[Molecule._Edge] = []
 		for edge in self.edges:
 			edgeIndex = edge.index
 			if edgeIndex not in visited:
 				visited.add(edgeIndex)
-				unique.append(edge)
-		return unique
+				yield edge
 
 	def mmt(self):
 		''' MMT formated string '''
@@ -771,7 +781,7 @@ class MSD:
 	results = property(fget = getResults)
 
 	def set_kT(self, kT): msd_clib.set_kT(self._msd, kT)
-	kT = property(fset = set_kT)	
+	kT = property(fset = set_kT)
 	def setB(self, B): msd_clib.setB(self._msd, byref(B))
 	B = property(fset = setB)
 
