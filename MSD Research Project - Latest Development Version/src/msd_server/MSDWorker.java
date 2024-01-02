@@ -9,7 +9,7 @@ import java.util.Collections;
 import java.util.List;
 
 public class MSDWorker implements AutoCloseable {
-	private Process python;
+	private Process proc;
 	private BufferedReader in;  // streams for python sub-process
 	private PrintWriter out;  // streams for python sub-process
 	private BufferedReader err;  // streams for python sub-process
@@ -35,11 +35,11 @@ public class MSDWorker implements AutoCloseable {
 	 * @throws IOException
 	 */
 	public MSDWorker(String args) throws IOException {
-		python = new ProcessBuilder("python", "msd_server/MSDWorker.py").start();
-		System.out.println("Worker pid=" + python.pid());
-		in = new BufferedReader(new InputStreamReader(python.getInputStream()));
-		out = new PrintWriter(python.getOutputStream(), true);
-		err = new BufferedReader(new InputStreamReader(python.getErrorStream()));
+		proc = new ProcessBuilder("python", "msd_server/MSDWorker.py").start();
+		System.out.println("Worker pid=" + proc.pid());
+		in = new BufferedReader(new InputStreamReader(proc.getInputStream()));
+		out = new PrintWriter(proc.getOutputStream(), true);
+		err = new BufferedReader(new InputStreamReader(proc.getErrorStream()));
 		errLogReader.start();
 
 		out.println(collapse(args));
@@ -53,7 +53,7 @@ public class MSDWorker implements AutoCloseable {
 	 * 	<code>{ simCount, freq, dkT, dB }</code>
 	 */
 	public void run(String args) throws IOException {
-		synchronized(python) {
+		synchronized(proc) {
 			out.println("RUN");
 			out.println(args);
 			// TODO: record.ensureCapacity(...)
@@ -77,7 +77,7 @@ public class MSDWorker implements AutoCloseable {
 	}
 
 	public String getState() throws IOException {
-		synchronized(python) {
+		synchronized(proc) {
 			out.println("GET");
 			return requireLine();
 		}
@@ -87,7 +87,7 @@ public class MSDWorker implements AutoCloseable {
 	 * @param parameters Compact JSON string containing MSD parameters
 	 */
 	public void setParameters(String parameters) throws IOException {
-		synchronized(python) {
+		synchronized(proc) {
 			out.println("SET");
 			out.println(parameters);
 			confirmResponse("DONE");
@@ -96,7 +96,7 @@ public class MSDWorker implements AutoCloseable {
 
 	public void exit() throws IOException {
 		shutdown = true;  // flag signals the run() method in case a simulation is running
-		synchronized(python) {
+		synchronized(proc) {
 			out.println("EXIT");
 			confirmResponse("GOODBYE");
 		}
@@ -120,7 +120,7 @@ public class MSDWorker implements AutoCloseable {
 			err.close();
 		} finally {
 			errLogReader.interrupt();
-			python.destroy();
+			proc.destroy();
 		}
 	}
 
