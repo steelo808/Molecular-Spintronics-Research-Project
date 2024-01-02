@@ -42,7 +42,7 @@ public class MSDWorker implements AutoCloseable {
 		in = new BufferedReader(new InputStreamReader(proc.getInputStream()));
 		out = new PrintWriter(proc.getOutputStream(), true);
 		err = new BufferedReader(new InputStreamReader(proc.getErrorStream()));
-		errLogReader.start();
+		errLogReader.start();  // TODO: not currently using errLog, turn off?
 
 		args = collapse(args);
 		out.println(args);
@@ -71,7 +71,7 @@ public class MSDWorker implements AutoCloseable {
 				}
 
 				// is the worker trying to exit?
-				if (shutdown) {
+				if (shutdown || Thread.interrupted()) {
 					out.println("CANCEL");
 					confirmResponse("DONE");
 					shutdown = false;

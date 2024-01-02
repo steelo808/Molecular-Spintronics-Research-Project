@@ -1,10 +1,11 @@
 package msd_server;
 
 import static msd_server.MSDServer.decode;
+import static msd_server.MSDServer.decodeURL;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.net.URI;
+import java.nio.ByteBuffer;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -50,9 +51,9 @@ public class HttpRequest {
 			for (String pair : pairs) {
 				String[] kv = pair.split("=", 2);  // { key, value }
 				if (kv.length == 2)
-					this.query.put(decode(kv[0]), decode(kv[1]));
+					this.query.put(decodeURL(kv[0]), decodeURL(kv[1]));
 				else  // kv.length == 1
-					this.query.put(decode(kv[0]), null);
+					this.query.put(decodeURL(kv[0]), null);
 			}
 		}
 
@@ -70,11 +71,7 @@ public class HttpRequest {
 	}
 
 	public String getBody() {
-		try {
-			return new String(body, MSDServer.CHARSET);
-		} catch(UnsupportedEncodingException ex) {
-			throw new Error(ex);  // this should never happen!
-		}
+		return decode(ByteBuffer.wrap(body)).toString();
 	}
 
 	public String requireQueryParameter(String name, HttpResponse res) throws RequiredException {

@@ -192,7 +192,7 @@ def main():
 		# Construct MSD object and set it up based on input
 		msd = MSD(**{k: v for k,v in kw.items() if k in MSD_INIT_ARGS})
 		if "seed" in kw:
-			msd.seed(kw["seed"])
+			msd.seed = kw["seed"]
 		if kw.get("randomize", False):
 			msd.randomize()
 		setParameters(msd, kw)
@@ -224,6 +224,8 @@ def main():
 					if freq <= 0:
 						freq = simCount
 					cont = True
+					print(state(msd))  # initial state
+					cont = input().upper() != "CANCEL"  # should we continue?
 					while cont and simCount >= freq:
 						sim(msd, freq, dkT, dB)
 						simCount -= freq

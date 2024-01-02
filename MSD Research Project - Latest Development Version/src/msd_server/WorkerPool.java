@@ -1,10 +1,11 @@
 package msd_server;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class WorkerPool {
+public class WorkerPool implements AutoCloseable {
 	private ConcurrentHashMap<UUID, MSDWorker> workers = new ConcurrentHashMap<>();
 	private final Object createWorkerLock = new Object();
 
@@ -64,7 +65,7 @@ public class WorkerPool {
 		return msd;
 	}
 
-	public MSDWorker destoryWorker(HttpRequest req, HttpResponse res) throws IOException {
+	public MSDWorker destroyWorker(HttpRequest req, HttpResponse res) throws IOException {
 		try {
 			return requireAction( this::destroyWorker, requireId(req, res), res );
 		} catch(RequiredException ex) {
@@ -93,5 +94,11 @@ public class WorkerPool {
 			throw new RequiredException();
 		}
 		return msd;
+	}
+
+	@Override
+	public void close() throws IOException {
+		for (UUID id : new ArrayList<>(workers.keySet()))
+			destroyWorker(id);
 	}
 }
