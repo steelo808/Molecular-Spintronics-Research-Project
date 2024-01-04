@@ -1,7 +1,7 @@
 (() => {  // define IIFE
 
 // ---- Imports: --------------------------------------------------------------
-const { defineExports } = MSDBuilder.util;
+const { defineExports, ajax } = MSDBuilder.util;
 
 
 // ---- Classes: --------------------------------------------------------------
@@ -67,14 +67,132 @@ class Simulation {
 			AL: Vector.zero(), AR: Vector.zero(),
 			DL: Vector.zero(), DR: Vector.zero(), DmL: Vector.zero(), DmR: Vector.zero(), DLR: Vector.zero()
 		};
+		// TODO: ...
 		this.mol = {
 			nodes: [],
 			edges: []
 		};
+	}
+}
+
+/**
+ * An asynchronous interface bewteen the frontend (Javascript) and the backend (MSD Server).
+ * TODO: Store/cache retrieved info?
+ */
+class MSD {
+	server;
+	id = null;
+
+	/** @private */
+	constructor(server) {
+		this.server = server;
+	}
+
+	/**
+	 * @private
+	 * @param {String} method - HTTP Method; same as ajax()
+	 * @param {String} path - Appended to <code>this.server</code> root.
+	 * @param {Object?} body - Stringified into JSON
+	 * @return {Object?} respnseText parsed into JSON, if a response body exists.
+	 */
+	async request(method, path, body) {
+		// set up request
+		let args = { url: this.server + path, method };
+		if (body) {
+			Object.assign(args, {
+				content_type: "application/json",
+				body: JSON.stringify(body) });
+		}
+
+		// send request. parse response as JSON.
+		return await ajax(args)
+			.catch(({ status, statusText, responseText }) => {
+				throw new Error(`${status} ${statusText}\n${responseText}`)
+			
+			}).then(xmlHttpRequest => {
+				let { status, responseText } = xmlHttpRequest;
+				if (Math.floor(status / 100) !== 2)
+					throw xmlHttpRequest;
+				if (responseText)
+					return JSON.parse(responseText);
+			});
+	}
+
+	/**
+	 * @public
+	 */
+	static async create(args, server = "http://localhost:8080") {
+		let msd = new MSD(server);
+		await msd.request("POST", "/msd", args)
+			.then(({ id }) => msd.id = id);
+		return msd;
+	}
+
+	/**
+	 * @public
+	 * @async
+	 * @param {Object} args
+	 * @param {Number} args.simCount - (int) (required) Number of iterations to run
+	 * @param {Number} args.freq - (int) (optional) How often (in iterations) to record data
+	 * @param {Number} args.dkT - (float) (optional) Linear change in tempurature (kT) per iteration
+	 * @param {Number[]} args.dB - (float[]) (optional) Linear change in external magnetic field (B) per iteration
+	 */
+	async run(args) {
+		await this.request("POST", "/run?id=" + this.id, args);
+	}
+
+	/**
+	 * @public
+	 */
+	get record() {
+		let self = this;
+		return {
+			async length() {
+				return await self.request("GET", "/results?id=" + self.id)
+					.then(({ length }) => length);
+			},
+
+			async get(index) {
+				return await self.request("GET", `/results?id=${self.id}&index=${index}`);
+			},
+
+			async range(start, end) {
+				return await self.request("GET", `/results?id=${self.id}&start=${start}&end=${end}`);
+			},
+
+			async all() {
+				return await self.request("GET", `/results?id=${self.id}&all`);
+			}
+		};
+	};
+
+	/**
+	 * @public
+	 * @returns {Object} Current state of MSD (TODO: add details of JSON structure)
+	 */
+	async getState() {
+		return await this.request("GET", "/msd?id=" + this.id);
+	}
+
+	/**
+	 * @public
+	 * @param {Object} p - Parameters to change
+	 */
+	async setParameters(p) {
+		return await this.request("PATCH", "/msd?id=" + this.id, p);
+	}
+
+	/**
+	 * @public
+	 */
+	async destory() {
+		await this.request("DELETE", "/msd?id=" + this.id)
+			.catch(MSD.throwError);
+	}
 }
 
 
 // ---- Exports: --------------------------------------------------------------
-defineExports("MSDBuilder.simulation", { /* TODO */ });
+defineExports("MSDBuilder.simulation", { MSD });
 
 })();  // run IIFE

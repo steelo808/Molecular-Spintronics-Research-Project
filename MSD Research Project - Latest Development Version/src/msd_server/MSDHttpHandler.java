@@ -14,7 +14,7 @@ public interface MSDHttpHandler extends HttpHandler {
 		HttpResponse res = new HttpResponse(exchange);  // set up HttpResponse object to store response
 		try(exchange; res) {
 			HttpRequest req = new HttpRequest(exchange);  // parse HttpRequest
-			
+
 			try {
 				handle(req, res);  // finish handling the request
 

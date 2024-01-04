@@ -3,12 +3,24 @@ package msd_server;
 import static msd_server.HttpStatus.OK;
 import static msd_server.HttpStatus.CREATED;
 import static msd_server.HttpStatus.ACCEPTED;
+import static msd_server.HttpStatus.NO_CONTENT;
 import static msd_server.HttpStatus.BAD_REQUEST;
 import static msd_server.HttpStatus.NOT_FOUND;
 import static msd_server.HttpStatus.METHOD_NOT_ALLOWED;
 
+import static msd_server.HttpHeader.ACCESS_CONTROL_ALLOW_ORIGIN;
+import static msd_server.HttpHeader.ACCESS_CONTROL_ALLOW_METHODS;
+import static msd_server.HttpHeader.ACCESS_CONTROL_ALLOW_HEADERS;
+import static msd_server.HttpHeader.ACCESS_CONTROL_MAX_AGE;
+import static msd_server.HttpHeader.ACCESS_CONTROL_REQUEST_METHOD;
 import static msd_server.HttpHeader.CONTENT_TYPE;
 import static msd_server.HttpHeader.LOCATION;
+
+import static msd_server.HttpMethod.GET;
+import static msd_server.HttpMethod.POST;
+import static msd_server.HttpMethod.PATCH;
+import static msd_server.HttpMethod.DELETE;
+import static msd_server.HttpMethod.OPTIONS;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -18,11 +30,13 @@ import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Scanner;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 import com.sun.net.httpserver.HttpServer;
 
@@ -64,11 +78,45 @@ public class MSDServer {
 	}
 
 	/**
+	 * @param req HTTP Request
+	 * @param res HTTP Response
+	 * @param allowedMethods Set of allowed HTTP Methods
+	 * @see https://www.baeldung.com/cs/cors-preflight-requests#:~:text=A%20preflight%20request%20is%20an,HTTP%20method%20the%20request%20implements
+	*/
+	private static void allowCors(HttpResponse res, EnumSet<HttpMethod> allowedMethods) {
+		ACCESS_CONTROL_ALLOW_ORIGIN.to("*", res.headers);
+		ACCESS_CONTROL_ALLOW_METHODS.to(allowedMethods.stream().map(HttpMethod::toString).collect(Collectors.joining(",")), res.headers);
+		ACCESS_CONTROL_ALLOW_HEADERS.to("*", res.headers);
+		ACCESS_CONTROL_MAX_AGE.to("86400", res.headers);
+	}
+
+	private static void handleOptionsRequest(HttpRequest req, HttpResponse res, EnumSet<HttpMethod> allowedMethods) {
+		try {
+			if (!allowedMethods.containsAll(ACCESS_CONTROL_REQUEST_METHOD.allFrom(req.headers, HttpMethod::match))) {
+				res.status = METHOD_NOT_ALLOWED;
+				return;
+			}
+		} catch(HttpMethod.UnsupportedException | NullPointerException ex) {
+			res.status = BAD_REQUEST;  // OPTIONS request must have ACCESS_CONTROL_REQUEST_METHOD
+			return;
+		}
+
+		res.status = NO_CONTENT;
+	}
+
+	/**
 	 * Path: /msd
-	 * Methods: POST, PATCH, GET, DELETE
+	 * Methods: POST, PATCH, GET, DELETE, OPTIONS
 	 */
 	private static final MSDHttpHandler msdHandler = (req, res) -> {
+		final EnumSet<HttpMethod> allowedMethods = EnumSet.of(POST, PATCH, GET, DELETE, OPTIONS);
+		allowCors(res, allowedMethods);
+
 		switch(req.method) {
+		case OPTIONS: {
+			handleOptionsRequest(req, res, allowedMethods);
+		} break;
+
 		case POST: {
 			/*
 			* Summary: Create a new MSDWorker.
@@ -113,7 +161,7 @@ public class MSDServer {
 			if (msd == null)  break;
 
 			msd.setParameters(req.getBody());
-			res.status = OK;
+			res.status = NO_CONTENT;
 		} break;
 		
 		case DELETE: {
@@ -126,7 +174,7 @@ public class MSDServer {
 			MSDWorker msd = workers.destroyWorker(req, res);
 			if (msd == null)  break;  // don't set HTTP status to 200 OK
 
-			res.status = OK;
+			res.status = NO_CONTENT;
 		} break;
 		
 		default:
@@ -136,10 +184,17 @@ public class MSDServer {
 
 	/**
 	 * Path: /run
-	 * Methods: POST, DELETE
+	 * Methods: POST, DELETE, OPTIONS
 	 */
 	private static final MSDHttpHandler runHandler = (req, res) -> {
+		final EnumSet<HttpMethod> allowedMethods = EnumSet.of(POST, DELETE, OPTIONS);
+		allowCors(res, allowedMethods);
+
 		switch(req.method) {
+		case OPTIONS: {
+			handleOptionsRequest(req, res, allowedMethods);
+		} break;
+
 		case POST: {
 			/*
 			 * Summary: Runs the metropolis algorith.
@@ -191,9 +246,15 @@ public class MSDServer {
 	 * Method: GET
 	 */
 	private static final MSDHttpHandler resultsHandler = (req, res) -> {
+		final EnumSet<HttpMethod> allowedMethods = EnumSet.of(POST, DELETE, OPTIONS);
 		final int MAX_RESPONSE_SIZE = 1 * GB;
+		allowCors(res, allowedMethods);
 
 		switch(req.method) {
+		case OPTIONS: {
+			handleOptionsRequest(req, res, allowedMethods);
+		} break;
+
 		case GET: {
 			MSDWorker msd = workers.lookup(req, res);
 			if (msd == null)  break;

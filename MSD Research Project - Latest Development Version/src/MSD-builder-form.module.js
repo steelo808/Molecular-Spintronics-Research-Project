@@ -140,7 +140,6 @@ const loadView = (msd) => {
  */
 const loadHTMLParamFields = () => {
 	DEFAULTS.PARAM_FIELDS.forEach((default_value, param_name) => {
-		console.log(param_name);
 		let value = valueCache.get(param_name);
 		document.getElementById(param_name).value =
 			(value !== undefined && value != null ? value : default_value);

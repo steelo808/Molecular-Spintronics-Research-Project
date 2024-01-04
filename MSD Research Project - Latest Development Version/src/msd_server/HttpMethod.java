@@ -89,7 +89,7 @@ public enum HttpMethod {
 		}
 	}
 
-	public static class UnsupportedException extends Exception {
+	public static class UnsupportedException extends RuntimeException {
 		private UnsupportedException(String message, Throwable cause) {
 			super(message, cause);
 		}

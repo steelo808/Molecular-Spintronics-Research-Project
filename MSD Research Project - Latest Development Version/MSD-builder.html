@@ -10,7 +10,52 @@
 	<script src="src/MSD-builder-util.module.js"></script>
 	<script src="src/MSD-builder-render.module.js"></script>
 	<script src="src/MSD-builder-form.module.js"></script>
+	<script src="src/MSD-builder-simulation.module.js"></script>
 	<script src="src/MSD-builder.js" defer></script>
+	<script>
+		const { sleep } = MSDBuilder.util;
+		const { MSD } = MSDBuilder.simulation;
+
+		async function workload() {
+			try {
+				console.log("Workload started...");
+				let msd = await MSD.create({
+					width: 11,
+					height: 10,
+					depth: 10,
+					kT: 0.3,
+
+					randomize: true,
+					seed: 0
+				});
+				console.log("-- Created MSD:", msd);
+				console.log("-- Start running simulation.");
+				await msd.run({
+					simCount: 25_000_000,
+					freq: 1_000_000
+				});
+				let prevIndex = -1;
+				let t = -1;	
+				while (t < 25_000_000) {
+					await sleep(1000);
+					let index = await msd.record.length() - 1;
+					if (index > prevIndex) {
+						prevIndex = index;
+						let state = await msd.record.get(index);
+						console.log(`Result [${index}]`, state);
+						t = state.results.t;
+					}
+				}
+				console.log("-- Destoryed MSD:", msd);
+				msd.destory();
+				console.log("==== Workload Complete. ====");
+			} catch(ex) {
+				console.error(ex);
+			}
+		}
+
+		workload();
+	</script>
 </head>
 <body>
 	<main id="msdBuilder"></main>

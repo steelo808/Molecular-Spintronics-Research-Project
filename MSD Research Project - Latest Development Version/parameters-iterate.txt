@@ -1,18 +1,18 @@
-simCount = 10000000
-freq = 50000
+simCount = 25000000
+freq = 1000000
 
 # dimensions of bounding box
-width  = 27
-height = 28
-depth  = 28
+width  = 11
+height = 10
+depth  = 10
 
 # boundaries which define the exact dimensions of FM_L, FM_R, and mol.
-molPosL = 10
-molPosR = 16
-topL    = 12
-bottomL = 15
-frontR  = 12
-backR   = 15
+molPosL = 5
+molPosR = 5
+topL    = 0
+bottomL = 9
+frontR  = 0
+backR   = 9
 
 # turn off front edge of mol.
 # [5 11 10] = 0
@@ -28,10 +28,10 @@ backR   = 15
 
 
 # Tempurature
-kT = 0.2
+kT = 0.3
 
 # External Magnetic Field
-B = 0.1 0 0
+B = 0 0 0
 
 # Magnetude of spin vectors
 SL = 1
@@ -39,56 +39,56 @@ SR = 1
 Sm = 1
 
 # Maximum Magnetude of spin fluctuation ("flux") vectors
-FL = 0.25
-FR = 0.25
-Fm = 0.25
+FL = 0
+FR = 0
+Fm = 0
 
 # Heisenberg exchange coupling between two neighboring spins
 JL = 1
 JR = 1
-Jm = 0.1
-JmL = 0.5
-JmR = -0.5
-JLR = 0.05
+Jm = 0
+JmL = 1
+JmR = -1
+JLR = 0
 
 # exchange coupling between a spin and its local flux
-Je0L = 0.1
-Je0R = 0.1
-Je0m = 0.2
+Je0L = 0
+Je0R = 0
+Je0m = 0
 
 # exchange coupling between a spin and its neighboring flux (and vice versa)
-Je1L = 0.02
-Je1R = 0.02
-Je1m = 0.02
-Je1mL = 0.02
-Je1mR = 0.02
-Je1LR = 0.001
+Je1L = 0
+Je1R = 0
+Je1m = 0
+Je1mL = 0
+Je1mR = 0
+Je1LR = 0
 
 # exchange coupling between two neighboring fluxes
-JeeL = 0.05
-JeeR = 0.05
-Jeem = -0.25
-JeemL = 0.05
-JeemR = -0.05
-JeeLR = 0.01
+JeeL = 0
+JeeR = 0
+Jeem = 0
+JeemL = 0
+JeemR = 0
+JeeLR = 0
 
 # Anisotropy constant(s), as vectors 
-AL = 0.1 0 0
-AR = 0.1 0 0
-Am = 0 0.2 0
+AL = 0 0 0
+AR = 0 0 0
+Am = 0 0 0
 
 # Biquadratic coupling
-bL = 0.01
-bR = 0.01
-bm = 0.01
-bmL = 0.01
-bmR = 0.01
-bLR = 0.001
+bL = 0
+bR = 0
+bm = 0
+bmL = 0
+bmR = 0
+bLR = 0
 
 # Dzyaloshinskii-Moriya (i.e. Skyrmion) interaction, as vectors
-DL = 0.002 0 0
-DR = 0.002 0 0
-Dm = 0.002 0 0
-DmL = 0.002 0 0
-DmR = 0.002 0 0
-DLR = 0.0002 0 0
+DL = 0 0 0
+DR = 0 0 0
+Dm = 0 0 0
+DmL = 0 0 0
+DmR = 0 0 0
+DLR = 0 0 0

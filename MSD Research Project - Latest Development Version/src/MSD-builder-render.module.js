@@ -496,7 +496,6 @@ const updateCamera = (camera, msd) => {
  * }}
  */
 const startRendering = ({ canvasWidth = 900, canvasHeight = 450, onAnimationFrame = null } = {}) => {
-	console.log("startRendering");  // DEBUG
 	const scene = new Scene();
 	const camera = new PerspectiveCamera(90, canvasWidth / canvasHeight);  // params: fov, aspect ratio
 	const renderer = new WebGLRenderer();
