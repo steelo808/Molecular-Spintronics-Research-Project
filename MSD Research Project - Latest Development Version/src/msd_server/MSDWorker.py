@@ -16,6 +16,13 @@ def molType(t: str) -> c_void_p:
 		"CIRCULAR": MSD.CIRCULAR_MOL
 	}[t.upper()]
 
+def flippingAlgorithm(algo: str) -> c_void_p:
+	''' Convert str to MSD FlippingAlgorithm'''
+	return {
+		"UP_DOWN_MODEL": MSD.UP_DOWN_MODEL,
+		"CONTINUOUS_SPIN_MODEL": MSD.CONTINUOUS_SPIN_MODEL
+	}[algo.upper()]
+
 def vec(v: list) -> Vector:
 	''' Convert list to MSD Vector '''
 	return Vector(*[float(x) for x in v])
@@ -38,7 +45,8 @@ MSD_INIT_ARGS = {
 }
 CONFIG_PARAMS = {
 	"seed": int,
-	"randomize": bool
+	"randomize": bool,
+	"flippingAlgorithm": flippingAlgorithm
 }
 MSD_PARAMS = {
 	"kT": float,
@@ -95,6 +103,8 @@ def setParameters(msd: MSD, kw: dict):
 	''' Updates the msd parameters (including molProto parameters)
 	    as efficiently as possible. Ignores any keys in given dict that aren't
 	    MSD.Parameters, Molecule.NodeParameters, or Molecule.EdgeParameters.
+		Only updates the parameters given. Any excluded parameters will be left
+		unchanged.
 	'''
 	if {"kT", "B"}.issuperset(kw.keys()):
 		# Efficient update?:
@@ -114,6 +124,9 @@ def setParameters(msd: MSD, kw: dict):
 				**msd.getParameters().__dict__,
 				**kw_p })
 		if kw_node_p or kw_edge_p:
+			# update nodes and edges one at a time incase their parameters are
+			# not uniform. This will only set node/edge parameters given in kw.
+			# The rest will be unchanged, and may remain non-uniform.
 			molProto = msd.getMolProto()
 			if kw_node_p:
 				for node in molProto.nodes:
@@ -171,6 +184,9 @@ def state(msd: MSD) -> str:
 	}, default=encodeMSD, indent=None)
 
 def sim(msd: MSD, n: int, dkT = 0., dB = 0.):
+	# TODO NEW FEATURE: Allow for non-linear changes to kT and B by passing
+	# 	either dKt and dB, or kT and B as functions of time (iterations), t,
+	# 	instead of just constanst.
 	if dkT == 0. and dB == 0.:
 		msd.metropolis(n)
 	else:
@@ -191,11 +207,15 @@ def main():
 
 		# Construct MSD object and set it up based on input
 		msd = MSD(**{k: v for k,v in kw.items() if k in MSD_INIT_ARGS})
+		if "flippingAlgorithm" in kw:
+			msd.flippingAlgorithm = kw["flippingAlgorithm"]
+		setParameters(msd, kw)
+		# TODO NEW FEATURE: set molProto if one is given
 		if "seed" in kw:
 			msd.seed = kw["seed"]
 		if kw.get("randomize", False):
-			msd.randomize()
-		setParameters(msd, kw)
+			msd.randomize(reseed = False)
+		
 		print("READY")  # Confirm worker process is crrectly setup and ready for job requests
 
 		# 2. Read a command, then execute

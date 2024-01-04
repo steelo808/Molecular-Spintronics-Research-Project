@@ -318,7 +318,7 @@ int main(int argc, char *argv[]) {
 	}
 
 	if( argc > RANDOMIZE && string(argv[RANDOMIZE]) != string("0") )
-		msd.randomize(!customSeed);
+		msd.randomize(!customSeed);  // TODO: arg should just be false always, right?
 
 	try {
 		//print info/headings

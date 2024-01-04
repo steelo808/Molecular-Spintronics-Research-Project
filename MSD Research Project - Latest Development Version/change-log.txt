@@ -179,14 +179,30 @@ Second bug fix. In MSD::setParameters()
 (8-7-2023) Fixed bug in MSD::MSD(MolProto) constructor.
 	Also removed debug print() from MSD.py in Molecule._Node.next
 
-6.2.6:
+6.3.0:
+(2023) Introduced ~/MSD-builder.html (similar to mol-builder)
 (12-31-2023) Merged a fix made by Robert! (His first contribution.)
 	Made the "export" button work in new MSD-builer.html GUI.
-(1-2-2023) Created REST server in Java (com.sun.net.httpserver package) with CRUD operations
+(1-2-2023) Created HTTP server in Java (com.sun.net.httpserver package) with CRUD operations
 	as well as the ability to run simulations, and query the results.
+(1-3-2023) Created JS functions/classes to use the server asynchronous.
+(1-4-2023) Bug fix in MSD.py:985. MSD.setMolParameters() msd_clib signature was set incorrectly
+	causing the method to be unusable.
+
+TODO: add reinitialize and randomize to the MSD Server (Java)
+TODO: create UI for interfacing with the Java HTTP MSD Server
+TODO: remove zdog
+TODO: (maybe?) reorganize builder JS files
+TODO: connect mol-builder and MSD-builder (maybe just links?)
+TODO: add bars on Three.js canvas showing current values of non-zero parameters,
+	and hide unused parameters from MSD-builder interface.
+TODO: Store results retrieved from server in JS for efficiency, and so further calculations like
+	magneticSusceptibility, specificHeat, and autocorrelation can be calculated in JS.
+TODO: (maybe?) add custom scripting support for advanced users to process data.
+TODO: Add a way to download data as CSV from the HTML/JS UI after simulation
+	and post-processing is done.
 
 TODO: Fix flux != 0 on mol. that are "turned off"
-TODO: Add graph-based mol. to MSD. (including ability to create fully customizable MolProto,
-		and input them into the apps)
-		WORKING... Currently we have a GUI builder, .mmb compiler, and "iterate" support.
-		Finish other apps.
+TODO: (Potentially Very Hard) Compile-time optimize
+	MSD.setLocalM, MSD.setParameters, and MSD.setMolProto
+	so that they ignore parameters that are not used.

@@ -41,14 +41,14 @@ import java.util.stream.Collectors;
 import com.sun.net.httpserver.HttpServer;
 
 public class MSDServer {
-	public static final String PROTOCOL = "http";
-	public static final InetSocketAddress ADDRESS = new InetSocketAddress("localhost", 8080);
+	public static final String PROTOCOL = "http";  // TODO: support https ??
 	public static final Charset CHARSET = StandardCharsets.UTF_8;
 	
 	public static final int KB = 1024;
 	public static final int MB = 1024 * KB;
 	public static final int GB = 1024 * MB;
 
+	public static InetSocketAddress address = null;
 	public static final WorkerPool workers = new WorkerPool();
 
 	/**
@@ -129,7 +129,7 @@ public class MSDServer {
 			res.setBody(String.format("{\"id\":\"%s\"}", id));
 			CONTENT_TYPE.to("application/json", res.headers);
 			LOCATION.to( String.format("%s://%s:%s/msd?id=%s",
-				PROTOCOL, ADDRESS.getHostString(), ADDRESS.getPort(), id
+				PROTOCOL, address.getHostString(), address.getPort(), id
 				), res.headers );
 			res.status = CREATED;
 		} break;
@@ -220,7 +220,7 @@ public class MSDServer {
 				}
 			});
 			LOCATION.to( String.format("%s://%s:%s/msd/record?id=%s",
-				PROTOCOL, ADDRESS.getHostString(), ADDRESS.getPort(), req.query.get("id")
+				PROTOCOL, address.getHostString(), address.getPort(), req.query.get("id")
 				), res.headers );
 			res.status = ACCEPTED;
 		} break;
@@ -344,27 +344,40 @@ public class MSDServer {
 	};
 
 	public static void main(String[] args) throws IOException {
-		HttpServer server = HttpServer.create(ADDRESS, 0);
+		// Parse cmd args
+		if (args.length == 0)
+			address = new InetSocketAddress("localhost", 8080);
+		else if (args.length == 1)
+			address = new InetSocketAddress(Integer.parseInt(args[0]));
+		else
+			address = new InetSocketAddress(args[0], Integer.parseInt(args[1]));
+
+		// Set up HTTP server
+		HttpServer server = HttpServer.create(address, 0);
 		server.setExecutor(Executors.newCachedThreadPool());
 
 		server.createContext("/msd", msdHandler);
 		server.createContext("/run", runHandler);
 		server.createContext("/results", resultsHandler);
 		
+		// Start server
 		server.start();
 		System.out.println("MSD Server started.");  // DEBUG
 
+		// Allow for server commands through System.in
 		try(Scanner stdin = new Scanner(System.in)) {
+			// ignore all commands other then "shutdown"
 			while (!stdin.nextLine().equalsIgnoreCase("shutdown")) { /* do nothing */ }
+			
+			// shutdown
 			System.out.println("Shutting down simulations...");
 			threadPool.shutdown();
 			System.out.println("Deleting data...");
 			workers.close();
 			System.out.println("Shutting down server...");
 			server.stop(10);
+			System.out.println("Server successfully closed.");
+			// TODO: some thread is still running. Maybe MSDWorker.errLogReader ??
 		}
-		System.out.println("Server successfully closed.");
-		// TODO: some thread is still running. Maybe MSDWorker.errLogReader ??
-
 	}
 }

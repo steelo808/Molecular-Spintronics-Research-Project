@@ -1,4 +1,4 @@
-simCount = 25000000
+simCount = 50000000
 freq = 1000000
 
 # dimensions of bounding box
@@ -46,9 +46,9 @@ Fm = 0
 # Heisenberg exchange coupling between two neighboring spins
 JL = 1
 JR = 1
-Jm = 0
-JmL = 1
-JmR = -1
+Jm = 1
+JmL = 0.75
+JmR = -0.75
 JLR = 0
 
 # exchange coupling between a spin and its local flux

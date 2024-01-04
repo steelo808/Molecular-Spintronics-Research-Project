@@ -982,7 +982,7 @@ _sig(None, msd_clib.setB, [c_void_p, POINTER(Vector)])
 
 _sig(c_void_p, msd_clib.getMolProto, [c_void_p])
 _sig(None, msd_clib.setMolProto, 2 * [c_void_p])
-_sig(None, msd_clib.setMolParameters, 3 * [c_void_p])
+_sig(None, msd_clib.setMolParameters, [c_void_p, Molecule.NodeParameters, Molecule.EdgeParameters])
 
 _sig(Vector, msd_clib.getSpin_i, [c_void_p, c_uint])
 _sig(Vector, msd_clib.getSpin_v, [c_void_p] + 3 * [c_uint])
