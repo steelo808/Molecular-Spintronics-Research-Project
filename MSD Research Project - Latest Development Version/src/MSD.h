@@ -3,10 +3,11 @@
  * @author Christopher D'Angelo
  * @brief The core logic which all the apps use to run MSD simulations.
  *        Includes definitions and calculations.
- * @version 6.2
- * @date 2022-11-29
  * 
- * @copyright Copyright (c) 2022
+ * @version 6.2a
+ * @date 2024-1-7
+ * 
+ * @copyright Copyright (c) 2011-2024
  */
 
 #ifndef UDC_MSD
