@@ -316,13 +316,13 @@ function loadFileContentAsJSON(msd) {
 	// depth of FMR can never exceed depth of FML
 	msd_depth = msd.FML.depth;
 
-	topL = (Math.floor((msd_height - msd.mol.height) / 2)) - msd.FML.y;
+	topL = (Math.floor((msd_height - msd.mol.height) / 2)) - Math.floor(msd.FML.y);
 	bottomL = topL + msd.FML.height - 1
 	
 	molPosL = msd.FML.width;
 	molPosR = molPosL + msd.mol.width - 1;
 	
-	frontR = (Math.floor((msd_depth - msd.mol.depth) / 2)) - msd.mol.z;
+	frontR = (Math.floor((msd_depth - msd.mol.depth) / 2)) - Math.floor(msd.mol.z);
 	backR = frontR + msd.FMR.depth - 1
 
 	json = {
