@@ -16,17 +16,16 @@
 		const { sleep } = MSDBuilder.util;
 		const { MSD } = MSDBuilder.simulation;
 
-		async function workload(msd_object_data) {
+		async function workload(msd_object_data, simCount, freq) {
 			console.time("MSD workload");
 			try {
 				console.log("Workload started...");
 				let msd = await MSD.create(msd_object_data);
 				console.log("-- Created MSD:", msd);
 				console.log("-- Start running simulation.");
-				const simCount = 50_000_000;
 				await msd.run({
 					simCount,
-					freq: 1_000_000
+					freq: freq
 				});
 				let prevIndex = -1;
 				let t = -1;	
@@ -96,6 +95,26 @@
 						</input-list>
 					</input-row>
 				</input-group>
+
+				<input-group>
+					<h2> Simulation </h2>
+					<input-row>
+						<label for="simCount"> simCount: </label>
+						<input id="simCount" type="number" min="1" value="1000000">
+					</input-row>
+					<input-row>
+						<label for="freq"> freq: </label>
+						<input id="freq" type="number" min="0" value="0">
+					</input-row>
+					<input-row>
+						<label for="seed"> seed: </label>
+						<input id="seed" type="number" min="0">
+					</input-row>
+					<label for="randomCheckbox" style="margin-right: 10px;">Randomize</label>
+					<input type="checkbox" id="randomCheckbox" name="randomCheckbox" checked>
+				</input-group>
+
+
 			</fieldset>
 
 			<fieldset id="FML">
