@@ -178,20 +178,7 @@ function replaceValues(template, name, value, x, y, z) {
 
 // Robert J.
 function loadFileContent(msd) {
-	msd_width = msd.FML.width + msd.FMR.width + msd.mol.width;
-	// height of FML can never exceed depth of FMR (making it automatically the maximum)
-	msd_height = msd.FMR.height;
-	// depth of FMR can never exceed depth of FML
-	msd_depth = msd.FML.depth;
-
-	topL = (msd_height - msd.mol.depth) < 0 ? (Math.floor((msd_height - msd.mol.depth) / 2)) + 1 - msd.FML.y : (Math.floor((msd_height - msd.mol.depth) / 2)) - msd.FML.y;
-	bottomL = topL + msd.FML.height - 1
-	
-	molPosL = msd.FML.width;
-	molPosR = molPosL + msd.mol.width - 1;
-	
-	frontR = (msd_depth - msd.mol.depth) < 0 ? (Math.floor((msd_depth - msd.mol.depth) / 2)) + 1 - Math.floor(msd.mol.z) : (Math.floor((msd_depth - msd.mol.depth) / 2)) - Math.floor(msd.mol.z);
-	backR = frontR + msd.FMR.depth - 1
+	buildJSON(msd);
 
 	let content = `simCount = 10000000
 freq = 50000
@@ -299,7 +286,6 @@ DLR = 0.0002 0 0
 
 	for(let id of vectors)
 	{	
-		console.log(id)
 		const id_x = document.getElementById(id + "_x");
 		const id_y = document.getElementById(id + "_y");
 		const id_z = document.getElementById(id + "_z");
@@ -310,6 +296,72 @@ DLR = 0.0002 0 0
 
 	
 	return content;
+}
+
+// Robert J.
+function replaceJSONValues(json, id, name, x, y, z) {
+	if (x,y,z == null) {
+	  json[id] = parseFloat(name);
+	} else {
+	  json[id] = [parseFloat(x), parseFloat(y), parseFloat(z)];
+	}
+	return json;
+  }
+
+// Robert J.
+function buildJSON(msd) {
+	msd_width = msd.FML.width + msd.FMR.width + msd.mol.width;
+	// height of FML can never exceed depth of FMR (making it automatically the maximum)
+	msd_height = msd.FMR.height;
+	// depth of FMR can never exceed depth of FML
+	msd_depth = msd.FML.depth;
+
+	topL = (Math.floor((msd_height - msd.mol.height) / 2)) - Math.floor(msd.FML.y);
+	bottomL = topL + msd.FML.height - 1
+	
+	molPosL = msd.FML.width;
+	molPosR = molPosL + msd.mol.width - 1;
+	
+	frontR = (Math.floor((msd_depth - msd.mol.depth) / 2)) - Math.floor(msd.mol.z);
+	backR = frontR + msd.FMR.depth - 1
+	
+	random_check = document.getElementById('randomCheckbox').checked;
+	molType = document.getElementById("mol-type").value
+	seed = document.getElementById("seed").value
+
+	json = {
+		width: msd_width,
+		height: msd_height,
+		depth: msd_depth,
+		topL: topL,
+		bottomL: bottomL,
+		molPosL: molPosL,
+		molPosR: molPosR,
+		frontR: frontR,
+		backR: backR,
+		flippingAlgorithm: "CONTINUOUS_SPIN_MODEL",
+		molType: molType,
+		randomize: random_check, 
+		seed: seed
+	}
+
+	for(let id of DEFAULTS.PARAM_FIELDS.keys())
+	{	
+		const Uinput = document.getElementById(id);
+		replaceJSONValues(json, Uinput.id, Uinput.value);
+	}
+
+	vectors = ["AL", "Am", "AR", "DL", "Dm", "DR", "DmL", "DmR", "DLR", "B"]
+
+	for(let id of vectors)
+	{	
+		const id_x = document.getElementById(id + "_x");
+		const id_y = document.getElementById(id + "_y");
+		const id_z = document.getElementById(id + "_z");
+		replaceJSONValues(json, id, null, id_x.value, id_y.value, id_z.value);
+	}
+
+	return json;
 }
 
 
@@ -387,15 +439,28 @@ const initForm = ({ camera, msdView }) => {
 	};
 
 	const paramsForm = document.getElementById("msd-params-form");
+
+	paramsForm.addEventListener("submit", (event) => {
+		if (event.submitter.id == 'runButton') {
+			event.preventDefault();
+			let json = buildJSON(msdView)
+			simCount = document.getElementById("simCount").value
+			freq = document.getElementById("freq").value
+			workload(json, simCount, freq)
+		}
+	});
+
 	paramsForm.addEventListener("submit", (event) => {
 		event.preventDefault();
-		let content = loadFileContent(msdView);
-		let blob = new Blob([content], { type: 'text/plain' });
-		let link = document.createElement('a');
-		link.download = 'parameters-iterate.txt';
-		link.href = window.URL.createObjectURL(blob);
-		link.click();
-		window.URL.revokeObjectURL(link.href);
+		if (event.submitter.id == 'exportFile') {
+			let content = loadFileContent(msdView);
+			let blob = new Blob([content], { type: 'text/plain' });
+			let link = document.createElement('a');
+			link.download = 'parameters-iterate.txt';
+			link.href = window.URL.createObjectURL(blob);
+			link.click();
+			window.URL.revokeObjectURL(link.href);
+		}
 	});
 
 
