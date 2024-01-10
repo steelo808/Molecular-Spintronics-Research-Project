@@ -189,6 +189,9 @@ Second bug fix. In MSD::setParameters()
 (1-4-2023) Bug fix in MSD.py:985. MSD.setMolParameters() msd_clib signature was set incorrectly
 	causing the method to be unusable.
 
+6.3.1:
+(1-09-2023) Merged a bug fix by Robert. Also included an import GUI feature.
+
 TODO: Bug Fix - MSD-Builder becomes unresponsive if dimensions are too small.
 	(JS error. Somthing to do with the CashedMap and localStorage.)
 TODO: add reinitialize and randomize to the MSD Server (Java)
