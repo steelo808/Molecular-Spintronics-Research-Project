@@ -1,7 +1,7 @@
 (() => {  // define IIFE
 
 // ---- Imports: --------------------------------------------------------------
-const { defineExports, ajax } = MSDBuilder.util;
+const { defineExports, ajax, sleep } = MSDBuilder.util;
 
 
 // ---- Classes: --------------------------------------------------------------
@@ -192,7 +192,105 @@ class MSD {
 }
 
 
+// ---- Functions: ------------------------------------------------------------
+let nextIterateID = 0;
+
+async function iterate(createArgs, runArgs) {
+	const id = `[iterate, ${++nextIterateID}]`;
+	console.time(id);
+	try {
+		console.log(`${id} Workload started...`);
+		let msd = await MSD.create(createArgs);
+		console.log(id, "Created MSD:", msd);
+		console.log(id, "Start running simulation.");
+		await msd.run(runArgs);
+		let index = -1;
+		let t = -1;	
+		while (t < simCount) {
+			await sleep(1000);
+			let length = await msd.record.length();
+			while(true) {
+				let next = index + 1;
+				if (next < length) {
+					index = next;
+					let state = await msd.record.get(index);
+					console.log(id, `Result [${index}]`, state);
+					t = state.results.t;
+				} else {
+					break;
+				}
+			}
+		}
+		console.log(id, "Destoryed MSD:", msd);
+		msd.destory();
+		console.log(id, "Workload Complete.");
+	} catch(ex) {
+		console.error(ex);
+	}
+	console.timeEnd(id);
+}
+
+async function demo() {
+	console.time("MSD workload");
+	try {
+		console.log("Workload started...");
+		let msd = await MSD.create({
+			width: 11,  height: 10,  depth: 10,
+			
+			molPosL: 5,  molPosR: 5,
+			topL: 0,  bottomL: 9,
+			frontR: 0,  backR: 9,
+
+			kT: 0.3,
+			B: [0, 0, 0],
+
+			SL: 1,  SR: 1,  Sm: 1,
+			FL: 0,  FR: 0,  Fm: 0,
+
+			JL: 1,  JR: 1,  Jm: 1,  JmL: 0.75,  JmR: -0.75,  JLR: 0,
+			Je0L: 0,  Je0R: 0,  Je0m: 0,
+			Je1L: 0,  Je1R: 0,  Je1m: 0,  Je1mL: 0,  Je1mR: 0, Je1LR: 0,
+			JeeL: 0,  JeeR: 0,  Jeem: 0,  JeemL: 0,  JeemR: 0, JeeLR: 0,
+			bL: 0,  bR: 0,  bm: 0,  bmL: 0,  bmR: 0,  bLR: 0,
+
+			AL:[0,0,0], AR:[0,0,0], Am:[0,0,0],
+			DL:[0,0,0], DR:[0,0,0], Dm:[0,0,0], DmL:[0,0,0], DmR:[0,0,0], DLR:[0,0,0],
+			
+			flippingAlgorithm: "CONTINUOUS_SPIN_MODEL",
+			molType: "LINEAR",
+			randomize: true,
+			seed: 0
+		});
+		console.log("-- Created MSD:", msd);
+		console.log("-- Start running simulation.");
+		const simCount = 50_000_000;
+		await msd.run({
+			simCount,
+			freq: 1_000_000
+		});
+		let prevIndex = -1;
+		let t = -1;	
+		while (t < simCount) {
+			await sleep(1000);
+			let index = await msd.record.length() - 1;
+			if (index > prevIndex) {
+				prevIndex = index;
+				let state = await msd.record.get(index);
+				console.log(`Result [${index}]`, state);
+				t = state.results.t;
+			}
+		}
+		console.log("-- Destoryed MSD:", msd);
+		msd.destory();
+		console.log("==== Workload Complete. ====");
+	} catch(ex) {
+		console.error(ex);
+	}
+	console.timeEnd("MSD workload");
+}
+
+
 // ---- Exports: --------------------------------------------------------------
-defineExports("MSDBuilder.simulation", { MSD });
+defineExports("MSDBuilder.simulation", { MSD, iterate, demo });
 
 })();  // run IIFE

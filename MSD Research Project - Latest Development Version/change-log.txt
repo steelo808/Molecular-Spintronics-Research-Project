@@ -190,10 +190,12 @@ Second bug fix. In MSD::setParameters()
 	causing the method to be unusable.
 
 6.3.1:
-(1-09-2023) Merged a bug fix by Robert. Also included an import GUI feature.
+(1-09-2023) Merged a bug fix by Robert! Also included an import GUI feature,
+	and a run button for running a simple iterate simulation.
+(1-10-2023) Minor linting, refactoring, and debugging. Also, fixed bug involving
+	the loading of out-of-sync saved paramters.
 
-TODO: Bug Fix - MSD-Builder becomes unresponsive if dimensions are too small.
-	(JS error. Somthing to do with the CashedMap and localStorage.)
+TODO: Save "seed" and "randomize" fields
 TODO: add reinitialize and randomize to the MSD Server (Java)
 TODO: create UI for interfacing with the Java HTTP MSD Server
 TODO: remove zdog

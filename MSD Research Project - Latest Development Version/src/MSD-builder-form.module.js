@@ -1,8 +1,17 @@
+/**
+ * @file MSD-builder-form.module.js
+ * @brief Contains classes and functions that control the form elements of the UI.
+ * @date 2024-1-10
+ * @author Christopher D'Angelo
+ * @author Robert J.
+ */
+
 (() => {  // define IIFE
 
 // ---- Imports: --------------------------------------------------------------
 const { defineExports } = MSDBuilder.util;
 const { updateCamera } = MSDBuilder.render;
+const { iterate } = MSDBuilder.simulation;
 
 
 // ---- Classes: --------------------------------------------------------------
@@ -61,6 +70,10 @@ const DEFAULTS = {
 	PARAM_FIELDS: new Map([
 		["kT", 0.1],
 		["B_x", 0], ["B_y", 0], ["B_z", 0],
+		["simCount", 1000000],
+		["freq", 0],
+		["seed", ""],
+		["randomize", true],
 		
 		["SL", 1], ["Sm", 1], ["SR", 1],
 		["FL", 1], ["Fm", 0], ["FR", 0],
@@ -139,10 +152,18 @@ const loadView = (msd) => {
  * Load HTML (param) inputs with cached or default info.
  */
 const loadHTMLParamFields = () => {
+	let inner_height_set = false;
+	let inner_depth_set = false;
+	
 	DEFAULTS.PARAM_FIELDS.forEach((default_value, param_name) => {
 		let value = valueCache.get(param_name);
-		document.getElementById(param_name).value =
-			(value !== undefined && value != null ? value : default_value);
+		if (value === undefined || value === null)
+			value = default_value;
+		let ele = document.getElementById(param_name);
+		if (ele.checked)
+			ele.checked = value;  // special case: <input type=checkbox>
+		else
+			ele.value = value;    // default case <input ...>
 
 		// TODO: handle _rho, _theta, _phi fields because they are not in PARAM_FIELDS
 		// let [ prefix, suffix ] = splitParam(param_name);
@@ -163,7 +184,9 @@ const syncHTMLDimFields = (msd) => {
 	})
 };
 
-// Robert J.
+/**
+ * @author Robert J.
+ */
 function replaceValues(template, name, value, x, y, z) {
 	let regex = new RegExp(`(${name}\\s*=\\s*)([^\\n]*)`);
 	
@@ -176,7 +199,9 @@ function replaceValues(template, name, value, x, y, z) {
   }
 
 
-// Robert J.
+/**
+ * @author Robert J.
+ */
 function loadFileContent(msd) {
 	buildJSON(msd);
 
@@ -298,7 +323,9 @@ DLR = 0.0002 0 0
 	return content;
 }
 
-// Robert J.
+/**
+ * @author Robert J.
+ */
 function replaceJSONValues(json, id, name, x, y, z) {
 	if (x,y,z == null) {
 	  json[id] = parseFloat(name);
@@ -308,7 +335,9 @@ function replaceJSONValues(json, id, name, x, y, z) {
 	return json;
   }
 
-// Robert J.
+/**
+ * @author Robert J.
+ */
 function buildJSON(msd) {
 	msd_width = msd.FML.width + msd.FMR.width + msd.mol.width;
 	// height of FML can never exceed depth of FMR (making it automatically the maximum)
@@ -317,33 +346,36 @@ function buildJSON(msd) {
 	msd_depth = msd.FML.depth;
 
 	topL = (Math.floor((msd_height - msd.mol.height) / 2)) - Math.floor(msd.FML.y);
-	bottomL = topL + msd.FML.height - 1
+	bottomL = topL + msd.FML.height - 1;
 	
 	molPosL = msd.FML.width;
 	molPosR = molPosL + msd.mol.width - 1;
 	
 	frontR = (Math.floor((msd_depth - msd.mol.depth) / 2)) - Math.floor(msd.mol.z);
-	backR = frontR + msd.FMR.depth - 1
+	backR = frontR + msd.FMR.depth - 1;
 	
-	random_check = document.getElementById('randomCheckbox').checked;
-	molType = document.getElementById("mol-type").value
-	seed = document.getElementById("seed").value
+	random_check = !!document.getElementById('randomize').checked;
+	molType = document.getElementById("mol-type").value;
 
 	json = {
 		width: msd_width,
 		height: msd_height,
 		depth: msd_depth,
-		topL: topL,
-		bottomL: bottomL,
-		molPosL: molPosL,
-		molPosR: molPosR,
-		frontR: frontR,
-		backR: backR,
+		topL,
+		bottomL,
+		molPosL,
+		molPosR,
+		frontR,
+		backR,
 		flippingAlgorithm: "CONTINUOUS_SPIN_MODEL",
-		molType: molType,
+		molType,
 		randomize: random_check, 
-		seed: seed
-	}
+	};
+
+	// only add a seed if one is provided
+	seed = document.getElementById("seed").value;
+	if (seed)
+		json.seed = +seed;
 
 	for(let id of DEFAULTS.PARAM_FIELDS.keys())
 	{	
@@ -351,7 +383,7 @@ function buildJSON(msd) {
 		replaceJSONValues(json, Uinput.id, Uinput.value);
 	}
 
-	vectors = ["AL", "Am", "AR", "DL", "Dm", "DR", "DmL", "DmR", "DLR", "B"]
+	vectors = ["AL", "Am", "AR", "DL", "Dm", "DR", "DmL", "DmR", "DLR", "B"];
 
 	for(let id of vectors)
 	{	
@@ -408,15 +440,32 @@ const initForm = ({ camera, msdView }) => {
 			valueCache.set(id, value);
 		});
 
+		// synchronize some fields
+		let ids = [id];
+		if (id === "FML-height")  ids.push("mol-height");
+		else if (id === "mol-height" )  ids.push("FML-height");
+		else if (id === "FMR-depth")  ids.push("mol-depth");
+		else if (id === "mol-depth")  ids.push("FMR-depth");
+
 		// onchange:
 		input.addEventListener("change", (event) => {
 			const input = event.currentTarget;
-			let value = Math.round(+input.value);
+			let value;
+			if (id === "seed")
+				value = input.value;  // seed can be empty string
+			else if (id === "randomize")
+				value = input.checked;  // checkbox
+			else
+				value = Math.round(+input.value);
 
-			input.value = value;
+			if (input.checked)
+				input.checked = value;  // special case: <input type=checkbox>
+			else
+				input.value = value;    // default case: <input ...>
+			
 			try {
 				msdView[region][prop] = value;
-				valueCache.set(id, value);
+				ids.forEach(id => valueCache.set(id, value));
 				syncHTMLDimFields(msdView);
 				updateCamera(camera, msdView);
 			} catch(ex) {
@@ -441,12 +490,15 @@ const initForm = ({ camera, msdView }) => {
 	const paramsForm = document.getElementById("msd-params-form");
 
 	paramsForm.addEventListener("submit", (event) => {
+		event.preventDefault();
 		if (event.submitter.id == 'runButton') {
-			event.preventDefault();
-			let json = buildJSON(msdView)
-			simCount = document.getElementById("simCount").value
-			freq = document.getElementById("freq").value
-			workload(json, simCount, freq)
+			let json = buildJSON(msdView);
+			simCount = +document.getElementById("simCount").value;
+			freq = +document.getElementById("freq").value;
+			iterate(json, { simCount, freq });
+
+			// TODO: replace with a better UI
+			alert(`Running...\nOpen JS console (Ctrl-Shift-J or Cmd-Shift-J) to see results.`);
 		}
 	});
 
@@ -462,7 +514,6 @@ const initForm = ({ camera, msdView }) => {
 			window.URL.revokeObjectURL(link.href);
 		}
 	});
-
 
 	paramsForm.addEventListener("reset", (event) => {
 		event.preventDefault();
