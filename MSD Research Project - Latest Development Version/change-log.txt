@@ -183,18 +183,20 @@ Second bug fix. In MSD::setParameters()
 (2023) Introduced ~/MSD-builder.html (similar to mol-builder)
 (12-31-2023) Merged a fix made by Robert! (His first contribution.)
 	Made the "export" button work in new MSD-builer.html GUI.
-(1-2-2023) Created HTTP server in Java (com.sun.net.httpserver package) with CRUD operations
+(1-2-2024) Created HTTP server in Java (com.sun.net.httpserver package) with CRUD operations
 	as well as the ability to run simulations, and query the results.
-(1-3-2023) Created JS functions/classes to use the server asynchronous.
-(1-4-2023) Bug fix in MSD.py:985. MSD.setMolParameters() msd_clib signature was set incorrectly
+(1-3-2024) Created JS functions/classes to use the server asynchronous.
+(1-4-2024) Bug fix in MSD.py:985. MSD.setMolParameters() msd_clib signature was set incorrectly
 	causing the method to be unusable.
 
 6.3.1:
-(1-09-2023) Merged a bug fix by Robert! Also included an import GUI feature,
+(1-09-2024) Merged a bug fix by Robert! Also included an import GUI feature,
 	and a run button for running a simple iterate simulation.
-(1-10-2023) Minor linting, refactoring, and debugging. Also, fixed bug involving
+(1-10-2024) Minor linting, refactoring, and debugging. Also, fixed bug involving
 	the loading of out-of-sync saved paramters.
+(1-11-2024) All parameters now save and load in the correct data type (hopefully.)
 
+TODO: Fix bug, FML y-offset not saving
 TODO: Save "seed" and "randomize" fields
 TODO: add reinitialize and randomize to the MSD Server (Java)
 TODO: create UI for interfacing with the Java HTTP MSD Server

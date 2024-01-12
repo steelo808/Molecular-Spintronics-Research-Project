@@ -193,10 +193,9 @@ class MSD {
 
 
 // ---- Functions: ------------------------------------------------------------
-let nextIterateID = 0;
-
-async function iterate(createArgs, runArgs) {
-	const id = `[iterate, ${++nextIterateID}]`;
+const iterate = async (createArgs, runArgs) => {
+	console.log(createArgs, runArgs);
+	const id = `[iterate, ${++iterate.nextId}]`;
 	console.time(id);
 	try {
 		console.log(`${id} Workload started...`);
@@ -228,9 +227,10 @@ async function iterate(createArgs, runArgs) {
 		console.error(ex);
 	}
 	console.timeEnd(id);
-}
+};
+iterate.nextId = 0;
 
-async function demo() {
+const demo = async () => {
 	console.time("MSD workload");
 	try {
 		console.log("Workload started...");
@@ -287,7 +287,7 @@ async function demo() {
 		console.error(ex);
 	}
 	console.timeEnd("MSD workload");
-}
+};
 
 
 // ---- Exports: --------------------------------------------------------------

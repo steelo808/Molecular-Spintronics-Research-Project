@@ -60,6 +60,27 @@ class SavedMap extends Map {
 
 
 // ---- Globals: --------------------------------------------------------------
+/** @private */ const real = {
+	getter: ele => +ele.value,
+	setter: (ele, x) => ele.value = x };
+/** @private */ const optStr = {
+	getter: ele => ele.value?.trim() ? ele.value : undefined,
+	setter: (ele, x) => ele.value = x ? x : "" };
+/** @private */ const checkbox = {
+	getter: ele => ele.checked,
+	setter: (ele, x) => ele.checked = x };
+
+/**
+ * @private
+ * @brief Wraps a default value as an object.
+ * 	May also provide a getter and setter method for converting between a form
+ * 	(or other HTML) element, and the underlying property's value.
+ * 	If no getter or setter is provided, the default "real" number
+ * 	getter and setter is used.
+ * @return and object with three (3) properties: { default_value, getter, setter }
+*/
+const val = (default_value, { getter, setter } = real) => ({default_value, getter, setter});
+
 const DEFAULTS = {
 	DIM_FIELDS: new Map([
 		["FML-width", 5], ["FML-height", 4], ["FML-depth", 10], ["FML-y", 0],
@@ -68,30 +89,30 @@ const DEFAULTS = {
 	]),
 
 	PARAM_FIELDS: new Map([
-		["kT", 0.1],
-		["B_x", 0], ["B_y", 0], ["B_z", 0],
-		["simCount", 1000000],
-		["freq", 0],
-		["seed", ""],
-		["randomize", true],
+		["kT", val(0.1)],
+		["B_x", val(0)], ["B_y", val(0)], ["B_z", val(0)],
+		["simCount", val(1000000)],
+		["freq", val(0)],
+		["seed", val("", optStr)],
+		["randomize", val(true, checkbox)],
 		
-		["SL", 1], ["Sm", 1], ["SR", 1],
-		["FL", 1], ["Fm", 0], ["FR", 0],
+		["SL", val(1)], ["Sm", val(1)], ["SR", val(1)],
+		["FL", val(1)], ["Fm", val(0)], ["FR", val(0)],
 	
-		["JL", 1], ["JmL", 1], ["Jm", 1], ["JmR", -1], ["JR", 1], ["JLR", 0],
-		["Je0L", 0], ["Je0m", 0], ["Je0R", 0],
-		["Je1L", 0], ["Je1m", 0], ["Je1R", 0], ["Je1mL", 0], ["Je1mR", 0], ["Je1LR", 0],
-		["JeeL", 0], ["Jeem", 0], ["JeeR", 0], ["JeemL", 0], ["JeemR", 0], ["JeeLR", 0],
+		["JL", val(1)], ["JmL", val(1)], ["Jm", val(1)], ["JmR", val(-1)], ["JR", val(1)], ["JLR", val(0)],
+		["Je0L", val(0)], ["Je0m", val(0)], ["Je0R", val(0)],
+		["Je1L", val(0)], ["Je1m", val(0)], ["Je1R", val(0)], ["Je1mL", val(0)], ["Je1mR", val(0)], ["Je1LR", val(0)],
+		["JeeL", val(0)], ["Jeem", val(0)], ["JeeR", val(0)], ["JeemL", val(0)], ["JeemR", val(0)], ["JeeLR", val(0)],
 	
-		["bL", 0], ["bm", 0], ["bR", 0], ["bmL", 0], ["bmR", 0], ["bLR", 0],
+		["bL", val(0)], ["bm", val(0)], ["bR", val(0)], ["bmL", val(0)], ["bmR", val(0)], ["bLR", val(0)],
 		
-		["AL_x", 0], ["Am_x", 0], ["AR_x", 0],
-		["AL_y", 0], ["Am_y", 0], ["AR_y", 0],
-		["AL_z", 0], ["Am_z", 0], ["AR_z", 0],
+		["AL_x", val(0)], ["Am_x", val(0)], ["AR_x", val(0)],
+		["AL_y", val(0)], ["Am_y", val(0)], ["AR_y", val(0)],
+		["AL_z", val(0)], ["Am_z", val(0)], ["AR_z", val(0)],
 	
-		["DL_x", 0], ["Dm_x", 0], ["DR_x", 0], ["DmL_x", 0], ["DmR_x", 0], ["DLR_x", 0],
-		["DL_y", 0], ["Dm_y", 0], ["DR_y", 0], ["DmL_y", 0], ["DmR_y", 0], ["DLR_y", 0],
-		["DL_z", 0], ["Dm_z", 0], ["DR_z", 0], ["DmL_z", 0], ["DmR_z", 0], ["DLR_z", 0],
+		["DL_x", val(0)], ["Dm_x", val(0)], ["DR_x", val(0)], ["DmL_x", val(0)], ["DmR_x", val(0)], ["DLR_x", val(0)],
+		["DL_y", val(0)], ["Dm_y", val(0)], ["DR_y", val(0)], ["DmL_y", val(0)], ["DmR_y", val(0)], ["DLR_y", val(0)],
+		["DL_z", val(0)], ["Dm_z", val(0)], ["DR_z", val(0)], ["DmL_z", val(0)], ["DmR_z", val(0)], ["DLR_z", val(0)],
 	])
 };
 
@@ -152,18 +173,11 @@ const loadView = (msd) => {
  * Load HTML (param) inputs with cached or default info.
  */
 const loadHTMLParamFields = () => {
-	let inner_height_set = false;
-	let inner_depth_set = false;
-	
-	DEFAULTS.PARAM_FIELDS.forEach((default_value, param_name) => {
+	DEFAULTS.PARAM_FIELDS.forEach(({ default_value, setter }, param_name) => {
 		let value = valueCache.get(param_name);
 		if (value === undefined || value === null)
 			value = default_value;
-		let ele = document.getElementById(param_name);
-		if (ele.checked)
-			ele.checked = value;  // special case: <input type=checkbox>
-		else
-			ele.value = value;    // default case <input ...>
+		setter(document.getElementById(param_name), value);
 
 		// TODO: handle _rho, _theta, _phi fields because they are not in PARAM_FIELDS
 		// let [ prefix, suffix ] = splitParam(param_name);
@@ -336,28 +350,29 @@ function replaceJSONValues(json, id, name, x, y, z) {
   }
 
 /**
+ * @param {MSDView} msd
+ * @return {Object} the form data
  * @author Robert J.
  */
 function buildJSON(msd) {
-	msd_width = msd.FML.width + msd.FMR.width + msd.mol.width;
+	let msd_width = msd.FML.width + msd.FMR.width + msd.mol.width;
 	// height of FML can never exceed depth of FMR (making it automatically the maximum)
-	msd_height = msd.FMR.height;
+	let msd_height = msd.FMR.height;
 	// depth of FMR can never exceed depth of FML
-	msd_depth = msd.FML.depth;
+	let msd_depth = msd.FML.depth;
 
-	topL = (Math.floor((msd_height - msd.mol.height) / 2)) - Math.floor(msd.FML.y);
-	bottomL = topL + msd.FML.height - 1;
+	let topL = (Math.floor((msd_height - msd.mol.height) / 2)) - Math.floor(msd.FML.y);
+	let bottomL = topL + msd.FML.height - 1;
 	
-	molPosL = msd.FML.width;
-	molPosR = molPosL + msd.mol.width - 1;
+	let molPosL = msd.FML.width;
+	let molPosR = molPosL + msd.mol.width - 1;
 	
-	frontR = (Math.floor((msd_depth - msd.mol.depth) / 2)) - Math.floor(msd.mol.z);
-	backR = frontR + msd.FMR.depth - 1;
+	let frontR = (Math.floor((msd_depth - msd.mol.depth) / 2)) - Math.floor(msd.mol.z);
+	let backR = frontR + msd.FMR.depth - 1;
 	
-	random_check = !!document.getElementById('randomize').checked;
-	molType = document.getElementById("mol-type").value;
+	let molType = document.getElementById("mol-type").value;
 
-	json = {
+	let json = {
 		width: msd_width,
 		height: msd_height,
 		depth: msd_depth,
@@ -369,21 +384,17 @@ function buildJSON(msd) {
 		backR,
 		flippingAlgorithm: "CONTINUOUS_SPIN_MODEL",
 		molType,
-		randomize: random_check, 
 	};
-
-	// only add a seed if one is provided
-	seed = document.getElementById("seed").value;
-	if (seed)
-		json.seed = +seed;
 
 	for(let id of DEFAULTS.PARAM_FIELDS.keys())
 	{	
 		const Uinput = document.getElementById(id);
-		replaceJSONValues(json, Uinput.id, Uinput.value);
+		// replaceJSONValues(json, Uinput.id, Uinput.value);  // Chris Note: not all PARAM_FIELDS are numbers
+		const { getter } = DEFAULTS.PARAM_FIELDS.get(Uinput.id);
+		json[id] = getter(Uinput);
 	}
 
-	vectors = ["AL", "Am", "AR", "DL", "Dm", "DR", "DmL", "DmR", "DLR", "B"];
+	const vectors = ["AL", "Am", "AR", "DL", "Dm", "DR", "DmL", "DmR", "DLR", "B"];
 
 	for(let id of vectors)
 	{	
@@ -435,7 +446,7 @@ const initForm = ({ camera, msdView }) => {
 	forEachDimField(({ id, input, region, prop }) => {
 		// onfocus: Store values of each field before they are changed,
 		// 	so they can be reverted incase invalid values are entered.
-		input.addEventListener("focus", (event) => {
+		input.addEventListener("focus", event => {
 			let value = +event.currentTarget.value;
 			valueCache.set(id, value);
 		});
@@ -448,20 +459,10 @@ const initForm = ({ camera, msdView }) => {
 		else if (id === "mol-depth")  ids.push("FMR-depth");
 
 		// onchange:
-		input.addEventListener("change", (event) => {
+		input.addEventListener("change", event => {
 			const input = event.currentTarget;
-			let value;
-			if (id === "seed")
-				value = input.value;  // seed can be empty string
-			else if (id === "randomize")
-				value = input.checked;  // checkbox
-			else
-				value = Math.round(+input.value);
-
-			if (input.checked)
-				input.checked = value;  // special case: <input type=checkbox>
-			else
-				input.value = value;    // default case: <input ...>
+			let value = Math.round(+input.value);
+			input.value = value;
 			
 			try {
 				msdView[region][prop] = value;
@@ -479,9 +480,14 @@ const initForm = ({ camera, msdView }) => {
 	for (let param_name of DEFAULTS.PARAM_FIELDS.keys()) {
 		// let [ prefix, suffix ] = splitParam(param_name);
 		// if (!suffix) {
-			document.getElementById(param_name).addEventListener("change", (event) => {
-				valueCache.set(param_name, +event.currentTarget.value);
-			});
+			let ele = document.getElementById(param_name);
+			let { getter } = DEFAULTS.PARAM_FIELDS.get(param_name);
+			const save = event =>
+				valueCache.set(param_name, getter(event.currentTarget));
+			ele.addEventListener("change", save);
+			ele.addEventListener("keyup", save);
+			ele.addEventListener("mouseup", save);
+
 		// } else {
 			// TODO: How to save Vectors, and how do we update vectors as one represntation is modified?
 		// }
