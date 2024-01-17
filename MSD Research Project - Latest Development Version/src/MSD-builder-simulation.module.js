@@ -184,6 +184,27 @@ class MSD {
 
 	/**
 	 * @public
+	 * @brief Reset this MSD to an intial state. Also clears the record.
+	 * 
+	 * @param {Object} options
+	 * 	Defaults to empty Object, {}
+	 * 	By default the MSD is not randomized, but is reseeded.
+	 * @param {Boolean?} options.randomize
+	 * 	Set <code>true</code> if the system should be reset to a random state
+	 * @param {Boolean?} options.reseed
+	 * 	Set <code>false</code> if the PRNG seed should not be changed.
+	 * 	Otherwise a new unique seed will be generated.
+	 * @param {Number?} options.seed
+	 * 	Use if PRNG should be reset with a specific seed.
+	 * 	Will override the reseed option.
+	 * @returns {Object} { seed } Contains whatever seed is now being used
+	 */
+	async reset(options = {}) {
+		return await this.request("POST", "/reset?id=" + this.id, options);
+	}
+
+	/**
+	 * @public
 	 */
 	async destory() {
 		await this.request("DELETE", "/msd?id=" + this.id)

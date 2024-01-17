@@ -243,10 +243,10 @@ public class MSDServer {
 
 	/**
 	 * Path: /results
-	 * Method: GET
+	 * Method: GET, OPTIONS
 	 */
 	private static final MSDHttpHandler resultsHandler = (req, res) -> {
-		final EnumSet<HttpMethod> allowedMethods = EnumSet.of(POST, DELETE, OPTIONS);
+		final EnumSet<HttpMethod> allowedMethods = EnumSet.of(GET, OPTIONS);
 		final int MAX_RESPONSE_SIZE = 1 * GB;
 		allowCors(res, allowedMethods);
 
@@ -343,6 +343,33 @@ public class MSDServer {
 		}
 	};
 
+	/**
+	 * Path: /reset
+	 * Method: POST, OPTIONS
+	 */
+	private static final MSDHttpHandler resetHandler = (req, res) -> {
+		final EnumSet<HttpMethod> allowedMethods = EnumSet.of(POST, OPTIONS);
+		allowCors(res, allowedMethods);
+
+		switch(req.method) {
+		case OPTIONS: {
+			handleOptionsRequest(req, res, allowedMethods);
+		} break;
+
+		case POST: {
+			MSDWorker msd = workers.lookup(req, res);
+			if (msd == null)  break;
+
+			res.setBody(msd.reset(req.getBody()));
+			CONTENT_TYPE.to("application/json", res.headers);
+			res.status = OK;
+		} break;
+
+		default:
+			res.status = METHOD_NOT_ALLOWED;
+		}
+	};
+
 	public static void main(String[] args) throws IOException {
 		// Parse cmd args
 		if (args.length == 0)
@@ -359,6 +386,7 @@ public class MSDServer {
 		server.createContext("/msd", msdHandler);
 		server.createContext("/run", runHandler);
 		server.createContext("/results", resultsHandler);
+		server.createContext("/reset", resetHandler);
 		
 		// Start server
 		server.start();

@@ -46,7 +46,8 @@ MSD_INIT_ARGS = {
 CONFIG_PARAMS = {
 	"seed": int,
 	"randomize": bool,
-	"flippingAlgorithm": flippingAlgorithm
+	"flippingAlgorithm": flippingAlgorithm,
+	"reseed": bool
 }
 MSD_PARAMS = {
 	"kT": float,
@@ -140,7 +141,41 @@ def setParameters(msd: MSD, kw: dict):
 						**kw_edge_p }))
 			msd.molProto = molProto
 
-def state(msd: MSD) -> str:
+def maybeSeed(msd: MSD, kw: dict):
+	''' Possibly seed the MSD based on the given JSON:
+		{ "seed": int }
+	'''
+	if "seed" in kw:
+		msd.seed = kw["seed"]
+		return True
+	return False
+
+def maybeRandomize(msd: MSD, kw: dict, reseed: bool):
+	''' Possibly randomize the MSD based on the given JSON
+	    { "randomize": bool }
+	'''
+	if kw.get("randomize", False):
+		msd.randomize(reseed)
+		return True
+	return False
+
+def reset(msd: MSD, kw: dict):
+	''' Either randomize or reinitialize the system based on the given JSON
+	    { "randomize": bool, "reseed": bool, "seed": int }
+		By default, MSD is not randomized, but is reseeded.
+		If a custom seed is given, the system will use that seed.
+	'''
+	reseed = not maybeSeed(msd, kw) and kw.get("reseed", True)
+	if not maybeRandomize(msd, kw, reseed):
+		msd.reinitialize(reseed)
+
+S_RESULTS = "results"
+S_PARAMETERS = "parameters"
+S_SEED = "seed"
+S_MSD = "msd"
+S_MOL = "mol"
+S_ALL = {S_RESULTS, S_PARAMETERS, S_SEED, S_MSD, S_MOL}
+def state(msd: MSD, what: set = S_ALL) -> str:
 	''' Gets the state of the current MSD and converts it into JSON. '''
 
 	def encodeMSD(obj):
@@ -154,20 +189,29 @@ def state(msd: MSD) -> str:
 				return encType(obj)
 		raise TypeError("Can't encode Unrecognized type: " + str(type(obj)))
 	
-	molProto = msd.getMolProto()
-	return json.dumps({
-		"results": msd.getResults().__dict__,
-		"parameters": msd.getParameters().__dict__,
-		
-		"msd": [{
+	state = {}
+
+	if S_RESULTS in what:
+		state[S_RESULTS] = msd.getResults().__dict__
+	
+	if S_PARAMETERS in what:
+		state[S_PARAMETERS] = msd.getParameters().__dict__
+	
+	if S_SEED in what:
+		state[S_SEED] = msd.seed
+	
+	if S_MSD in what:
+		state[S_MSD] = [{
 			"index": a.index,
 			"pos": a.pos,
 			"spin": a.spin,
 			"flux": a.flux,
 			"localM": a.localM
-		} for a in msd],
+		} for a in msd]
 
-		"mol": {
+	if S_MOL in what:
+		molProto = msd.getMolProto()
+		state[S_MOL] = {
 			"nodes": [{
 				"index": node.index,
 				"parameters": node.getParameters().__dict__
@@ -181,7 +225,8 @@ def state(msd: MSD) -> str:
 				"direction": edge.direction
 			} for edge in molProto.edgesUnique]
 		}
-	}, default=encodeMSD, indent=None)
+	
+	return json.dumps(state, default=encodeMSD, indent=None)
 
 def sim(msd: MSD, n: int, dkT = 0., dB = 0.):
 	# TODO NEW FEATURE: Allow for non-linear changes to kT and B by passing
@@ -211,10 +256,8 @@ def main():
 			msd.flippingAlgorithm = kw["flippingAlgorithm"]
 		setParameters(msd, kw)
 		# TODO NEW FEATURE: set molProto if one is given
-		if "seed" in kw:
-			msd.seed = kw["seed"]
-		if kw.get("randomize", False):
-			msd.randomize(reseed = False)
+		maybeSeed(msd, kw)
+		maybeRandomize(msd, kw, reseed = False)
 		
 		print("READY")  # Confirm worker process is crrectly setup and ready for job requests
 
@@ -259,8 +302,15 @@ def main():
 
 				case "GET":
 					# Get the current state of the MSD without running.
-					print(state(msd))
+					what = set(json.loads(input()))
+					if len(what) == 0:
+						what = S_ALL
+					print(state(msd, what))
 				
+				case "RESET":
+					reset(msd, readJSON())
+					print(state(msd, what = {S_SEED}))
+
 				case cmd:
 					print("Unrecognized command: " + cmd, file=sys.stderr)
 	

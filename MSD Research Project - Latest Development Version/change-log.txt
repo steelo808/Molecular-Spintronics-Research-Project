@@ -195,6 +195,7 @@ Second bug fix. In MSD::setParameters()
 (1-10-2024) Minor linting, refactoring, and debugging. Also, fixed bug involving
 	the loading of out-of-sync saved paramters.
 (1-11-2024) All parameters now save and load in the correct data type (hopefully.)
+(1-17-2024) Added /reset request to MSD Server.
 
 TODO: Fix bug, FML y-offset not saving
 TODO: Save "seed" and "randomize" fields
@@ -210,6 +211,7 @@ TODO: Store results retrieved from server in JS for efficiency, and so further c
 TODO: (maybe?) add custom scripting support for advanced users to process data.
 TODO: Add a way to download data as CSV from the HTML/JS UI after simulation
 	and post-processing is done.
+TODO: Why does MSD Server shutdown not close app once an MSDWorker has been created?
 
 TODO: Fix flux != 0 on mol. that are "turned off"
 TODO: (Potentially Very Hard) Compile-time optimize

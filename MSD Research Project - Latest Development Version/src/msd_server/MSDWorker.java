@@ -83,11 +83,17 @@ public class MSDWorker implements AutoCloseable {
 		}
 	}
 
-	public String getState() throws IOException {
+	public String getState(String args) throws IOException {
 		synchronized(proc) {
 			out.println("GET");
+			out.println(args);
 			return requireLine();
 		}
+	}
+
+	public String getState() throws IOException {
+		// get all state by sending empty JSON object to worker process
+		return getState("[]");
 	}
 
 	/**
@@ -99,6 +105,15 @@ public class MSDWorker implements AutoCloseable {
 			out.println("SET");
 			out.println(parameters);
 			confirmResponse("DONE");
+		}
+	}
+
+	public String reset(String args) throws IOException {
+		synchronized(proc) {
+			out.println("RESET");
+			out.println(args);
+			clearRecord();
+			return requireLine();
 		}
 	}
 
@@ -153,6 +168,12 @@ public class MSDWorker implements AutoCloseable {
 				}
 			}
 		};
+	}
+
+	private void clearRecord() {
+		synchronized(record) {
+			record = new ArrayList<>(0);
+		}
 	}
 
 	/**
