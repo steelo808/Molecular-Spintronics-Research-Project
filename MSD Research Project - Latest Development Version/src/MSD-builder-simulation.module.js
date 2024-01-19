@@ -82,6 +82,8 @@ class Simulation {
 class MSD {
 	server;
 	id = null;
+	t = 0;
+	timeoutMap = new Map();
 
 	/** @private */
 	constructor(server) {
@@ -130,7 +132,7 @@ class MSD {
 
 	/**
 	 * @public
-	 * @async
+	 * @brief Returns once the job has been confirmed, but before the simulation is finished.
 	 * @param {Object} args
 	 * @param {Number} args.simCount - (int) (required) Number of iterations to run
 	 * @param {Number} args.freq - (int) (optional) How often (in iterations) to record data
@@ -138,6 +140,7 @@ class MSD {
 	 * @param {Number[]} args.dB - (float[]) (optional) Linear change in external magnetic field (B) per iteration
 	 */
 	async run(args) {
+		this.t += args.simCount;
 		await this.request("POST", "/run?id=" + this.id, args);
 	}
 
@@ -156,12 +159,23 @@ class MSD {
 				return await self.request("GET", `/results?id=${self.id}&index=${index}`);
 			},
 
+			/**
+			 * @param {Number} start (inclusive) index
+			 * @param {Number} end (exclusive) index
+			 * @returns JSON Array of states
+			 */
 			async range(start, end) {
 				return await self.request("GET", `/results?id=${self.id}&start=${start}&end=${end}`);
 			},
 
 			async all() {
 				return await self.request("GET", `/results?id=${self.id}&all`);
+			},
+
+			[Symbol.asyncIterator]: async function*() {
+				const length = await this.length();
+				for (let i = 0; i < length; i++)
+					yield this.get(i);
 			}
 		};
 	};
@@ -200,6 +214,7 @@ class MSD {
 	 * @returns {Object} { seed } Contains whatever seed is now being used
 	 */
 	async reset(options = {}) {
+		this.t = 0;
 		return await this.request("POST", "/reset?id=" + this.id, options);
 	}
 
@@ -209,6 +224,65 @@ class MSD {
 	async destory() {
 		await this.request("DELETE", "/msd?id=" + this.id)
 			.catch(MSD.throwError);
+	}
+
+	/**
+	 * @param {Function} callback A function that's called when the simulation reaches the specified "time".
+	 * 	By default, this is set to the sum of all previous calls to {@link #run}.
+	 * @param {Object?} options
+	 * @param {Number?} options.until What simulation time the MSD is expected to end at.
+	 * @param {Number?} options.delay How often (in milliseconds) to query the server for new states.
+	 * @param {Function?} options.process A function to call on each new state as they come in.
+	 */
+	addFinishListener(callback, { until = this.t, delay = 1000, process = null } = {}) {
+		if (!callback)
+			throw new Error("No callback function given: " + callback);
+
+		let prevLen = 0;
+		const loop = async () => {
+			let len = await this.record.length();
+			if (len > prevLen)  {  // has the record gotten longer?
+
+				// get missing records for processing
+				let lastState;
+				if (process) {
+					let states = await this.record.range(prevLen, len);
+					states.forEach((s, i) => process(s, prevLen + i));
+					lastState = states[states.length - 1];
+				} else {
+					lastState = await this.record.get(-1);
+				}
+				prevLen = len;
+
+				if (lastState.results.t >= until) {  // have we reached time = "until"?
+					callback(lastState);  // onFinish
+					this.timeoutMap.delete(callback);  // delete tid
+					return;  // don't setTimeout
+				}
+			}
+
+			// still waiting; setTimeout, and store tid in Map
+			this.timeoutMap.set(callback, setTimeout(loop, delay));
+		};
+		loop();  // check immediately
+	}
+
+	removeFinishListener(callback) {
+		let tid = this.timeoutMap.get(callback);
+		if (tid)
+			clearTimeout(tid);
+	}
+
+	/**
+	 * @async
+	 * @param {Function?} options.process A function to call on each new state as they come in.
+	 * @param {Object?} options
+	 * @param {Number?} options.until What simulation time the MSD is expected to end at.
+	 * @param {Number?} options.delay How often (in milliseconds) to query the server for new states.
+	 */
+	wait(process = null, options = {}) {
+		return new Promise((resolve, reject) =>
+			this.addFinishListener(resolve, Object.assign(options, { process })) );
 	}
 }
 
@@ -224,26 +298,10 @@ const iterate = async (createArgs, runArgs) => {
 		console.log(id, "Created MSD:", msd);
 		console.log(id, "Start running simulation.");
 		await msd.run(runArgs);
-		let index = -1;
-		let t = -1;	
-		while (t < simCount) {
-			await sleep(1000);
-			let length = await msd.record.length();
-			while(true) {
-				let next = index + 1;
-				if (next < length) {
-					index = next;
-					let state = await msd.record.get(index);
-					console.log(id, `Result [${index}]`, state);
-					t = state.results.t;
-				} else {
-					break;
-				}
-			}
-		}
+		await msd.wait((state, index) => console.log(id, `Result [${index}]`, state));
 		console.log(id, "Destoryed MSD:", msd);
 		msd.destory();
-		console.log(id, "Workload Complete.");
+		console.log(id, "Complete.");
 	} catch(ex) {
 		console.error(ex);
 	}

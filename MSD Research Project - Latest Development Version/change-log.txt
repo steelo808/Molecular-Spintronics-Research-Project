@@ -198,8 +198,6 @@ Second bug fix. In MSD::setParameters()
 (1-17-2024) Added /reset request to MSD Server.
 
 TODO: Fix bug, FML y-offset not saving
-TODO: Save "seed" and "randomize" fields
-TODO: add reinitialize and randomize to the MSD Server (Java)
 TODO: create UI for interfacing with the Java HTTP MSD Server
 TODO: remove zdog
 TODO: (maybe?) reorganize builder JS files

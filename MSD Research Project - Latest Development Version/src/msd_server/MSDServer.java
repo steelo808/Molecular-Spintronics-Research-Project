@@ -302,9 +302,11 @@ public class MSDServer {
 					res.writeHeaders();
 
 					res.writeBody("[");
-					for (int i = start; i < end; i++) {
-						res.writeBody(record.get(i));
+					if (start < end)
+						res.writeBody(record.get(start));
+					for (int i = start + 1; i < end; i++) {
 						res.writeBody(",");
+						res.writeBody(record.get(i));
 					}
 					res.writeBody("]");
 
