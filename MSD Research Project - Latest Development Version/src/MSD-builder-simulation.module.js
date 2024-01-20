@@ -131,8 +131,10 @@ class MSD {
 	}
 
 	/**
+	 * Dispatches a job to the server. Returns once the job has been
+	 * confirmed, but before the simulation is finished.
 	 * @public
-	 * @brief Returns once the job has been confirmed, but before the simulation is finished.
+	 * 
 	 * @param {Object} args
 	 * @param {Number} args.simCount - (int) (required) Number of iterations to run
 	 * @param {Number} args.freq - (int) (optional) How often (in iterations) to record data
@@ -197,8 +199,8 @@ class MSD {
 	}
 
 	/**
+	 * Reset this MSD to an intial state. Also clears the record.
 	 * @public
-	 * @brief Reset this MSD to an intial state. Also clears the record.
 	 * 
 	 * @param {Object} options
 	 * 	Defaults to empty Object, {}
@@ -227,18 +229,21 @@ class MSD {
 	}
 
 	/**
+	 * @public
 	 * @param {Function} callback A function that's called when the simulation reaches the specified "time".
 	 * 	By default, this is set to the sum of all previous calls to {@link #run}.
 	 * @param {Object?} options
 	 * @param {Number?} options.until What simulation time the MSD is expected to end at.
 	 * @param {Number?} options.delay How often (in milliseconds) to query the server for new states.
+	 * @param {Number?} options.start What index to start processing.
+	 * 	Default is 0 which means all previous states are processed.
 	 * @param {Function?} options.process A function to call on each new state as they come in.
 	 */
-	addFinishListener(callback, { until = this.t, delay = 1000, process = null } = {}) {
+	addFinishListener(callback, { until = this.t, delay = 1000, start = 0, process = null } = {}) {
 		if (!callback)
 			throw new Error("No callback function given: " + callback);
 
-		let prevLen = 0;
+		let prevLen = start;
 		const loop = async () => {
 			let len = await this.record.length();
 			if (len > prevLen)  {  // has the record gotten longer?
@@ -255,7 +260,7 @@ class MSD {
 				prevLen = len;
 
 				if (lastState.results.t >= until) {  // have we reached time = "until"?
-					callback(lastState);  // onFinish
+					callback(lastState, len - 1);  // onFinish
 					this.timeoutMap.delete(callback);  // delete tid
 					return;  // don't setTimeout
 				}
@@ -267,6 +272,10 @@ class MSD {
 		loop();  // check immediately
 	}
 
+	/**
+	 * @public
+	 * @param {Function} callback 
+	 */
 	removeFinishListener(callback) {
 		let tid = this.timeoutMap.get(callback);
 		if (tid)
@@ -274,6 +283,7 @@ class MSD {
 	}
 
 	/**
+	 * @public
 	 * @async
 	 * @param {Function?} options.process A function to call on each new state as they come in.
 	 * @param {Object?} options
@@ -282,7 +292,7 @@ class MSD {
 	 */
 	wait(process = null, options = {}) {
 		return new Promise((resolve, reject) =>
-			this.addFinishListener(resolve, Object.assign(options, { process })) );
+			this.addFinishListener(resolve, {...options, process}) );
 	}
 }
 

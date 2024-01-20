@@ -1,4 +1,5 @@
 body {
+	margin: 0;
 	text-align: center;
 	font-family: Arial;
 }
@@ -9,8 +10,16 @@ no-wrap {
 
 
 /* Canvas (ThreeJS/WebGL) */
+#msdBuilder {
+	width: 100%;
+	height: calc(100vh - 7em);
+	background-color: black;  /* the entire canvas isn't drawn */
+}
+
 #msdBuilder canvas {
-	margin: auto;
+	width: inherit;
+	height: inherit;
+	object-fit: contain;  /* the entire canvas isn't drawn */
 }
 
 

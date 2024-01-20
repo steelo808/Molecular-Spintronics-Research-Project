@@ -495,12 +495,40 @@ const updateCamera = (camera, msd) => {
  * 	msdView: MSDView
  * }}
  */
-const startRendering = ({ canvasWidth = 900, canvasHeight = 450, onAnimationFrame = null } = {}) => {
+const startRendering = ({
+	aspectRatio = 16/9,
+	maxCanvasWidth = Infinity,
+	maxCanvasHeight = Infinity,
+	onAnimationFrame = null
+} = {}) => {
 	const scene = new Scene();
-	const camera = new PerspectiveCamera(90, canvasWidth / canvasHeight);  // params: fov, aspect ratio
+	const camera = new PerspectiveCamera(90, aspectRatio);  // params: fov, aspect ratio
 	const renderer = new WebGLRenderer();
-	renderer.setSize(canvasWidth, canvasHeight /*, false */);
-	document.querySelector("#msdBuilder").append(renderer.domElement);
+	// renderer.setSize(canvasWidth, canvasHeight, false);
+	
+	// add canvas to DOM
+	let container = document.querySelector("#msdBuilder");
+	let canvas = renderer.domElement;
+	container.append(canvas);
+
+	// response canvas resolution
+	const resize = () => {
+		let { width, height } = container.getBoundingClientRect();
+		width = Math.min(width, maxCanvasWidth);
+		height = Math.min(height, maxCanvasWidth);
+		
+		let expectedWidth = height * aspectRatio;
+		if (width > expectedWidth)  // too wide, make smaller
+			width = expectedWidth;
+		else                        // too tall, make smaller
+			height = width / aspectRatio;
+		
+		renderer.setSize(width, height, false);
+	};
+	resize();
+	window.addEventListener("resize", resize);
+	
+	// continuously redraw canvas (once per "frames")
 	const loop = new AnimationLoop(renderer, scene, camera);
 	const msdView = new MSDView();
 	scene.add(msdView.objects);
