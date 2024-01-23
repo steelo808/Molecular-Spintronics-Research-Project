@@ -121,7 +121,14 @@ const valueCache = new SavedMap(localStorage, "valueCache");
 
 // ---- Functions: ------------------------------------------------------------
 const forEachDimField = (f) => {
-	for(let id of DEFAULTS.DIM_FIELDS.keys())
+	// order keys:
+	let keys = new Set(DEFAULTS.DIM_FIELDS.keys());
+	let priority_keys = ["FML-depth", "FMR-height"];  // these must be loaded first
+	priority_keys.forEach(k => keys.delete(k));
+	keys = [...priority_keys, ...keys];
+
+	// iterate:
+	for(let id of keys)
 	{
 		const [region, prop] = id.split("-", 2);	
 		const input = document.getElementById(id);

@@ -17,7 +17,7 @@ const {
  * @abstract Override: {@link #_updateGeometry()}, {@link #_updateMaterial()}
  */
 class MSDRegion extends Group {
-	constructor({ x = 0, y = 0, z = 0, width = 1, height = 1, depth = 1, color = 0xffffff, wireframe = true }) {
+	constructor({ x = 0, y = 0, z = 0, width = 1, height = 1, depth = 1, color = 0xffffff, wireframe = true } = {}) {
 		super();
 
 		// @protected - fields
@@ -211,10 +211,10 @@ class MSDView {
 		let FMRType = RegionTypes.length > 2 ? RegionTypes[2] : FMLType;
 		let MolType = RegionTypes.length > 1 ? RegionTypes[1] : FMLType;
 
-		const wireframe = true;  // TODO: set undefinded - use defaults
-		this._FML = new FMLType({ width: 5, height: 4, depth: 10, color: 0x0000FF, wireframe: wireframe });
-		this._FMR = new FMRType({ width: 5, height: 10, depth: 4, color: 0xFF0000, wireframe: wireframe });
-		this._mol = new MolType({ width: 1, height: 4, depth: 4, color: 0xFF00FF, wireframe: wireframe });
+		const wireframe = undefined;  // use defaults
+		this._FML = new FMLType({ color: 0x0000FF, wireframe: wireframe });
+		this._FMR = new FMRType({ color: 0xFF0000, wireframe: wireframe });
+		this._mol = new MolType({ color: 0xFF00FF, wireframe: wireframe });
 
 		this.objects = new Group();
 		this.objects.add(this._FML);
@@ -242,6 +242,26 @@ class MSDView {
 	_ensureX({ bounds }, x) { this._ensureBound(bounds.x, x); }
 	_ensureY({ bounds }, y) { this._ensureBound(bounds.y, y); }
 	_ensureZ({ bounds }, z) { this._ensureBound(bounds.z, z); }
+
+	_replaceView(region_name, view) {
+		let old = this[region_name];
+		
+		// copy some properties from current view to new view
+		console.log(view);
+		view.width = old.width;
+		view.height = old.height;
+		view.depth = old.depth;
+		view.x = old.x;
+		view.y = old.y;
+		view.z = old.z;
+		console.log(view);
+
+		// update Three.js Group
+		this.objects.remove(old);
+		this.objects.add(view);
+
+		this[region_name] = view;
+	}
 
 	get FML() {
 	 const self = this;
@@ -308,7 +328,11 @@ class MSDView {
 
 		get x() { return 0; },
 		get y() { return self._FML.y; },
-		get z() { return self._FML.z; }
+		get z() { return self._FML.z; },
+
+		/** Be careful about modifing the state of returned object! */
+		get view() { return self._FML; },
+		set view(view) { self._replaceView("_FML", view); }
 	 };
 	}
 
@@ -377,7 +401,14 @@ class MSDView {
 
 		get x() { return 0; },
 		get y() { return self._FMR.y; },
-		get z() { return self._FMR.z; }
+		get z() { return self._FMR.z; },
+
+		// TODO: come up with a better abstrction.
+		// 	Seperate MSDRegion geometry (dimension & position info)
+		// 	from materials (style info)??
+		/** Be careful about modifing the state of returned object! */
+		get view() { return self._FMR; },
+		set view(view) { self._replaceView("_FMR", view); }
 	 };
 	}
 
@@ -516,7 +547,11 @@ class MSDView {
 
 		get x() { return 0; },
 		get y() { return self._mol.y; },
-		get z() { return self._mol.z; }
+		get z() { return self._mol.z; },
+
+		/** Be careful about modifing the state of returned object! */
+		get view() { return self._mol; },
+		set view(view) { self._replaceView("_mol", view); }
 	 };
 	}
 

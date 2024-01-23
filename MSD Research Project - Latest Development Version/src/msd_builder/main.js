@@ -24,6 +24,10 @@ const main = () => {
 	// 	else
 	// 		loop.start(update);
 	// });
+
+	// DEBUG: make global for testing
+	window.msdView = msdView;
+	window.camera = camera;
 };
 
 document.addEventListener("DOMContentLoaded", main);
