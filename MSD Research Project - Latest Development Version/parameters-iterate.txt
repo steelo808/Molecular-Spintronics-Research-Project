@@ -1,5 +1,5 @@
-simCount = 50000000
-freq = 1000000
+simCount = 1000000
+freq = 100000
 
 # dimensions of bounding box
 width  = 11
@@ -28,7 +28,7 @@ backR   = 9
 
 
 # Tempurature
-kT = 0.3
+kT = 0.2
 
 # External Magnetic Field
 B = 0 0 0
@@ -47,8 +47,8 @@ Fm = 0
 JL = 1
 JR = 1
 Jm = 1
-JmL = 0.75
-JmR = -0.75
+JmL = 0.5
+JmR = -0.5
 JLR = 0
 
 # exchange coupling between a spin and its local flux
