@@ -1,14 +1,14 @@
 (function() {  // IIFE
 
 // ---- Imports: --------------------------------------------------------------
-const { startRendering, BoxMSDRegion, LatticeMSDRegion } = MSDBuilder.render;
+const { startRendering, BoxMSDRegion, LatticeMSDRegion, YZFaceLatticeMSDRegion } = MSDBuilder.render;
 const { initForm } = MSDBuilder.form;
 
 
 // ---- Main: -----------------------------------------------------------------
 const main = () => {
 	const { camera, msdView, /* DEBUG: */ scene } = startRendering({
-		MSDRegionTypes: [LatticeMSDRegion, BoxMSDRegion],
+		MSDRegionTypes: [LatticeMSDRegion, YZFaceLatticeMSDRegion],
 		// onAnimationFrame: ({ loop }) => {
 		// 	camera.rotation.y += 0.0001 * 10 * loop.deltaTime;
 		// 	console.log(loop.time, loop.deltaTime);

@@ -3,11 +3,11 @@
 // ---- Imports: --------------------------------------------------------------
 const { defineExports } = MSDBuilder.util;
 const {
-	Scene, Camera, PerspectiveCamera, WebGLRenderer,
+	WebGLRenderer, Scene, Camera, PerspectiveCamera,
 	BufferGeometry, BoxGeometry, SphereGeometry,
-	MeshBasicMaterial,
-	Mesh, Group,
-	SceneLoader
+	MeshBasicMaterial, LineBasicMaterial,
+	Group, Mesh, Line,
+	Vector3
 } = Three;
 
 
@@ -151,34 +151,71 @@ class LatticeMSDRegion extends MSDRegion {
 		if (!args.wireframe)  this.wireframe = false;
 	}
 
+	/** @protected */
+	_addNode(x, y, z) {
+		let { r, detail, color, wireframe } = this;
+		let geo = new SphereGeometry(r, detail, detail);
+		let mat = new MeshBasicMaterial({ color, wireframe });
+		let mesh = new Mesh(geo, mat);
+		Object.assign(mesh.position, {x, y, z});
+		this.nodes.add(mesh);
+	}
+
+	/** @private */
+	_addEdge(x0, y0, z0, x1, y1, z1) {
+		let { color } = this;
+		let geo = new BufferGeometry().setFromPoints([
+			new Vector3(x0, y0, z0),
+			new Vector3(x1, y1, z1) ]);
+		let mat = new LineBasicMaterial({ color });
+		this.edges.add(new Line(geo, mat));
+	}
+
+	/** @protected */
+	_addXEdge(x, y, z) {
+		let { r } = this;
+		this._addEdge(x + r, y, z, x + 1 - r, y, z);
+	}
+
+	/** @protected */
+	_addYEdge(x, y, z) {
+		let { r } = this;
+		this._addEdge(x, y + r, z, x, y + 1 - r, z);
+	}
+
+	/** @protected */
+	_addZEdge(x, y, z) {
+		let { r } = this;
+		this._addEdge(x, y, z + r, x, y, z + 1 - r);
+	}
+
 	/** @Override */
 	_updateGeometry() {
 		// TODO: optimize. do we really need to delete all the node meshs?
+		// TODO: I do think this is causing problems at large scale!
 		this.nodes.clear();
+		this.edges.clear();
 
-		let dims = [this.width, this.height, this.depth];
-		let [w, h, d] = dims;
-		let [halfW, halfH, halfD] = dims.map(dim => (dim - 1) / 2);
+		let [halfW, halfH, halfD] = [this.width, this.height, this.depth].map(
+			dim => (dim - 1) / 2 );
 
 		for (let z = -halfD; z <= halfD; z++)
 		for (let y = -halfH; y <= halfH; y++)
 		for (let x = -halfW; x <= halfW; x++) {
-			let geo = new SphereGeometry(this.r, this.detail, this.detail);
-			let mat = new MeshBasicMaterial({
-				color: this.color,
-				wireframe: this.wireframe });
-			let mesh = new Mesh(geo, mat);
-			Object.assign(mesh.position, {x, y, z});
-			this.nodes.add(mesh);
+			this._addNode(x, y, z);
+			if (x + 1 <= halfW)  this._addXEdge(x, y, z);
+			if (y + 1 <= halfH)  this._addYEdge(x, y, z);
+			if (z + 1 <= halfD)  this._addZEdge(x, y, z);
 		}
 	}
 
 	/** @Override */
 	_updateMaterial() {
+		const { color, wireframe } = this;
 		this.nodes.traverse(mesh =>
-			mesh.material = new MeshBasicMaterial({
-				color: this.color,
-				wireframe: this.wireframe }) );
+			mesh.material = new MeshBasicMaterial({ color, wireframe }) );
+		this.edges.traverse(line =>
+			line.material = new LineBasicMaterial({ color }) );
 	}
 
 	set r(r) {
@@ -193,6 +230,87 @@ class LatticeMSDRegion extends MSDRegion {
 
 	get r() { return this._r; }
 	get detail() { return this._detail; }
+}
+
+class YZFaceLatticeMSDRegion extends LatticeMSDRegion {
+	constructor({ front = true, back = true, top = true, bottom = true, ...args } = {}) {
+		super(args);
+		this._front = !!front;
+		this._back = !!back;
+		this._top = !!top;
+		this._bottom = !!bottom;
+	}
+
+	/** @Override */
+	_updateGeometry() {
+		// TODO: optimize. do we really need to delete all the node meshs?
+		// TODO: I do think this is causing problems at large scale!
+		this.nodes.clear();
+		this.edges.clear();
+
+		let { front, back, top, bottom } = this;
+		let [halfW, halfH, halfD] = [this.width, this.height, this.depth].map(
+			dim => (dim - 1) / 2 );
+		
+		let ys =[], zs = [];
+		if (front)   zs.push(-halfD);
+		if (back)    zs.push(halfD);
+		if (top)     ys.push(-halfH);
+		if (bottom)  ys.push(halfH);
+
+		// left leads:
+		if (this.width > 0) {
+			let x = -halfW - 1;
+			for (let z of zs)  // front and back?
+				for (let y = -halfH; y <= halfH; y++)
+					this._addXEdge(x, y, z);
+			for (let y of ys)  // top and bottom?
+				for (let z = -halfD; z <= halfD; z++)
+					this._addXEdge(x, y, z);
+		}
+
+		// nodes and right-neightbor connections (includes right lead)
+		for (let x = -halfW; x <= halfW; x++) {
+			// front and back?
+			for (let z of zs)
+				for (let y = -halfH; y <= halfH; y++) {
+					this._addNode(x, y, z);
+					this._addXEdge(x, y, z);
+				}
+
+			// top and bottom?
+			for (let y of ys)
+				for (let z = -halfD; z <= halfD; z++) {
+					this._addNode(x, y, z);
+					this._addXEdge(x, y, z);
+				}
+		}
+	}
+
+	set front(front) {
+		this._front = !!front;
+		this._updateMaterial();
+	}
+
+	set back(back) {
+		this._back = !!back;
+		this._updateMaterial();
+	}
+
+	set top(top) {
+		this._top = !!top;
+		this._updateMaterial();
+	}
+
+	set bottom(bottom) {
+		this._bottom = !!bottom;
+		this._updateMaterial();
+	}
+
+	get front() { return this._front; }
+	get back() { return this._back; }
+	get top() { return this._top; }
+	get bottom() { return this._bottom; }
 }
 
 /**
@@ -692,7 +810,8 @@ const startRendering = ({
 
 // ---- Exports ---------------------------------------------------------------
 defineExports("MSDBuilder.render", {
-	MSDRegion, BoxMSDRegion, LatticeMSDRegion, MSDView, AnimationLoop,
+	MSDRegion, BoxMSDRegion, LatticeMSDRegion, YZFaceLatticeMSDRegion,
+	MSDView, AnimationLoop,
 	updateCamera, startRendering
 });
 
