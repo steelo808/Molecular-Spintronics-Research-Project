@@ -7,16 +7,16 @@ const { initForm } = MSDBuilder.form;
 
 // ---- Main: -----------------------------------------------------------------
 const main = () => {
-	const { camera, msdView } = startRendering({
+	const { camera, msdView, /* DEBUG: */ scene } = startRendering({
 		MSDRegionTypes: [LatticeMSDRegion, BoxMSDRegion],
-		/* onAnimationFrame: ({ loop }) => console.log(loop.deltaTime) */ });
+		// onAnimationFrame: ({ loop }) => {
+		// 	camera.rotation.y += 0.0001 * 10 * loop.deltaTime;
+		// 	console.log(loop.time, loop.deltaTime);
+ 		// }
+	});
 	msdView.objects.rotation.x = Math.PI / 6;
 	msdView.objects.rotation.y = -Math.PI / 24;
 	initForm({ camera, msdView });
-	// const { camera, renderer, msd: msdView } = startRendering({ onAnimationFrame: ({ loop, msd: msdView }) => {
-	// 	msd.objects.rotation.y += 0.0001 * loop.deltaTime;
-	// 	console.log(loop.time, loop.deltaTime);
-	// } });
 	
 	// renderer.domElement.addEventListener("click", (event) => {
 	// 	if (loop.isRunning)
@@ -26,8 +26,16 @@ const main = () => {
 	// });
 
 	// DEBUG: make global for testing
-	window.msdView = msdView;
-	window.camera = camera;
+	Object.assign(window, { msdView, camera, scene });
+
+	// DEBUG: FBX test
+	const { FBXLoader } = Three;  // import
+	// TODO: need to server FBX files via server because of CORS
+	// console.log(MSDBuilder.assets.TestFBX);
+	// new FBXLoader().load(MSDBuilder.assets.TestFBX, fbx => {
+	// 	console.log("FBX:", fbx);
+	// 	scene.add(fbx);
+	// })
 };
 
 document.addEventListener("DOMContentLoaded", main);

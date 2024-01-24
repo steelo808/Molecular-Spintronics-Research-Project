@@ -686,23 +686,7 @@ const startRendering = ({
 	else
 		loop.start();
 
-	// TODO: testing FBX file (need to import from Addons.js)
-	// new FBXLoader().load("../assets/Test.fbx", object => {
-	// 	scene.add(object);
-	// });
-
 	return _vars;
-	// const update = () => {
-	// 	msd.objects.rotation.y += 0.0001 * loop.deltaTime;
-	// 	console.log(loop.time, loop.deltaTime);
-	// };
-	// loop.start(update);
-	// renderer.domElement.addEventListener("click", (event) => {
-	// 	if (loop.isRunning)
-	// 		loop.stop();
-	// 	else
-	// 		loop.start(update);
-	// });
 };
 
 
