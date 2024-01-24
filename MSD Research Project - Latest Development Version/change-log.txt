@@ -196,11 +196,9 @@ Second bug fix. In MSD::setParameters()
 	the loading of out-of-sync saved paramters.
 (1-11-2024) All parameters now save and load in the correct data type (hopefully.)
 (1-17-2024) Added /reset request to MSD Server.
+(1-24-2024) Added new MSDRegion views. Now dots and lines!
 
-TODO: Fix bug, FML y-offset not saving
-TODO: create UI for interfacing with the Java HTTP MSD Server
 TODO: remove zdog
-TODO: (maybe?) reorganize builder JS files
 TODO: connect mol-builder and MSD-builder (maybe just links?)
 TODO: add bars on Three.js canvas showing current values of non-zero parameters,
 	and hide unused parameters from MSD-builder interface.
@@ -215,3 +213,4 @@ TODO: Fix flux != 0 on mol. that are "turned off"
 TODO: (Potentially Very Hard) Compile-time optimize
 	MSD.setLocalM, MSD.setParameters, and MSD.setMolProto
 	so that they ignore parameters that are not used.
+TODO: MSR (Magnetic Spin Resonance)
