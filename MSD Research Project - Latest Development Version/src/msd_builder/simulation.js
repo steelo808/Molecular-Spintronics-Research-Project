@@ -1,7 +1,13 @@
+/**
+ * @file simulation.js
+ * @brief Contains logic related to comunicating with the MSD Server.
+ * @author Christopher D'Angelo
+ */
+
 (function() {  // IIFE
 
 	// ---- Imports: --------------------------------------------------------------
-const { defineExports, ajax, sleep } = MSDBuilder.util;
+const { AsyncPool, defineExports, ajax, sleep } = MSDBuilder.util;
 
 
 // ---- Classes: --------------------------------------------------------------
@@ -30,49 +36,6 @@ class Vector extends Array {
 	set x(x) { this[0] = x; }
 	set y(y) { this[1] = y; }
 	set z(z) { this[2] = z; }
-}
-
-/**
- * Contains data in a format that can be set to MSD.py for execution.
- * Also stores data send from MSD.py upon completion.
- */
-class Simulation {
-	constructor({
-		width, height, depth,
-		molPosL = null, molPosR = null,
-		topL = null, bottomL = null, frontR = null, backR = null,
-		molLen = null, heightL = null, depthR = null
-	}) {
-		// assign each of the parameters 
-		Object.assign(this, (obj => {
-			for (let prop in obj)
-				if (obj[prop] !== null)
-					obj[prop] = +obj[prop];
-		})({
-			width, height, depth,
-			molPosL, molPosR,
-			topL, bottomL, frontR, backR,
-			molLen, heightL, depthR
-		}));
-		this.parameters = {
-			kT: 0.25,
-			B: Vector(0, 0, 0),
-			SL: 1,   SR: 1,
-			FL: 1,   FR: 1,
-			JL: 1,   JR: 1,   JmL: 1,   JmR: -1,  JLR: 0,
-			Je0L: 0, Je0R: 0,
-			Je1L: 0, Je1R: 0, Je1mL: 0, Je1mR: 0, Je1LR: 0,
-			JeeL: 0, JeeR: 0, JeemL: 0, JeemR: 0, JeeLR: 0,
-			bL: 0,   bR: 0,   bmL: 0,   bmR: 0,   bLR: 0,
-			AL: Vector.zero(), AR: Vector.zero(),
-			DL: Vector.zero(), DR: Vector.zero(), DmL: Vector.zero(), DmR: Vector.zero(), DLR: Vector.zero()
-		};
-		// TODO: ...
-		this.mol = {
-			nodes: [],
-			edges: []
-		};
-	}
 }
 
 /**
@@ -294,6 +257,77 @@ class MSD {
 		return new Promise((resolve, reject) =>
 			this.addFinishListener(resolve, {...options, process}) );
 	}
+}
+
+/**
+ * Base class for running multiple related simulations as a single "group".
+ */
+class MSDGroup {
+	threadCount;  // Max number of threads
+	msds;  // Array of MSD objects
+
+	/** @private */
+	constructor() {}
+
+	/**
+	 * @public
+	 * @param {Number} threadCount - Maximum number of active run requests for this group.
+	 * @param {Array[Object]} createArgs - Array of createArgs
+	 * @return {MSDGroup}
+	 */
+	static async create(threadCount, createArgs) {
+		let group = new MSDGroup();
+
+		group.threadCount = threadCount;
+
+		let len = createArgs.length;
+		group.msds = new Array(len);
+		for (let i = 0; i < len; i++)
+			group.msds[i] = MSD.create(createArgs[i])  // store Promise
+		for (let i = 0; i < len; i++)
+			group.msds[i] = await group.msds[i];  // await for all MSDs to be created
+
+		return group;
+	}
+
+	/**
+	 * @public
+	 * Depth-First: Run to completion this.threadCount MSD simulations.
+	 * Only run new simulations as previous ones finish.
+	 *  
+	 * @param {Array[Object]} runArgs - Array of runArgs
+	 * @param {Number} delay - (optional) Time (in ms) to wait between
+	 * 	HTTP requests while waiting for simulations to finish.
+	 */
+	async runD(runArgs, delay = 1000) {
+		let pool = new AsyncPool(this.threadCount);
+
+		// queue runs
+		for (let msd of this.msds)
+			pool.do(() => msd.run(runArgs[i]));
+
+		await pool.join();  // await for pool to finish all tasks
+	}
+
+	// TODO: can we add and remove from the group after it's constructed and potentially run simulations??
+
+	// TODO: add methods for aggrigating results??
+}
+
+/**
+ * Runs multiple repatitions of the same system (different seeds)
+ * so averages can be calculated.
+ */
+class Ensemble extends MSDGroup {
+	// TODO ...
+}
+
+/**
+ * Runs multiple repatitions of the system with some variables controlled
+ * (i.e., constant), and some independant (i.e., varied) to study their effect.
+ */
+class ExperimentalGroup extends MSDGroup {
+	// TODO ...
 }
 
 

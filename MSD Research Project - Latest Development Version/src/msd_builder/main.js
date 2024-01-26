@@ -1,21 +1,27 @@
+/**
+ * @file main.js
+ * @brief Entry point. Called when page loads.
+ * @author Christopher D'Angelo
+ */
+
 (function() {  // IIFE
 
 // ---- Imports: --------------------------------------------------------------
-const { startRendering, BoxMSDRegion, LatticeMSDRegion, YZFaceLatticeMSDRegion } = MSDBuilder.render;
+const { startRendering, BoxRegion, LatticeRegion, OptimizedLatticeRegion, YZFaceLatticeRegion } = MSDBuilder.render;
 const { initForm } = MSDBuilder.form;
 
 
 // ---- Main: -----------------------------------------------------------------
 const main = () => {
 	const { camera, msdView, /* DEBUG: */ scene } = startRendering({
-		MSDRegionTypes: [LatticeMSDRegion, YZFaceLatticeMSDRegion],
+		MSDRegionTypes: [OptimizedLatticeRegion, YZFaceLatticeRegion],
 		// onAnimationFrame: ({ loop }) => {
 		// 	camera.rotation.y += 0.0001 * 10 * loop.deltaTime;
 		// 	console.log(loop.time, loop.deltaTime);
  		// }
 	});
-	msdView.objects.rotation.x = Math.PI / 6;
-	msdView.objects.rotation.y = -Math.PI / 24;
+	msdView.rotation.x = Math.PI / 6;
+	msdView.rotation.y = -Math.PI / 24;
 	initForm({ camera, msdView });
 	
 	// renderer.domElement.addEventListener("click", (event) => {

@@ -1,7 +1,13 @@
+/**
+ * @file render.js
+ * @brief Contains code which controls the 3D rendering.
+ * @author Christopher D'Angelo
+ */
+
 (function() {  // IEFF
 
 // ---- Imports: --------------------------------------------------------------
-const { defineExports } = MSDBuilder.util;
+const { Map2, defineExports } = MSDBuilder.util;
 const {
 	WebGLRenderer, Scene, Camera, PerspectiveCamera,
 	BufferGeometry, BoxGeometry, SphereGeometry,
@@ -52,6 +58,14 @@ class MSDRegion extends Group {
 	 */
 	_updateMaterial() {
 		throw new Error("Unimplemented method: MSDRegion._updateMaterial()");
+	}
+
+	/**
+	 * @public
+	 * Should be overriden in subclass.
+	 */
+	viewDetailedEnergy(state) {
+		console.warn("Unimlemented method: MSD.viewDetailedEnergy(state)");
 	}
 
 	set x(x) {
@@ -110,7 +124,7 @@ class MSDRegion extends Group {
 /**
  * Displays the region as a single box with width, height, and depth.
  */
-class BoxMSDRegion extends MSDRegion {
+class BoxRegion extends MSDRegion {
 	constructor(args) {
 		super(args);
 
@@ -136,7 +150,7 @@ class BoxMSDRegion extends MSDRegion {
 	}
 }
 
-class LatticeMSDRegion extends MSDRegion {
+class LatticeRegion extends MSDRegion {
 	constructor({r = 1/6, detail = 8, ...args}) {
 		super(args);
 		this._r = r;
@@ -191,8 +205,6 @@ class LatticeMSDRegion extends MSDRegion {
 
 	/** @Override */
 	_updateGeometry() {
-		// TODO: optimize. do we really need to delete all the node meshs?
-		// TODO: I do think this is causing problems at large scale!
 		this.nodes.clear();
 		this.edges.clear();
 
@@ -232,7 +244,303 @@ class LatticeMSDRegion extends MSDRegion {
 	get detail() { return this._detail; }
 }
 
-class YZFaceLatticeMSDRegion extends LatticeMSDRegion {
+// TODO: fix
+class OptimizedLatticeRegion extends MSDRegion {
+	constructor({r = 1/6, detail = 8, ...args} = {}) {
+		super(args);
+		this._r = r;
+		this._detail = detail;  // TODO: better name? (Controls polygon count)
+
+		this.nodeGroup = new Group();
+		this.edgeGroup = new Group();
+		this.add(this.nodeGroup, this.edgeGroup);  // add to this Three.js Group
+		
+		// create inital nodes and edges
+		this.nodeMap = new Map2();   // pack(i, j, k) -> Mesh
+		this.xEdgeMap = new Map2();  // pack(i, j, k) -> Mesh
+		this.yEdgeMap = new Map2();  // pack(i, j, k) -> Mesh
+		this.zEdgeMap = new Map2();  // pack(i, j, k) -> Mesh
+
+		// create nodes and edges 
+		const pos = this.pos();  // function (i, j, k) -> [x, y, z]
+		for (let [i, j, k] of this.indices()) {
+			let idx = OptimizedLatticeRegion.key(i, j, k);
+			let [x, y, z] = pos(i, j, k);
+
+			// create nodes
+			this.nodeMap.set(idx, this._addNode(x, y, z));
+
+			// create edges
+			if (i + 1 < this.width)   this.xEdgeMap.set(idx, this._addXEdge(x, y, z));
+			if (j + 1 < this.height)  this.yEdgeMap.set(idx, this._addYEdge(x, y, z));
+			if (k + 1 < this.depth)   this.zEdgeMap.set(idx, this._addZEdge(x, y, z));
+		}
+		
+		// overriding defaults
+		if (!args.wireframe)  this.wireframe = false;
+	}
+
+	/** @private */
+	static key(i, j, k) { return `${i},${j},${k}`; }
+
+	/**
+	 * @private
+	 * @return {Fucntion} The returned function will convert indices to [x,y,z]
+	 * coordinates based on <code>this</code> Region's current dimensions.
+	 */
+	static pos(width, height, depth) {
+		const [halfW, halfH, halfD] = [width, height, depth].map(dim => (dim - 1) / 2);
+		return (i, j, k) => [i - halfW, j - halfH, k - halfD];
+	}
+
+	/** @private */
+	pos() {
+		return OptimizedLatticeRegion.pos(this.width, this.height, this.depth);
+	}
+
+	/** @private */
+	static *indices(i_start, i_end, j_start, j_end, k_start, k_end) {
+		for (let k = k_start; k < k_end; k++)
+		for (let j = j_start; j < j_end; j++)
+		for (let i = i_start; i < i_end; i++)
+			yield [i, j, k];
+	}
+
+	/** @private */
+	indices() {
+		return OptimizedLatticeRegion.indices(0, this.width, 0, this.height, 0, this.depth);
+	}
+
+	/** @protected */
+	_addNode(x, y, z) {
+		let { r, detail, color, wireframe } = this;
+		let geo = new SphereGeometry(r, detail, detail);
+		let mat = new MeshBasicMaterial({ color, wireframe });
+		let mesh = new Mesh(geo, mat);
+		Object.assign(mesh.position, {x, y, z});
+		this.nodeGroup.add(mesh);
+		return mesh;
+	}
+
+	/** @private */
+	_addEdge(x, y, z, dx, dy, dz) {
+		let { color } = this;
+		let geo = new BufferGeometry().setFromPoints([
+			new Vector3(0, 0, 0),
+			new Vector3(dx, dy, dz) ]);
+		let mat = new LineBasicMaterial({ color });
+		let mesh = new Line(geo, mat);
+		Object.assign(mesh.position, { x, y, z });
+		this.edgeGroup.add(mesh);
+		return mesh;
+	}
+
+	/** @protected */
+	_addXEdge(x, y, z) {
+		let { r } = this;
+		return this._addEdge(x + r, y, z, 1 - 2*r, 0, 0);
+	}
+
+	/** @protected */
+	_addYEdge(x, y, z) {
+		let { r } = this;
+		return this._addEdge(x, y + r, z, 0, 1 - 2*r, 0);
+	}
+
+	/** @protected */
+	_addZEdge(x, y, z) {
+		let { r } = this;
+		return this._addEdge(x, y, z + r, 0, 0, 1 - 2*r);
+	}
+
+	/**
+	 * @Override
+	 * Just updates the positions after adding or removing nodes.
+	 */
+	_updateGeometry() { /* empty */ }
+
+	/** @Override */
+	_updateMaterial() {
+		const { color, wireframe } = this;
+		this.nodeGroup.traverse(mesh =>
+			mesh.material = new MeshBasicMaterial({ color, wireframe }) );
+		this.edgeGroup.traverse(line =>
+			line.material = new LineBasicMaterial({ color }) );
+	}
+
+	/**
+	 * @public
+	 * @Override
+	 * @param {Object} state - The state object from one MSD.record.get(index)
+	 */
+	viewDetailedEnergy(state) {
+		// TODO ...
+	}
+
+	/** @private */
+	_updatePositions(pos = this.pos(), width = this.width, height = this.height, depth = this.depth) {
+		for (let [i, j, k] of OptimizedLatticeRegion.indices(0, width, 0, height, 0, depth)) {
+			let idx = OptimizedLatticeRegion.key(i, j, k);
+			let [x, y, z] = pos(i, j, k);
+			Object.assign(this.nodeMap.get(idx).position, {x, y, z});
+			if (i + 1 < width)   Object.assign(this.xEdgeMap.get(idx), {x: x+this.r, y, z});
+			if (j + 1 < height)  Object.assign(this.yEdgeMap.get(idx), {x, y: y+this.r, z});
+			if (k + 1 < depth)   Object.assign(this.zEdgeMap.get(idx), {x, y, z: z+this.r});
+		}
+	}
+
+	/** @Override */
+	set width(width) {
+		if (width === this.width)
+			return;  // do nothing
+
+		const dim = [width, this.height, this.depth];
+		const pos = OptimizedLatticeRegion.pos(...dim);  // function (i, j, k) -> [x, y, z]
+		
+		if (width > this.width) {
+			// growing
+			this._updatePositions(pos);
+
+			for (let k = 0; k < this.depth; k++)
+			for (let j = 0; j < this.height; j++)
+			for (let i = this.width; i < width; i++) {
+				let idx = OptimizedLatticeRegion.key(i, j, k);
+				let [x, y, z] = pos(i, j, k);
+
+				// create new node
+				this.nodeMap.set(idx, this._addNode(x, y, z));
+
+				// create new edges
+				if (i > 0)  this.xEdgeMap.set(OptimizedLatticeRegion.key(i - 1, j, k), this._addXEdge(...pos(i - 1, j, k)) );
+				if (j + 1 < this.height)  this.yEdgeMap.set(idx, this._addYEdge(x, y, z));
+				if (k + 1 < this.depth)   this.zEdgeMap.set(idx, this._addZEdge(x, y, z));
+			}
+		} else {
+			// shrinking
+			this._updatePositions(pos, ...dim);
+
+			for (let k = 0; k < this.depth; k++)
+			for (let j = 0; j < this.height; j++)
+			for (let i = this.width - 1; i >= width; i--) {
+				let idx = OptimizedLatticeRegion.key(i, j, k);
+				this.nodeMap.remove(idx).removeFromParent();
+				if (i > 0)  this.xEdgeMap.remove(OptimizedLatticeRegion.key(i - 1, j, k)).removeFromParent();
+				if (j + 1 < this.height)  this.yEdgeMap.remove(idx).removeFromParent();
+				if (k + 1 < this.depth)   this.zEdgeMap.remove(idx).removeFromParent();
+			}
+		}
+
+		super.width = width;
+	}
+
+	/** @Override */
+	set height(height) {
+		if (height === this.height)
+			return;  // do nothing
+
+		const dim = [this.width, height, this.depth];
+		const pos = OptimizedLatticeRegion.pos(...dim);  // function (i, j, k) -> [x, y, z]
+		
+		if (height > this.height) {
+			// growing
+			this._updatePositions(pos);
+
+			for (let k = 0; k < this.depth; k++)
+			for (let j = this.height; j < height; j++)
+			for (let i = 0; i < this.width; i++) {
+				let idx = OptimizedLatticeRegion.key(i, j, k);
+				let [x, y, z] = pos(i, j, k);
+
+				// create new node
+				this.nodeMap.set(idx, this._addNode(x, y, z));
+
+				// create new edges
+				if (i + 1 < this.width)  this.xEdgeMap.set(idx, this._addXEdge(x, y, z));
+				if (j > 0) this.yEdgeMap.set(OptimizedLatticeRegion.key(i, j - 1, k), this._addYEdge(...pos(i, j - 1, k)) );
+				if (k + 1 < this.depth)  this.zEdgeMap.set(idx, this._addZEdge(x, y, z));
+			}
+		} else {
+			// shrinking
+			this._updatePositions(pos, ...dim);
+			
+			for (let k = 0; k < this.depth; k++)
+			for (let j = this.heigh - 1; j >= height; j--)
+			for (let i = 0; i < this.width; i++) {
+				let idx = OptimizedLatticeRegion.key(i, j, k);
+				this.nodeMap.remove(idx).removeFromParent();
+				if (i + 1 < this.width)  this.xEdgeMap.remove(idx).removeFromParent();
+				if (j > 0)  this.yEdgeMap.remove(OptimizedLatticeRegion.key(i, j - 1, k)).removeFromParent();
+				if (k + 1 < this.depth)  this.zEdgeMap.remove(idx).removeFromParent();
+			}
+		}
+
+		super.height = height;
+	}
+
+	/** @Override */
+	set depth(depth) {
+		if (depth === this.depth)
+			return;  // do nothing
+
+		const dim = [this.width, this.height, depth];
+		const pos = OptimizedLatticeRegion.pos(...dim);  // function (i, j, k) -> [x, y, z]
+		
+		if (depth > this.depth) {
+			// growing
+			this._updatePositions(pos);
+
+			for (let k = this.depth; k < depth; k++)
+			for (let j = 0; j < this.height; j++)
+			for (let i = 0; i < this.width; i++) {
+				let idx = OptimizedLatticeRegion.key(i, j, k);
+				let [x, y, z] = pos(i, j, k);
+
+				// create new node
+				this.nodeMap.set(idx, this._addNode(x, y, z));
+
+				// create new edges
+				if (i + 1 < this.width)   this.xEdgeMap.set(idx, this._addXEdge(x, y, z));
+				if (j + 1 < this.height)  this.yEdgeMap.set(idx, this._addYEdge(x, y, z));
+				if (k > 0)  this.zEdgeMap.set(OptimizedLatticeRegion.key(i, j, k - 1), this._addZEdge(...pos(i, j, k - 1)) );
+				
+			}
+		} else {
+			// shrinking
+			this._updatePositions(pos, ...dim);
+
+			for (let k = this.depth - 1; k >= depth; k--)
+			for (let j = 0; j < this.height; j++)
+			for (let i = 0; i < this.width; i++) {
+				let idx = OptimizedLatticeRegion.key(i, j, k);
+				this.nodeMap.remove(idx).removeFromParent();
+				if (i + 1 < this.width)   this.xEdgeMap.remove(idx).removeFromParent();
+				if (j + 1 < this.height)  this.yEdgeMap.remove(idx).removeFromParent();
+				if (k > 0)  this.zEdgeMap.remove(OptimizedLatticeRegion.key(i, j, k - 1)).removeFromParent();
+			}
+		}
+
+		super.depth = depth;
+	}
+
+	get width() { return super.width; }
+	get height() { return super.height; }
+	get depth() { return super.depth; }	
+
+	set r(r) {
+		this._r = r;
+		// this._updateGeometry();  // TODO: ....
+	}
+
+	set detail(detail) {
+		this._detail = detail;
+		// this._updateGeometry();  // TODO: ....
+	}
+
+	get r() { return this._r; }
+	get detail() { return this._detail; }
+}
+
+class YZFaceLatticeRegion extends LatticeRegion {
 	constructor({ front = true, back = true, top = true, bottom = true, ...args } = {}) {
 		super(args);
 		this._front = !!front;
@@ -316,7 +624,8 @@ class YZFaceLatticeMSDRegion extends LatticeMSDRegion {
 /**
  * GUI logic for 3D redering an MSD.
  */
-class MSDView {
+class MSDView extends Group {
+
 	/**
 	 * @param {...<? extends MSDRegion>} RegionTypes
 	 * 	(optional) one to three region types (classes) to use for
@@ -325,7 +634,9 @@ class MSDView {
 	// TODO: what is the correct interface for this so the called can configure some of the parameters??
 	// Maybe a getter of each MSDRegion (view) where they can edit the properties?
 	constructor(...RegionTypes) {
-		let FMLType = RegionTypes.length > 0 ? RegionTypes[0] : BoxMSDRegion;
+		super();
+
+		let FMLType = RegionTypes.length > 0 ? RegionTypes[0] : BoxRegion;
 		let FMRType = RegionTypes.length > 2 ? RegionTypes[2] : FMLType;
 		let MolType = RegionTypes.length > 1 ? RegionTypes[1] : FMLType;
 
@@ -334,10 +645,9 @@ class MSDView {
 		this._FMR = new FMRType({ color: 0xFF0000, wireframe: wireframe });
 		this._mol = new MolType({ color: 0xFF00FF, wireframe: wireframe });
 
-		this.objects = new Group();
-		this.objects.add(this._FML);
-		this.objects.add(this._FMR);
-		this.objects.add(this._mol);
+		this.add(this._FML);
+		this.add(this._FMR);
+		this.add(this._mol);
 
 		this.FML._updateX();
 		this.FMR._updateX();
@@ -365,18 +675,16 @@ class MSDView {
 		let old = this[region_name];
 		
 		// copy some properties from current view to new view
-		console.log(view);
 		view.width = old.width;
 		view.height = old.height;
 		view.depth = old.depth;
 		view.x = old.x;
 		view.y = old.y;
 		view.z = old.z;
-		console.log(view);
-
+		
 		// update Three.js Group
-		this.objects.remove(old);
-		this.objects.add(view);
+		this.remove(old);
+		this.add(view);
 
 		this[region_name] = view;
 	}
@@ -680,7 +988,7 @@ class MSDView {
 	get width() { return this.FML.width + this._mol.width + this._FMR.width; }
 	get height() { return this.FMR.height; }
 	get depth() { return this.FML.depth; }
-};
+}
 
 class AnimationLoop {
 	/**
@@ -796,7 +1104,7 @@ const startRendering = ({
 	// continuously redraw canvas (once per "frames")
 	const loop = new AnimationLoop(renderer, scene, camera);
 	const msdView = new MSDView(...MSDRegionTypes);
-	scene.add(msdView.objects);
+	scene.add(msdView);
 	const _vars = { scene, camera, renderer, loop, msdView };
 
 	if (onAnimationFrame)
@@ -810,7 +1118,7 @@ const startRendering = ({
 
 // ---- Exports ---------------------------------------------------------------
 defineExports("MSDBuilder.render", {
-	MSDRegion, BoxMSDRegion, LatticeMSDRegion, YZFaceLatticeMSDRegion,
+	MSDRegion, BoxRegion, LatticeRegion, OptimizedLatticeRegion, YZFaceLatticeRegion,
 	MSDView, AnimationLoop,
 	updateCamera, startRendering
 });
