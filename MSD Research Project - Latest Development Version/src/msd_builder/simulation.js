@@ -86,7 +86,7 @@ class MSD {
 	/**
 	 * @public
 	 */
-	static async create(args, server = "http://localhost:8080") {
+	static async create(args, server = "http://localhost:8082") {
 		let msd = new MSD(server);
 		await msd.request("POST", "/msd", args)
 			.then(({ id }) => msd.id = id);

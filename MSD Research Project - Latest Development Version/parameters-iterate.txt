@@ -9,10 +9,10 @@ depth  = 10
 # boundaries which define the exact dimensions of FM_L, FM_R, and mol.
 molPosL = 5
 molPosR = 5
-topL    = 0
-bottomL = 9
-frontR  = 0
-backR   = 9
+topL    = 3
+bottomL = 6
+frontR  = 3
+backR   = 6
 
 # turn off front edge of mol.
 # [5 11 10] = 0
@@ -28,7 +28,7 @@ backR   = 9
 
 
 # Tempurature
-kT = 0.2
+kT = 0.1
 
 # External Magnetic Field
 B = 0 0 0
@@ -47,8 +47,8 @@ Fm = 0
 JL = 1
 JR = 1
 Jm = 1
-JmL = 0.5
-JmR = -0.5
+JmL = 1
+JmR = -1
 JLR = 0
 
 # exchange coupling between a spin and its local flux
