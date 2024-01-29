@@ -206,6 +206,8 @@ const syncHTMLDimFields = (msd) => {
 };
 
 /**
+ * Replace sections of iterate-parameters TXT file template with given (actual) values.
+ * TODO: maybe split this into two functions?
  * @author Robert J.
  */
 function replaceValues(template, name, value, x, y, z) {
@@ -221,6 +223,9 @@ function replaceValues(template, name, value, x, y, z) {
 
 
 /**
+ * Format current GUI and DOM info into iterate-parameters file TXT format.
+ * @param {MSDView} msd
+ * @return {String}
  * @author Robert J.
  */
 function loadFileContent(msd) {
@@ -342,6 +347,9 @@ DLR = 0.0002 0 0
 }
 
 /**
+ * TODO: split into scalar and Vector versions.
+ * Take DOM <input> value string and store into JSON field. (parse)
+ *  
  * @author Robert J.
  */
 function replaceJSONValues(json, id, name, x, y, z) {
@@ -354,6 +362,9 @@ function replaceJSONValues(json, id, name, x, y, z) {
   }
 
 /**
+ * Takes info from GUI and DOM.
+ * Packages as object both to send to server and save as file.
+ * 
  * @param {MSDView} msd
  * @return {Object} the form data
  * @author Robert J.
@@ -411,13 +422,19 @@ function buildJSON(msd) {
 	return json;
 }
 
-// Robert J.
+/**
+ * Parse a line from parameters file.
+ * @author Robert J.
+ */
 function getValues(line) {
 	[id, value] = line.split('=');
 	return [id, parseFloat(value)];
 }
 
-// Robert J.
+/**
+ * @author Robert J.
+ * @params {String} iterate parameters files.
+ */
 function importFileContent(content) {
 
 	// send to workload msd-builder	
@@ -529,6 +546,7 @@ function importFileContent(content) {
 }
 
 // Returns spherical coordinates in radians
+// Robert K.
 function rectToSph(x, y, z) {
 	rho = Math.sqrt(x**2+y**2+z**2)
 	theta = isNaN(Math.atan2(y,x)) ? 0 : Math.atan2(y,x);
@@ -537,6 +555,12 @@ function rectToSph(x, y, z) {
 	return [rho, theta, phi]
 }
 
+/**
+ * Build first row of iterate-out CSV file: headers, and parameters.
+ * @param {Object} json State of {@link MSD} (only parameters??)
+ * @return {String} first line of CSV file, with \n
+ * @author Robert J.
+ */
 function initCSV(json) {
 	row_results = ""
 
@@ -570,13 +594,18 @@ function initCSV(json) {
 			row_results += ","
 		}
 	}
-		row_results += ",msd_version = 6.2a"
+		row_results += ",msd_version = 6.2a"  // TODO: update server so we can get this from server
 		row_results += "\n"
 		
 		row_results = row_results.replace("seed = undefined", "seed = unique");
 	return row_results
 }
 
+/**
+ * @param {Object} row_data - .results from {@link MSD} state (record) object
+ * @return a single row of iterate-out CSV file
+ * @author Robert J.
+ */
 function buildCSVRow(row_data) {
 	row_results = ""
 
@@ -605,6 +634,12 @@ function buildCSVRow(row_data) {
 	return row_results
 }
 
+/**
+ * @param {Object} msd - .msd field from (@link MSD) state (record) object.
+ * @param {Number} index - which msd location we are outputing
+ * @return {String} partial CSV row (only "snapshot")
+ * @authro Robert J.
+ */
 function buildMSDIterations(msd, index) {
 	pos = msd[index].pos
 	localM = msd[index].localM
