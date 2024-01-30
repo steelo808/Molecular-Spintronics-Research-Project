@@ -7,7 +7,7 @@
 (function() {  // IIFE
 
 // ---- Imports: --------------------------------------------------------------
-// (None)
+const { PI, min, sqrt, sin, cos, asin, atan2 } = Math;
 
 
 // ---- Classes: ------------------------------------------------------------
@@ -40,7 +40,7 @@ class AsyncPool {
 
 	/** @public */
 	get availble() {
-		return Math.min(this.size - this.count, this.queue.length);
+		return min(this.size - this.count, this.queue.length);
 	}
 
 	/** @private */
@@ -100,6 +100,130 @@ class Map2 extends Map {
 		this.delete(key);
 		return value;
 	}
+}
+
+/**
+ * A {@link Map} that persists through a {@link Storage} object (e.g. localStorage).
+ */
+class SavedMap extends Map2 {
+	/**
+	 * @param {Storage} storage Either localStorage or sessionStorage, or similar object.
+	 * @param {String} name Key for saving this object in given storage.
+	 * @param {Object} obj
+	 * @param {Boolean} obj.autoSave - should the map automatically save when updated?
+	 * @param {Boolean} obj.autoLoad - should the map automatically load when constructed?
+	 * @param {...Object} args - Arguments to pass to the parent {@link Map} constructor.
+	 */ 
+	constructor(storage, name, { autoSave = true, autoLoad = true } = {}, ...args) {
+		super(...args);
+		this.storage = storage;
+		this.name = name;
+		this.autoSave = autoSave;
+		if (autoLoad)
+			this.load();
+	}
+
+	save() {
+		this.storage.setItem(this.name, JSON.stringify([...this]));
+	}
+
+	load() {
+		const map = this.storage.getItem(this.name);
+		if (map !== null)
+			JSON.parse(map)?.forEach(([ key, value ]) => { super.set(key, value) });
+	}
+
+	clear() {
+		super.clear();
+		if (this.autoSave)
+			this.save();
+	}
+
+	set(key, value) {
+		super.set(key, value);
+		if (this.autoSave)
+			this.save();
+	}
+
+	delete(key) {
+		super.delete(key);
+		if (this.autoSave)
+			this.save();
+	}
+}
+
+class Vector extends Array {
+	/**
+	 * @param {...Number} xyz - Contains 3 elements: [x, y, z].
+	 * 	Extra elements will get stored, but ignored otherwise.
+	 *  Missing elements will be filled with 0.
+	 *  All parameters will be converted to the Number type.
+	 */
+	constructor(...xyz) {
+		super(...xyz);
+		for (let i = 0; i < xyz.length; i++)
+			this[i] = +this[i];
+		while (this.length < 3)
+			this.push(0);
+	}
+
+	static cylindricalForm(r, theta, z = 0) {
+		return new Vector(r * cos(theta), r * sin(theta), z);
+	}
+
+	static sphericalForm(rho, theta, phi) {
+		return new Vector.cylindricalForm(rho * cos(phi), theta, rho * sin(phi));
+	}
+
+	static zero = () => new Vector();
+	static i = () => new Vector(1, 0, 0);
+	static j = () => new Vector(0, 1, 0);
+	static k = () => new Vector(0, 0, 1);
+
+	get x() { return this[0]; }
+	get y() { return this[1]; }
+	get z() { return this[2]; }
+	set x(x) { this[0] = x; }
+	set y(y) { this[1] = y; }
+	set z(z) { this[2] = z; }
+
+	/**
+	 * @returns {Array} [rho, theta, phi] in radians
+	 * @author Robert J.
+	 * @author Christopher D'Angelo
+	 */
+	toSphericalForm() {
+		let {x, y, z} = this;
+		let rho = sqrt(x*x + y*y + z*z);
+		let theta = atan2(y, x);
+		let phi = rho != 0 ? asin(z / rho) : 0;
+		return [rho, theta, phi]
+	}
+
+	/** @private */
+	static _convertAngles(sphericalForm, factor) {
+		sphericalForm[1] *= factor;
+		sphericalForm[2] *= factor;
+		return sphericalForm;
+	}
+
+	/**
+	 * Converts (in place) the theta and phi elements of a sphericalForm Vector Array
+	 * from radians to degrees. 
+	 * 
+	 * @param {Array} sphericalForm - [rho, theta, phi] in radians 
+	 * @return {Array} [rho, theta phi] in degrees
+	 */
+	static toDegrees = (sphericalForm) => Vector._convertAngles(sphericalForm, 180 / PI);
+
+	/**
+	 * Converts (in place) the theta and phi elements of a sphericalForm Vector Array
+	 * from degrees to radians. 
+	 * 
+	 * @param {Array} sphericalForm - [rho, theta, phi] in degrees 
+	 * @return {Array} [rho, theta phi] in radians
+	 */
+	static toRadians = (sphericalForm) => Vector._convertAngles(sphericalForm, PI / 180);
 }
 
 // ---- Functions: ------------------------------------------------------------
@@ -162,6 +286,8 @@ function sleep(ms) {
 }
 
 // ---- Exports: --------------------------------------------------------------
-defineExports("MSDBuilder.util", { AsyncPool, Map2, defineExports, ajax, sleep });
+defineExports("MSDBuilder.util", {
+	AsyncPool, Map2, SavedMap, Vector,
+	defineExports, ajax, sleep });
 
 })();  // end IIFE

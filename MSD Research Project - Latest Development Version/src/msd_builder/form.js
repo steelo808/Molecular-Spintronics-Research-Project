@@ -9,54 +9,12 @@
 (function() {  // IIEF
 
 // ---- Imports: --------------------------------------------------------------
-const { defineExports } = MSDBuilder.util;
+const { defineExports, SavedMap, Vector } = MSDBuilder.util;
 const { updateCamera } = MSDBuilder.render;
 const { MSD, iterate } = MSDBuilder.simulation;
 
 
 // ---- Classes: --------------------------------------------------------------
-class SavedMap extends Map {
-	/**
-	 * @param {Storage} storage Either localStorage or sessionStorage, or similar object.
-	 * @param {String} name Key for saving this object in given storage.
-	 */ 
-	constructor(storage, name, { autoSave = true, autoLoad = true } = {}) {
-		super();
-		this.storage = storage;
-		this.name = name;
-		this.autoSave = autoSave;
-		if (autoLoad)
-			this.load();
-	}
-
-	save() {
-		this.storage.setItem(this.name, JSON.stringify([...this]));
-	}
-
-	load() {
-		const map = this.storage.getItem(this.name);
-		if (map !== null)
-			JSON.parse(map)?.forEach(([ key, value ]) => { super.set(key, value) });
-	}
-
-	clear() {
-		super.clear();
-		if (this.autoSave)
-			this.save();
-	}
-
-	set(key, value) {
-		super.set(key, value);
-		if (this.autoSave)
-			this.save();
-	}
-
-	delete(key) {
-		super.delete(key);
-		if (this.autoSave)
-			this.save();
-	}
-};
 
 
 // ---- Globals: --------------------------------------------------------------
@@ -548,11 +506,7 @@ function importFileContent(content) {
 // Returns spherical coordinates in radians
 // Robert K.
 function rectToSph(x, y, z) {
-	rho = Math.sqrt(x**2+y**2+z**2)
-	theta = isNaN(Math.atan2(y,x)) ? 0 : Math.atan2(y,x);
-	phi = isNaN(Math.asin(z/rho)) ? 0 : Math.asin(z/rho);	
-
-	return [rho, theta, phi]
+	return new Vector(x, y, z).toSphericalForm();
 }
 
 /**

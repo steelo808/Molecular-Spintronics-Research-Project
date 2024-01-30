@@ -11,6 +11,8 @@
  * @author Christopher D'Angelo
  */
 
+(() => {  // IIFE
+
 const { defineExports } = MSDBuilder.util;
 
 let assets = {
@@ -22,3 +24,5 @@ for (let key in assets)
 	assets[key] = `data:@file/octet-stream;base64,${assets[key]}`;
 
 defineExports("MSDBuilder.assets", assets);  // default export
+
+})();  // end IIFE
