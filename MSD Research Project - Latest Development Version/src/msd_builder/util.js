@@ -7,7 +7,7 @@
 (function() {  // IIFE
 
 // ---- Imports: --------------------------------------------------------------
-const { PI, min, sqrt, sin, cos, asin, atan2 } = Math;
+const { PI, min, max, sqrt, sin, cos, asin, atan2 } = Math;
 
 
 // ---- Classes: ------------------------------------------------------------
@@ -187,6 +187,37 @@ class Vector extends Array {
 	set y(y) { this[1] = y; }
 	set z(z) { this[2] = z; }
 
+	fuse(v, f) {
+		for (let i = 0; i < v.length; i++)
+			this[i] = f(this[i], v[i]);  // get this[i] will be undefined for all i >= this.length
+		return this;
+	}
+
+	zip(v, f = (a, b) => [a, b]) {
+		let len = max(this.length, v.length);
+		let result = [];
+		for (let i = 0; i < len; i++)
+			result[i] = f(this[i], v[i]);
+		return result;
+	}
+
+	zipv = (v, f) => new Vector(...this.zipa(v, f));
+
+	// modify "this"
+	add = v => this.fuse(v, (a, b) => a + b);
+	subtract = v => this.fuse(v, (a, b) => a - b);
+	multiply = k => this.fuse(null, a => a * k);  // scalar product
+	normalize = () => this.mul(1 / this.norm());
+
+	// doesn't modify "this"
+	getSum =        v => this.zipv(v, (a, b) => a + b);
+	getDifference = v => this.zipv(v, (a, b) => a - b);
+	getProduct =    k => this.zipv(null, a => a * k);
+	getProjection = v => v.getProduct(this.dotProduct(v) / v.normSq());
+	dotProduct =    v => this.zipv(v, (a, b) => a * b).reduce((sum, x) => sum + x);
+	normSq =        () => this.reduce((sum, x) => sum + x*x, 0);
+	norm =          () => sqrt(this.norm());
+
 	/**
 	 * @returns {Array} [rho, theta, phi] in radians
 	 * @author Robert J.
@@ -285,9 +316,17 @@ function sleep(ms) {
 	return promise;
 }
 
+function interpolate(a, b, t, f) {
+	return a + (b - a) * f(t);
+}
+
+function lerp(a, b, t) {
+	return a + (b - a) * t;
+}
+
 // ---- Exports: --------------------------------------------------------------
 defineExports("MSDBuilder.util", {
 	AsyncPool, Map2, SavedMap, Vector,
-	defineExports, ajax, sleep });
+	defineExports, ajax, sleep, interpolate, lerp });
 
 })();  // end IIFE
