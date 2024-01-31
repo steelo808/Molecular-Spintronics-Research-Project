@@ -7,7 +7,8 @@
 (function() {  // IEFF
 
 // ---- Imports: --------------------------------------------------------------
-const { Map2, defineExports } = MSDBuilder.util;
+const { sqrt } = Math;
+const { Map2, defineExports, interpolate, lerp } = MSDBuilder.util;
 const {
 	WebGLRenderer, Scene, Camera, PerspectiveCamera,
 	BufferGeometry, BoxGeometry, SphereGeometry,
@@ -58,14 +59,6 @@ class MSDRegion extends Group {
 	 */
 	_updateMaterial() {
 		throw new Error("Unimplemented method: MSDRegion._updateMaterial()");
-	}
-
-	/**
-	 * @public
-	 * Should be overriden in subclass.
-	 */
-	viewDetailedEnergy(state) {
-		console.warn("Unimlemented method: MSD.viewDetailedEnergy(state)");
 	}
 
 	set x(x) {
@@ -119,6 +112,14 @@ class MSDRegion extends Group {
 	get depth() { return this._depth; }
 	get color() { return this._color; }
 	get wireframe() { return this._wireframe; }
+
+	/**
+	 * @public
+	 * Should be overriden in subclass.
+	 */
+	viewDetailedEnergy(data, ...args) {
+		console.warn("Unimlemented method: MSD.viewDetailedEnergy(data, ...args)");
+	}
 }
 
 /**
@@ -150,7 +151,8 @@ class BoxRegion extends MSDRegion {
 	}
 }
 
-class LatticeRegion extends MSDRegion {
+/** @deprecated */
+class SlowLatticeRegion extends MSDRegion {
 	constructor({r = 1/6, detail = 8, ...args}) {
 		super(args);
 		this._r = r;
@@ -245,7 +247,7 @@ class LatticeRegion extends MSDRegion {
 }
 
 // TODO: fix
-class OptimizedLatticeRegion extends MSDRegion {
+class LatticeRegion extends MSDRegion {
 	constructor({r = 1/6, detail = 8, ...args} = {}) {
 		super(args);
 		this._r = r;
@@ -264,7 +266,7 @@ class OptimizedLatticeRegion extends MSDRegion {
 		// create nodes and edges 
 		const pos = this.pos();  // function (i, j, k) -> [x, y, z]
 		for (let [i, j, k] of this.indices()) {
-			let idx = OptimizedLatticeRegion.key(i, j, k);
+			let idx = LatticeRegion.key(i, j, k);
 			let [x, y, z] = pos(i, j, k);
 
 			// create nodes
@@ -285,7 +287,7 @@ class OptimizedLatticeRegion extends MSDRegion {
 
 	/**
 	 * @private
-	 * @return {Fucntion} The returned function will convert indices to [x,y,z]
+	 * @return {Fucntion} (Currying) The returned function will convert indices to [x,y,z]
 	 * coordinates based on <code>this</code> Region's current dimensions.
 	 */
 	static pos(width, height, depth) {
@@ -293,9 +295,13 @@ class OptimizedLatticeRegion extends MSDRegion {
 		return (i, j, k) => [i - halfW, j - halfH, k - halfD];
 	}
 
-	/** @private */
+	/**
+	 * @private
+	 * Wrapper for static method.
+	 * @see LatticeRegion#pos(width,height,depth)
+	 */
 	pos() {
-		return OptimizedLatticeRegion.pos(this.width, this.height, this.depth);
+		return LatticeRegion.pos(this.width, this.height, this.depth);
 	}
 
 	/** @private */
@@ -308,7 +314,7 @@ class OptimizedLatticeRegion extends MSDRegion {
 
 	/** @private */
 	indices() {
-		return OptimizedLatticeRegion.indices(0, this.width, 0, this.height, 0, this.depth);
+		return LatticeRegion.indices(0, this.width, 0, this.height, 0, this.depth);
 	}
 
 	/** @protected */
@@ -369,24 +375,32 @@ class OptimizedLatticeRegion extends MSDRegion {
 	}
 
 	/**
-	 * @public
-	 * @Override
-	 * @param {Object} state - The state object from one MSD.record.get(index)
+	 * @private
+	 * Update the positions of all currently existing nodes and edges
+	 * within the given index bounds.
+	 * @param {Function?} pos
+	 * 	What position function to use. Function should take (i,j,k) -> [x,y,z]
+	 * @param {Number?} width Exclusive upper bound for i
+	 * @param {Number?} height Exclusive upper bound for j
+	 * @param {Number?} depth Exclusive upper bound for k
 	 */
-	viewDetailedEnergy(state) {
-		// TODO ...
+	_updatePositions(pos = this.pos(), width = this.width, height = this.height, depth = this.depth) {
+		for (let [i, j, k] of LatticeRegion.indices(0, width, 0, height, 0, depth)) {
+			let idx = LatticeRegion.key(i, j, k);
+			let [x, y, z] = pos(i, j, k);
+			Object.assign(this.nodeMap.get(idx).position, {x, y, z});
+			if (i + 1 < width)   Object.assign(this.xEdgeMap.get(idx).position, {x: x+this.r, y, z});
+			if (j + 1 < height)  Object.assign(this.yEdgeMap.get(idx).position, {x, y: y+this.r, z});
+			if (k + 1 < depth)   Object.assign(this.zEdgeMap.get(idx).position, {x, y, z: z+this.r});
+		}
 	}
 
 	/** @private */
-	_updatePositions(pos = this.pos(), width = this.width, height = this.height, depth = this.depth) {
-		for (let [i, j, k] of OptimizedLatticeRegion.indices(0, width, 0, height, 0, depth)) {
-			let idx = OptimizedLatticeRegion.key(i, j, k);
-			let [x, y, z] = pos(i, j, k);
-			Object.assign(this.nodeMap.get(idx).position, {x, y, z});
-			if (i + 1 < width)   Object.assign(this.xEdgeMap.get(idx), {x: x+this.r, y, z});
-			if (j + 1 < height)  Object.assign(this.yEdgeMap.get(idx), {x, y: y+this.r, z});
-			if (k + 1 < depth)   Object.assign(this.zEdgeMap.get(idx), {x, y, z: z+this.r});
-		}
+	_updateNodes() {
+		// TODO: not working??? Tried with .geometry = ..., setGeometry(...), and scale.setScale()
+		let { r, detail } = this;
+		for (let [i, j, k] of LatticeRegion.indices())
+			this.nodeMap.get(LatticeRegion.key(i, j, k)).geometry = new SphereGeometry(r, detail, detail);
 	}
 
 	/** @Override */
@@ -394,24 +408,22 @@ class OptimizedLatticeRegion extends MSDRegion {
 		if (width === this.width)
 			return;  // do nothing
 
-		const dim = [width, this.height, this.depth];
-		const pos = OptimizedLatticeRegion.pos(...dim);  // function (i, j, k) -> [x, y, z]
+		const dim = [width, this.height, this.depth];  // new dimensions
+		const pos = LatticeRegion.pos(...dim);  // function (i, j, k) -> [x, y, z]
 		
 		if (width > this.width) {
 			// growing
 			this._updatePositions(pos);
 
-			for (let k = 0; k < this.depth; k++)
-			for (let j = 0; j < this.height; j++)
-			for (let i = this.width; i < width; i++) {
-				let idx = OptimizedLatticeRegion.key(i, j, k);
+			for (let [i, j, k] of LatticeRegion.indices(this.width, width, 0, this.height, 0, this.depth)) {
+				let idx = LatticeRegion.key(i, j, k);
 				let [x, y, z] = pos(i, j, k);
 
 				// create new node
 				this.nodeMap.set(idx, this._addNode(x, y, z));
 
 				// create new edges
-				if (i > 0)  this.xEdgeMap.set(OptimizedLatticeRegion.key(i - 1, j, k), this._addXEdge(...pos(i - 1, j, k)) );
+				if (i > 0)  this.xEdgeMap.set(LatticeRegion.key(i - 1, j, k), this._addXEdge(...pos(i - 1, j, k)) );
 				if (j + 1 < this.height)  this.yEdgeMap.set(idx, this._addYEdge(x, y, z));
 				if (k + 1 < this.depth)   this.zEdgeMap.set(idx, this._addZEdge(x, y, z));
 			}
@@ -422,9 +434,9 @@ class OptimizedLatticeRegion extends MSDRegion {
 			for (let k = 0; k < this.depth; k++)
 			for (let j = 0; j < this.height; j++)
 			for (let i = this.width - 1; i >= width; i--) {
-				let idx = OptimizedLatticeRegion.key(i, j, k);
+				let idx = LatticeRegion.key(i, j, k);
 				this.nodeMap.remove(idx).removeFromParent();
-				if (i > 0)  this.xEdgeMap.remove(OptimizedLatticeRegion.key(i - 1, j, k)).removeFromParent();
+				if (i > 0)  this.xEdgeMap.remove(LatticeRegion.key(i - 1, j, k)).removeFromParent();
 				if (j + 1 < this.height)  this.yEdgeMap.remove(idx).removeFromParent();
 				if (k + 1 < this.depth)   this.zEdgeMap.remove(idx).removeFromParent();
 			}
@@ -438,17 +450,15 @@ class OptimizedLatticeRegion extends MSDRegion {
 		if (height === this.height)
 			return;  // do nothing
 
-		const dim = [this.width, height, this.depth];
-		const pos = OptimizedLatticeRegion.pos(...dim);  // function (i, j, k) -> [x, y, z]
+		const dim = [this.width, height, this.depth];  // new dimensions
+		const pos = LatticeRegion.pos(...dim);  // function (i, j, k) -> [x, y, z]
 		
 		if (height > this.height) {
 			// growing
 			this._updatePositions(pos);
 
-			for (let k = 0; k < this.depth; k++)
-			for (let j = this.height; j < height; j++)
-			for (let i = 0; i < this.width; i++) {
-				let idx = OptimizedLatticeRegion.key(i, j, k);
+			for (let [i, j, k] of LatticeRegion.indices(0, this.width, this.height, height, 0, this.depth)) {
+				let idx = LatticeRegion.key(i, j, k);
 				let [x, y, z] = pos(i, j, k);
 
 				// create new node
@@ -456,7 +466,7 @@ class OptimizedLatticeRegion extends MSDRegion {
 
 				// create new edges
 				if (i + 1 < this.width)  this.xEdgeMap.set(idx, this._addXEdge(x, y, z));
-				if (j > 0) this.yEdgeMap.set(OptimizedLatticeRegion.key(i, j - 1, k), this._addYEdge(...pos(i, j - 1, k)) );
+				if (j > 0) this.yEdgeMap.set(LatticeRegion.key(i, j - 1, k), this._addYEdge(...pos(i, j - 1, k)) );
 				if (k + 1 < this.depth)  this.zEdgeMap.set(idx, this._addZEdge(x, y, z));
 			}
 		} else {
@@ -464,12 +474,12 @@ class OptimizedLatticeRegion extends MSDRegion {
 			this._updatePositions(pos, ...dim);
 			
 			for (let k = 0; k < this.depth; k++)
-			for (let j = this.heigh - 1; j >= height; j--)
+			for (let j = this.height - 1; j >= height; j--)
 			for (let i = 0; i < this.width; i++) {
-				let idx = OptimizedLatticeRegion.key(i, j, k);
+				let idx = LatticeRegion.key(i, j, k);
 				this.nodeMap.remove(idx).removeFromParent();
 				if (i + 1 < this.width)  this.xEdgeMap.remove(idx).removeFromParent();
-				if (j > 0)  this.yEdgeMap.remove(OptimizedLatticeRegion.key(i, j - 1, k)).removeFromParent();
+				if (j > 0)  this.yEdgeMap.remove(LatticeRegion.key(i, j - 1, k)).removeFromParent();
 				if (k + 1 < this.depth)  this.zEdgeMap.remove(idx).removeFromParent();
 			}
 		}
@@ -482,8 +492,8 @@ class OptimizedLatticeRegion extends MSDRegion {
 		if (depth === this.depth)
 			return;  // do nothing
 
-		const dim = [this.width, this.height, depth];
-		const pos = OptimizedLatticeRegion.pos(...dim);  // function (i, j, k) -> [x, y, z]
+		const dim = [this.width, this.height, depth];  // new dimensions
+		const pos = LatticeRegion.pos(...dim);  // function (i, j, k) -> [x, y, z]
 		
 		if (depth > this.depth) {
 			// growing
@@ -492,7 +502,7 @@ class OptimizedLatticeRegion extends MSDRegion {
 			for (let k = this.depth; k < depth; k++)
 			for (let j = 0; j < this.height; j++)
 			for (let i = 0; i < this.width; i++) {
-				let idx = OptimizedLatticeRegion.key(i, j, k);
+				let idx = LatticeRegion.key(i, j, k);
 				let [x, y, z] = pos(i, j, k);
 
 				// create new node
@@ -501,7 +511,7 @@ class OptimizedLatticeRegion extends MSDRegion {
 				// create new edges
 				if (i + 1 < this.width)   this.xEdgeMap.set(idx, this._addXEdge(x, y, z));
 				if (j + 1 < this.height)  this.yEdgeMap.set(idx, this._addYEdge(x, y, z));
-				if (k > 0)  this.zEdgeMap.set(OptimizedLatticeRegion.key(i, j, k - 1), this._addZEdge(...pos(i, j, k - 1)) );
+				if (k > 0)  this.zEdgeMap.set(LatticeRegion.key(i, j, k - 1), this._addZEdge(...pos(i, j, k - 1)) );
 				
 			}
 		} else {
@@ -511,36 +521,65 @@ class OptimizedLatticeRegion extends MSDRegion {
 			for (let k = this.depth - 1; k >= depth; k--)
 			for (let j = 0; j < this.height; j++)
 			for (let i = 0; i < this.width; i++) {
-				let idx = OptimizedLatticeRegion.key(i, j, k);
+				let idx = LatticeRegion.key(i, j, k);
 				this.nodeMap.remove(idx).removeFromParent();
 				if (i + 1 < this.width)   this.xEdgeMap.remove(idx).removeFromParent();
 				if (j + 1 < this.height)  this.yEdgeMap.remove(idx).removeFromParent();
-				if (k > 0)  this.zEdgeMap.remove(OptimizedLatticeRegion.key(i, j, k - 1)).removeFromParent();
+				if (k > 0)  this.zEdgeMap.remove(LatticeRegion.key(i, j, k - 1)).removeFromParent();
 			}
 		}
 
 		super.depth = depth;
 	}
 
+	/** @Override - Must override both getter and setter */
 	get width() { return super.width; }
+	
+	/** @Override - Must override both getter and setter */
 	get height() { return super.height; }
-	get depth() { return super.depth; }	
+	
+	/** @Override - Must override both getter and setter */
+	get depth() { return super.depth; }
 
 	set r(r) {
 		this._r = r;
-		// this._updateGeometry();  // TODO: ....
+		this._updateNodes();
 	}
 
 	set detail(detail) {
 		this._detail = detail;
-		// this._updateGeometry();  // TODO: ....
+		this._updateNodes();
 	}
 
 	get r() { return this._r; }
 	get detail() { return this._detail; }
+
+	/**
+	 * @public
+	 * @Override
+	 * @param {Object} data - The state object from one MSD.record.get(index)
+	 * @param {Vector} direction - Direction vector to project m_i onto. Must be a unit vector!
+	 * @param {Function} toLocalIndicies
+	 * 	A function which converts from global MSD .pos position {x, y, z} to
+	 * 	local LatticeRegion indices, [i, j, k].
+	 */
+	viewDetailedMagnetization(data, direction, toLocalIndicies) {
+		// TODO: test!
+		data.msd.forEach(a => {
+			let [i, j, k] = toLocalIndicies(a.pos);
+			let node = this.nodeMap.get(LatticeRegion.key(i, j, k));
+			if (!node)  return;
+			let norm = new Vector(...a.local_m).dotProduct(direction);
+			console.log("[i, j, k]:", [i, j, k], "norm:", norm);  //  DEBUG
+			let red = interpolate(this.color & 0xff0000 >> 16, 0xff, norm, sqrt);
+			let green = interpolate(this.color & 0x00ff00 >> 8, 0xff, norm, sqrt);
+			let blue = interpolate(this.color & 0x0000ff, 0xff, norm, sqrt);
+			node.material.color = red << 16 | green << 8 | blue;
+		});
+	}
 }
 
-class YZFaceLatticeRegion extends LatticeRegion {
+class YZFaceLatticeRegion extends SlowLatticeRegion {
 	constructor({ front = true, back = true, top = true, bottom = true, ...args } = {}) {
 		super(args);
 		this._front = !!front;
@@ -561,10 +600,10 @@ class YZFaceLatticeRegion extends LatticeRegion {
 			dim => (dim - 1) / 2 );
 		
 		let ys =[], zs = [];
-		if (front)   zs.push(-halfD);
-		if (back)    zs.push(halfD);
-		if (top)     ys.push(-halfH);
-		if (bottom)  ys.push(halfH);
+		if (front  && this.depth > 0)   zs.push(-halfD);
+		if (back   && this.depth > 0)   zs.push(halfD);
+		if (top    && this.height > 0)  ys.push(-halfH);
+		if (bottom && this.height > 0)  ys.push(halfH);
 
 		// left leads:
 		if (this.width > 0) {
@@ -577,7 +616,7 @@ class YZFaceLatticeRegion extends LatticeRegion {
 					this._addXEdge(x, y, z);
 		}
 
-		// nodes and right-neightbor connections (includes right lead)
+		// nodes and right-neighbor connections (includes right lead)
 		for (let x = -halfW; x <= halfW; x++) {
 			// front and back?
 			for (let z of zs)
@@ -1118,7 +1157,7 @@ const startRendering = ({
 
 // ---- Exports ---------------------------------------------------------------
 defineExports("MSDBuilder.render", {
-	MSDRegion, BoxRegion, LatticeRegion, OptimizedLatticeRegion, YZFaceLatticeRegion,
+	MSDRegion, BoxRegion, LatticeRegion, YZFaceLatticeRegion,
 	MSDView, AnimationLoop,
 	updateCamera, startRendering
 });

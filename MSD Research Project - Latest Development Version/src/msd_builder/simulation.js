@@ -11,33 +11,6 @@ const { AsyncPool, defineExports, ajax, sleep } = MSDBuilder.util;
 
 
 // ---- Classes: --------------------------------------------------------------
-class Vector extends Array {
-	/**
-	 * @param {...Number} xyz - Contains 3 elements: [x, y, z].
-	 * 	Extra elements will get stored, but ignored otherwise.
-	 *  Missing elements will be filled with 0.
-	 *  All parameters will be converted to the Number type.
-	 */
-	constructor(...xyz) {
-		for (let x of xyz)
-			this.push(+x);
-		while (this.length < 3)
-			this.push(0);
-	}
-
-	static zero = () => { Vector(); }
-	static i = () => { Vector(1, 0, 0); }
-	static j = () => { Vector(0, 1, 0); }
-	static k = () => { Vector(0, 0, 1); }
-
-	get x() { return this[0]; }
-	get y() { return this[1]; }
-	get z() { return this[2]; }
-	set x(x) { this[0] = x; }
-	set y(y) { this[1] = y; }
-	set z(z) { this[2] = z; }
-}
-
 /**
  * An asynchronous interface bewteen the frontend (Javascript) and the backend (MSD Server).
  * TODO: Store/cache retrieved info?
@@ -326,7 +299,7 @@ class Ensemble extends MSDGroup {
  * Runs multiple repatitions of the system with some variables controlled
  * (i.e., constant), and some independant (i.e., varied) to study their effect.
  */
-class ExperimentalGroup extends MSDGroup {
+class Experiment extends MSDGroup {
 	// TODO ...
 }
 

@@ -197,7 +197,10 @@ Second bug fix. In MSD::setParameters()
 (1-11-2024) All parameters now save and load in the correct data type (hopefully.)
 (1-17-2024) Added /reset request to MSD Server.
 (1-24-2024) Added new MSDRegion views. Now dots and lines!
+(1-29-2024) Merged features from Robert! Included a load parameters file button,
+	and saves as CSV after run.
 
+TODO: Send C++ MSD version through MSD Server to Javascript.
 TODO: remove zdog
 TODO: connect mol-builder and MSD-builder (maybe just links?)
 TODO: add bars on Three.js canvas showing current values of non-zero parameters,
