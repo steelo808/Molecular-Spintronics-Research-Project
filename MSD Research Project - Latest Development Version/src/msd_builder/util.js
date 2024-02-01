@@ -201,7 +201,7 @@ class Vector extends Array {
 		return result;
 	}
 
-	zipv = (v, f) => new Vector(...this.zipa(v, f));
+	zipv = (v, f) => new Vector(...this.zip(v, f));
 
 	// modify "this"
 	add = v => this.fuse(v, (a, b) => a + b);

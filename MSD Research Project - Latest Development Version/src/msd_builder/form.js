@@ -714,6 +714,7 @@ const initForm = ({ camera, msdView }) => {
 		}
 	});
 
+	let runId = 0;  // TODO: Used for timing each simulation in the console
 	paramsForm.addEventListener("submit", (event) => {
 		event.preventDefault();
 		if (event.submitter.id == 'runButton') {
@@ -722,17 +723,20 @@ const initForm = ({ camera, msdView }) => {
 			freq = +document.getElementById("freq").value;
 
 			// Robert J.
-			let final_results = initCSV(json)
-			let final_index = 0
-			let final_state = null
+			let final_results = initCSV(json);
+			let final_index = 0;
+			let final_state = null;
 			const iterate = async (createArgs, runArgs) => {
+				const id = `[run, ${++runId}]`;
+				console.time(id);
 				try {
 					let msd = await MSD.create(createArgs);
 					console.log("-- Created MSD:", msd);
 					console.log("-- Start running simulation.");
 					await msd.run(runArgs);
 					await msd.wait((state, index) => {
-						console.log(state)
+						console.log(state);
+						msdView.viewDetailedMagnetization(state, Vector.i());  // TODO: this should be based on current "lens" settings
 						row = buildCSVRow(state.results);
 						row += "ITER";
 						final_results += row + "\r\n";
@@ -741,9 +745,9 @@ const initForm = ({ camera, msdView }) => {
 					});
 					for(i in final_state.msd) {
 						if(!(final_results.includes("ITER"))) {
-							row = ""
-							row += ",".repeat(95) + buildMSDIterations(final_state.msd, i)
-							final_results += row + "\r\n"
+							row = "";
+							row += ",".repeat(95) + buildMSDIterations(final_state.msd, i);
+							final_results += row + "\r\n";
 						} else {
 							final_results = final_results.replace("ITER", buildMSDIterations(final_state.msd, i));
 						}
@@ -761,6 +765,7 @@ const initForm = ({ camera, msdView }) => {
 				} catch(ex) {
 					console.error(ex);
 				}
+				console.timeEnd(id);
 			};
 			iterate(json, { simCount, freq });
 

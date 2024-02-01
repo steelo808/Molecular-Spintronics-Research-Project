@@ -8,13 +8,13 @@
 
 // ---- Imports: --------------------------------------------------------------
 const { sqrt, floor } = Math;
-const { Map2, defineExports, interpolate, lerp } = MSDBuilder.util;
+const { Map2, Vector, defineExports, interpolate, lerp } = MSDBuilder.util;
 const {
 	WebGLRenderer, Scene, Camera, PerspectiveCamera,
 	BufferGeometry, BoxGeometry, SphereGeometry,
 	MeshBasicMaterial, LineBasicMaterial,
 	Group, Mesh, Line,
-	Vector3
+	Vector3, Color
 } = Three;
 
 
@@ -560,22 +560,28 @@ class LatticeRegion extends MSDRegion {
 	 * @param {Object} data - The state object from one MSD.record.get(index)
 	 * @param {Vector} direction - Direction vector to project m_i onto. Must be a unit vector!
 	 * @param {Function} toLocalIndicies
-	 * 	A function which converts from global MSD .pos position {x, y, z} to
+	 * 	A function which converts from global MSD .pos position [x, y, z] to
 	 * 	local LatticeRegion indices, [i, j, k].
 	 */
 	viewDetailedMagnetization(data, direction, toLocalIndicies) {
 		// TODO: test!
+		const WHITE = new Color(0xffffff);
+		const BLACK = new Color(0x000000);
+		const color = new Color(this.color);
+
 		data.msd.forEach(a => {
 			let [i, j, k] = toLocalIndicies(a.pos);
 			let node = this.nodeMap.get(LatticeRegion.key(i, j, k));
 			if (!node)  return;
-			let norm = new Vector(...a.local_m).dotProduct(direction);
-			console.log("[i, j, k]:", [i, j, k], "norm:", norm);  //  DEBUG
+			let proj = new Vector(...a.localM).dotProduct(direction);  // +- projection norm
 			// let red = interpolate(this.color & 0xff0000 >> 16, 0xff, norm, sqrt);
 			// let green = interpolate(this.color & 0x00ff00 >> 8, 0xff, norm, sqrt);
 			// let blue = interpolate(this.color & 0x0000ff, 0xff, norm, sqrt);
 			// node.material.color.setHex(red << 16 | green << 8 | blue);
-			node.material.color.lerpColors(this.color, 0xffffff, norm);
+			if (proj >= 0)
+				node.material.color.lerpColors(color, WHITE, proj);
+			else
+				node.material.color.lerpColors(BLACK, color, -proj);
 		});
 	}
 }
@@ -1034,12 +1040,12 @@ class MSDView extends Group {
 		const x2Offset = x1Offset + this.mol.width;
 		const yOffset = floor((this.height - this.FML.height) / 2);
 		const zOffset = floor((this.depth - this.FMR.depth) / 2);
-		self.FML.view.viewDetailedMagnetization(data, direction,
-			({x, y, z}) => [x, y - yOffset, z] );
-		self.mol.view.viewDetailedMagnetization(data, direction,
-			({x, y, z}) => [x - x1Offset, y - yOffset, z - zOffset] );
-		self.FMR.view.viewDetailedMagnetization(data, direction,
-			({x, y, z}) => [x - x2Offset, y, z - zOffset] );
+		this.FML.view.viewDetailedMagnetization(data, direction,
+			([x, y, z]) => [x, y - yOffset, z] );
+		this.mol.view.viewDetailedMagnetization(data, direction,
+			([x, y, z]) => [x - x1Offset, y - yOffset, z - zOffset] );
+		this.FMR.view.viewDetailedMagnetization(data, direction,
+			([x, y, z]) => [x - x2Offset, y, z - zOffset] );
 	}
 }
 
