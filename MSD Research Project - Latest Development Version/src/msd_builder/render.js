@@ -7,7 +7,7 @@
 (function() {  // IEFF
 
 // ---- Imports: --------------------------------------------------------------
-const { sqrt } = Math;
+const { sqrt, floor } = Math;
 const { Map2, defineExports, interpolate, lerp } = MSDBuilder.util;
 const {
 	WebGLRenderer, Scene, Camera, PerspectiveCamera,
@@ -117,8 +117,8 @@ class MSDRegion extends Group {
 	 * @public
 	 * Should be overriden in subclass.
 	 */
-	viewDetailedEnergy(data, ...args) {
-		console.warn("Unimlemented method: MSD.viewDetailedEnergy(data, ...args)");
+	viewDetailedMagnetization(data, ...args) {
+		console.warn("Unimlemented method: MSD.viewDetailedMagnetization(data, ...args)");
 	}
 }
 
@@ -399,8 +399,8 @@ class LatticeRegion extends MSDRegion {
 	_updateNodes() {
 		// TODO: not working??? Tried with .geometry = ..., setGeometry(...), and scale.setScale()
 		let { r, detail } = this;
-		for (let [i, j, k] of LatticeRegion.indices())
-			this.nodeMap.get(LatticeRegion.key(i, j, k)).geometry = new SphereGeometry(r, detail, detail);
+		this.nodeGroup.traverse(node =>
+			node.geometry = new SphereGeometry(r, detail, detail) );
 	}
 
 	/** @Override */
@@ -571,10 +571,11 @@ class LatticeRegion extends MSDRegion {
 			if (!node)  return;
 			let norm = new Vector(...a.local_m).dotProduct(direction);
 			console.log("[i, j, k]:", [i, j, k], "norm:", norm);  //  DEBUG
-			let red = interpolate(this.color & 0xff0000 >> 16, 0xff, norm, sqrt);
-			let green = interpolate(this.color & 0x00ff00 >> 8, 0xff, norm, sqrt);
-			let blue = interpolate(this.color & 0x0000ff, 0xff, norm, sqrt);
-			node.material.color = red << 16 | green << 8 | blue;
+			// let red = interpolate(this.color & 0xff0000 >> 16, 0xff, norm, sqrt);
+			// let green = interpolate(this.color & 0x00ff00 >> 8, 0xff, norm, sqrt);
+			// let blue = interpolate(this.color & 0x0000ff, 0xff, norm, sqrt);
+			// node.material.color.setHex(red << 16 | green << 8 | blue);
+			node.material.color.lerpColors(this.color, 0xffffff, norm);
 		});
 	}
 }
@@ -1027,6 +1028,19 @@ class MSDView extends Group {
 	get width() { return this.FML.width + this._mol.width + this._FMR.width; }
 	get height() { return this.FMR.height; }
 	get depth() { return this.FML.depth; }
+
+	viewDetailedMagnetization(data, direction) {
+		const x1Offset = this.FML.width;
+		const x2Offset = x1Offset + this.mol.width;
+		const yOffset = floor((this.height - this.FML.height) / 2);
+		const zOffset = floor((this.depth - this.FMR.depth) / 2);
+		self.FML.view.viewDetailedMagnetization(data, direction,
+			({x, y, z}) => [x, y - yOffset, z] );
+		self.mol.view.viewDetailedMagnetization(data, direction,
+			({x, y, z}) => [x - x1Offset, y - yOffset, z - zOffset] );
+		self.FMR.view.viewDetailedMagnetization(data, direction,
+			({x, y, z}) => [x - x2Offset, y, z - zOffset] );
+	}
 }
 
 class AnimationLoop {
