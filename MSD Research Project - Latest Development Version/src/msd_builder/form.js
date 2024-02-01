@@ -504,7 +504,7 @@ function importFileContent(content) {
 }
 
 // Returns spherical coordinates in radians
-// Robert K.
+// Robert J.
 function rectToSph(x, y, z) {
 	return new Vector(x, y, z).toSphericalForm();
 }
@@ -549,7 +549,7 @@ function initCSV(json) {
 		}
 	}
 		row_results += ",msd_version = 6.2a"  // TODO: update server so we can get this from server
-		row_results += "\n"
+		row_results += "\r\n"
 		
 		row_results = row_results.replace("seed = undefined", "seed = unique");
 	return row_results
@@ -704,12 +704,13 @@ const initForm = ({ camera, msdView }) => {
 				reader.onload = function (e) {
 					const content = e.target.result;
 					importFileContent(content)
+
+					location.reload();
 				};
 
 				reader.readAsText(file);
 			}
 
-			location.reload();
 		}
 	});
 
@@ -726,13 +727,15 @@ const initForm = ({ camera, msdView }) => {
 			let final_state = null
 			const iterate = async (createArgs, runArgs) => {
 				try {
-
 					let msd = await MSD.create(createArgs);
+					console.log("-- Created MSD:", msd);
+					console.log("-- Start running simulation.");
 					await msd.run(runArgs);
 					await msd.wait((state, index) => {
+						console.log(state)
 						row = buildCSVRow(state.results);
 						row += "ITER";
-						final_results += row + "\n";
+						final_results += row + "\r\n";
 						final_index = index;
 						final_state = state;
 					});
@@ -740,16 +743,18 @@ const initForm = ({ camera, msdView }) => {
 						if(!(final_results.includes("ITER"))) {
 							row = ""
 							row += ",".repeat(95) + buildMSDIterations(final_state.msd, i)
-							final_results += row + "\n"
+							final_results += row + "\r\n"
 						} else {
 							final_results = final_results.replace("ITER", buildMSDIterations(final_state.msd, i));
 						}
 						
 					}
+					console.log("-- Destoryed MSD:", msd);
 					msd.destory();
+					console.log("==== Workload Complete. ====");
 					let blob = new Blob([final_results], { type: 'text/csv' });
 					let link = document.createElement('a');
-					link.download = 'parameters-iterate.csv';
+					link.download = 'iteration-results.csv';
 					link.href = window.URL.createObjectURL(blob);
 					link.click();
 					window.URL.revokeObjectURL(link.href);
