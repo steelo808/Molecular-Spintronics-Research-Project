@@ -13,7 +13,7 @@ const { defineExports, SavedMap } = MSDBuilder.util;
 const DEFAULTS = MSDBuilder.defaults;
 const { updateCamera } = MSDBuilder.render;
 const { parseParametersTXT } = MSDBuilder.parametersIO;
-const { runSim, exportParameters } = MSDBuilder.actions;
+const { runSim, endSim, exportParameters } = MSDBuilder.actions;
 
 
 // ---- Globals: --------------------------------------------------------------
@@ -370,6 +370,7 @@ const initForm = ({ camera, msdView }) => {
 	paramsForm.addEventListener("reset", (event) => {
 		event.preventDefault();
 		if (confirm("Reset all parameters to a default state?")) {
+			endSim();
 			valueCache.clear();
 			resetView(msdView, DEFAULTS);
 			updateCamera(camera, msdView);

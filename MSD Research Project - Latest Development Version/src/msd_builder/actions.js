@@ -2,7 +2,7 @@
  * @file actions.js
  * @brief
  * 	Contains classes and functions that control the actions of the App.
- * 	E.g., Run, Import/Export, etc.
+ * 	E.g., Run, Import/Export, etc. Doesn't know about the UI.
  * @date 2024-2-2
  * @author Christopher D'Angelo
  * @author Robert J.
@@ -64,6 +64,13 @@ async function runSim(json, runArgs) {
 }
 
 /**
+ * Doesn't currently stop a running sim, but instead allows a new sim to start.
+ */
+function endSim() {
+	iterate.done();
+}
+
+/**
  * @param {Object} json - buildJSON(msdView)
  * @author Robert J.
  * @author Christopher D'Angelo - Packaged as functions
@@ -78,7 +85,9 @@ function exportParameters(json) {
 	window.URL.revokeObjectURL(link.href);
 }
 
+
 // ---- Exports: --------------------------------------------------------------
-defineExports("MSDBuilder.actions", { runSim, exportParameters });
+defineExports("MSDBuilder.actions", { runSim, endSim, exportParameters });
+
 
 })();  // end IIFE

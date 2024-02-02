@@ -311,6 +311,7 @@ const iterate = async (createArgs, runArgs, onResult = iterate.LOG) => {
 	console.log(createArgs, runArgs);
 	const id = `[iterate, ${++iterate.nextId}]`;
 	console.time(id);
+	iterate.running = true;
 	try {
 		console.log(`${id} Workload started...`);
 		let start = 0;  // length of previous record so we know where to start processing new data from
@@ -321,9 +322,9 @@ const iterate = async (createArgs, runArgs, onResult = iterate.LOG) => {
 		} else {
 			start = await iterate.msd.record.length();
 			console.log(id, `Using previous MSD; len=${start}`);
+			await iterate.msd.setParameters(createArgs);  // update parameters (where possible)
 		}
 		console.log(id, "Start running simulation...");
-		iterate.running = true;
 		await iterate.msd.run(runArgs);
 		await iterate.msd.wait((state, index) => onResult(state, index, id), { start });
 		// await iterate.msd.destory();
@@ -340,7 +341,19 @@ iterate.nextId = 0;
 iterate.LOG = (state, index, id) => console.log(id, `Result [${index}]`, state);
 // TODO: make into array of structs?? How can multiple simulations be active in different tabs at once?
 iterate.msd = null;  // MSD, or MSDGroup representing the current active simulation
-iterate.running = false;
+iterate.running = false;  // this will cause issues if multiple iteration() sims are running concurrently 
+
+/**
+ * Resets the iterate.* variables and signals to the server to free resources
+ * so we can run a new simulation. It is safe to run another iterate() simualtion
+ * before this function's Promise is resolved. This function will NOT stop a
+ * currently running iterate() simulation.
+ */
+iterate.done = async () => {
+	let msd = iterate.msd;
+	iterate.msd = null;
+	await msd?.destory();
+};
 
 /** @async */
 const demo = () => iterate(
