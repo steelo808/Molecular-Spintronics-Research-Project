@@ -6,7 +6,7 @@
 
 (function() {  // IIFE
 
-	// ---- Imports: --------------------------------------------------------------
+// ---- Imports: --------------------------------------------------------------
 const { AsyncPool, defineExports, ajax, sleep } = MSDBuilder.util;
 
 
@@ -225,6 +225,8 @@ class MSD {
 	 * @param {Object?} options
 	 * @param {Number?} options.until What simulation time the MSD is expected to end at.
 	 * @param {Number?} options.delay How often (in milliseconds) to query the server for new states.
+	 * @param {Number?} options.start What index to start processing.
+	 * 	Default is 0 which means all previous states are processed.
 	 */
 	wait(process = null, options = {}) {
 		return new Promise((resolve, reject) =>
@@ -305,85 +307,75 @@ class Experiment extends MSDGroup {
 
 
 // ---- Functions: ------------------------------------------------------------
-const iterate = async (createArgs, runArgs) => {
+const iterate = async (createArgs, runArgs, onResult = iterate.LOG) => {
 	console.log(createArgs, runArgs);
 	const id = `[iterate, ${++iterate.nextId}]`;
 	console.time(id);
 	try {
 		console.log(`${id} Workload started...`);
-		let msd = await MSD.create(createArgs);
-		console.log(id, "Created MSD:", msd);
-		console.log(id, "Start running simulation.");
-		await msd.run(runArgs);
-		await msd.wait((state, index) => console.log(id, `Result [${index}]`, state));
-		console.log(id, "Destoryed MSD:", msd);
-		msd.destory();
+		let start = 0;  // length of previous record so we know where to start processing new data from
+		if (!iterate.msd) {
+			iterate.msd = {};
+			iterate.msd = await MSD.create(createArgs);
+			console.log(id, "Created MSD:", iterate.msd);
+		} else {
+			start = await iterate.msd.record.length();
+			console.log(id, `Using previous MSD; len=${start}`);
+		}
+		console.log(id, "Start running simulation...");
+		iterate.running = true;
+		await iterate.msd.run(runArgs);
+		await iterate.msd.wait((state, index) => onResult(state, index, id), { start });
+		// await iterate.msd.destory();
+		// console.log(id, "Destoryed MSD:", iterate.msd);
 		console.log(id, "Complete.");
 	} catch(ex) {
 		console.error(ex);
+	} finally {
+		iterate.running = false;
 	}
 	console.timeEnd(id);
 };
 iterate.nextId = 0;
+iterate.LOG = (state, index, id) => console.log(id, `Result [${index}]`, state);
+// TODO: make into array of structs?? How can multiple simulations be active in different tabs at once?
+iterate.msd = null;  // MSD, or MSDGroup representing the current active simulation
+iterate.running = false;
 
-const demo = async () => {
-	console.time("MSD workload");
-	try {
-		console.log("Workload started...");
-		let msd = await MSD.create({
-			width: 11,  height: 10,  depth: 10,
-			
-			molPosL: 5,  molPosR: 5,
-			topL: 0,  bottomL: 9,
-			frontR: 0,  backR: 9,
+/** @async */
+const demo = () => iterate(
+	{	// createArgs:
+		width: 11,  height: 10,  depth: 10,
+		
+		molPosL: 5,  molPosR: 5,
+		topL: 0,  bottomL: 9,
+		frontR: 0,  backR: 9,
 
-			kT: 0.3,
-			B: [0, 0, 0],
+		kT: 0.3,
+		B: [0, 0, 0],
 
-			SL: 1,  SR: 1,  Sm: 1,
-			FL: 0,  FR: 0,  Fm: 0,
+		SL: 1,  SR: 1,  Sm: 1,
+		FL: 0,  FR: 0,  Fm: 0,
 
-			JL: 1,  JR: 1,  Jm: 1,  JmL: 0.75,  JmR: -0.75,  JLR: 0,
-			Je0L: 0,  Je0R: 0,  Je0m: 0,
-			Je1L: 0,  Je1R: 0,  Je1m: 0,  Je1mL: 0,  Je1mR: 0, Je1LR: 0,
-			JeeL: 0,  JeeR: 0,  Jeem: 0,  JeemL: 0,  JeemR: 0, JeeLR: 0,
-			bL: 0,  bR: 0,  bm: 0,  bmL: 0,  bmR: 0,  bLR: 0,
+		JL: 1,  JR: 1,  Jm: 1,  JmL: 0.75,  JmR: -0.75,  JLR: 0,
+		Je0L: 0,  Je0R: 0,  Je0m: 0,
+		Je1L: 0,  Je1R: 0,  Je1m: 0,  Je1mL: 0,  Je1mR: 0, Je1LR: 0,
+		JeeL: 0,  JeeR: 0,  Jeem: 0,  JeemL: 0,  JeemR: 0, JeeLR: 0,
+		bL: 0,  bR: 0,  bm: 0,  bmL: 0,  bmR: 0,  bLR: 0,
 
-			AL:[0,0,0], AR:[0,0,0], Am:[0,0,0],
-			DL:[0,0,0], DR:[0,0,0], Dm:[0,0,0], DmL:[0,0,0], DmR:[0,0,0], DLR:[0,0,0],
-			
-			flippingAlgorithm: "CONTINUOUS_SPIN_MODEL",
-			molType: "LINEAR",
-			randomize: true,
-			seed: 0
-		});
-		console.log("-- Created MSD:", msd);
-		console.log("-- Start running simulation.");
-		const simCount = 50_000_000;
-		await msd.run({
-			simCount,
-			freq: 1_000_000
-		});
-		let prevIndex = -1;
-		let t = -1;	
-		while (t < simCount) {
-			await sleep(1000);
-			let index = await msd.record.length() - 1;
-			if (index > prevIndex) {
-				prevIndex = index;
-				let state = await msd.record.get(index);
-				console.log(`Result [${index}]`, state);
-				t = state.results.t;
-			}
-		}
-		console.log("-- Destoryed MSD:", msd);
-		msd.destory();
-		console.log("==== Workload Complete. ====");
-	} catch(ex) {
-		console.error(ex);
-	}
-	console.timeEnd("MSD workload");
-};
+		AL:[0,0,0], AR:[0,0,0], Am:[0,0,0],
+		DL:[0,0,0], DR:[0,0,0], Dm:[0,0,0], DmL:[0,0,0], DmR:[0,0,0], DLR:[0,0,0],
+		
+		flippingAlgorithm: "CONTINUOUS_SPIN_MODEL",
+		molType: "LINEAR",
+		randomize: true,
+		seed: 0
+
+	}, {
+		// runArgs:
+		simCount,
+		freq: 1_000_000
+	});
 
 
 // ---- Exports: --------------------------------------------------------------

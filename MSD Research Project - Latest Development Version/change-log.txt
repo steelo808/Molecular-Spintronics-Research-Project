@@ -199,7 +199,9 @@ Second bug fix. In MSD::setParameters()
 (1-24-2024) Added new MSDRegion views. Now dots and lines!
 (1-29-2024) Merged features from Robert! Included a load parameters file button,
 	and saves as CSV after run.
+(2-1-2024) Added basic realtime animations to the 3D MSD model.
 
+TODO: Add a timeline.
 TODO: Send C++ MSD version through MSD Server to Javascript.
 TODO: remove zdog
 TODO: connect mol-builder and MSD-builder (maybe just links?)

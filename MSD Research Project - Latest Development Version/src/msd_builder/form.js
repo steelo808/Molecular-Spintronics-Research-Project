@@ -9,71 +9,14 @@
 (function() {  // IIEF
 
 // ---- Imports: --------------------------------------------------------------
-const { defineExports, SavedMap, Vector } = MSDBuilder.util;
+const { defineExports, SavedMap } = MSDBuilder.util;
+const DEFAULTS = MSDBuilder.defaults;
 const { updateCamera } = MSDBuilder.render;
-const { MSD, iterate } = MSDBuilder.simulation;
-
-
-// ---- Classes: --------------------------------------------------------------
+const { parseParametersTXT } = MSDBuilder.parametersIO;
+const { runSim, exportParameters } = MSDBuilder.actions;
 
 
 // ---- Globals: --------------------------------------------------------------
-/** @private */ const real = {
-	getter: ele => +ele.value,
-	setter: (ele, x) => ele.value = x };
-/** @private */ const optStr = {
-	getter: ele => ele.value?.trim() ? ele.value : undefined,
-	setter: (ele, x) => ele.value = x ? x : "" };
-/** @private */ const checkbox = {
-	getter: ele => ele.checked,
-	setter: (ele, x) => ele.checked = x };
-
-/**
- * @private
- * @brief Wraps a default value as an object.
- * 	May also provide a getter and setter method for converting between a form
- * 	(or other HTML) element, and the underlying property's value.
- * 	If no getter or setter is provided, the default "real" number
- * 	getter and setter is used.
- * @return and object with three (3) properties: { default_value, getter, setter }
-*/
-const val = (default_value, { getter, setter } = real) => ({default_value, getter, setter});
-
-const DEFAULTS = {
-	DIM_FIELDS: new Map([
-		["FML-width", 5], ["FML-height", 4], ["FML-depth", 10], ["FML-y", 0],
-		["FMR-width", 5], ["FMR-height", 10], ["FMR-depth", 4], ["FMR-z", 0],
-		["mol-width", 1], ["mol-height", 4], ["mol-depth", 4], ["mol-y", 0], ["mol-z", 0]
-	]),
-
-	PARAM_FIELDS: new Map([
-		["kT", val(0.1)],
-		["B_x", val(0)], ["B_y", val(0)], ["B_z", val(0)],
-		["simCount", val(1000000)],
-		["freq", val(0)],
-		["seed", val("", optStr)],
-		["randomize", val(true, checkbox)],
-		
-		["SL", val(1)], ["Sm", val(1)], ["SR", val(1)],
-		["FL", val(1)], ["Fm", val(0)], ["FR", val(0)],
-	
-		["JL", val(1)], ["JmL", val(1)], ["Jm", val(1)], ["JmR", val(-1)], ["JR", val(1)], ["JLR", val(0)],
-		["Je0L", val(0)], ["Je0m", val(0)], ["Je0R", val(0)],
-		["Je1L", val(0)], ["Je1m", val(0)], ["Je1R", val(0)], ["Je1mL", val(0)], ["Je1mR", val(0)], ["Je1LR", val(0)],
-		["JeeL", val(0)], ["Jeem", val(0)], ["JeeR", val(0)], ["JeemL", val(0)], ["JeemR", val(0)], ["JeeLR", val(0)],
-	
-		["bL", val(0)], ["bm", val(0)], ["bR", val(0)], ["bmL", val(0)], ["bmR", val(0)], ["bLR", val(0)],
-		
-		["AL_x", val(0)], ["Am_x", val(0)], ["AR_x", val(0)],
-		["AL_y", val(0)], ["Am_y", val(0)], ["AR_y", val(0)],
-		["AL_z", val(0)], ["Am_z", val(0)], ["AR_z", val(0)],
-	
-		["DL_x", val(0)], ["Dm_x", val(0)], ["DR_x", val(0)], ["DmL_x", val(0)], ["DmR_x", val(0)], ["DLR_x", val(0)],
-		["DL_y", val(0)], ["Dm_y", val(0)], ["DR_y", val(0)], ["DmL_y", val(0)], ["DmR_y", val(0)], ["DLR_y", val(0)],
-		["DL_z", val(0)], ["Dm_z", val(0)], ["DR_z", val(0)], ["DmL_z", val(0)], ["DmR_z", val(0)], ["DLR_z", val(0)],
-	])
-};
-
 const valueCache = new SavedMap(localStorage, "valueCache");
 
 
@@ -164,162 +107,6 @@ const syncHTMLDimFields = (msd) => {
 };
 
 /**
- * Replace sections of iterate-parameters TXT file template with given (actual) values.
- * TODO: maybe split this into two functions?
- * @author Robert J.
- */
-function replaceValues(template, name, value, x, y, z) {
-	let regex = new RegExp(`(${name}\\s*=\\s*)([^\\n]*)`);
-	
-	if(x,y,z != null) {
-		template = template.replace(regex, `${name} = ${x} ${y} ${z}`);
-	} else {
-		template = template.replace(regex, `$1${value}`);
-	}
-	return template;
-  }
-
-
-/**
- * Format current GUI and DOM info into iterate-parameters file TXT format.
- * @param {MSDView} msd
- * @return {String}
- * @author Robert J.
- */
-function loadFileContent(msd) {
-	let json = buildJSON(msd);
-
-	let content = `simCount = 10000000
-freq = 50000
-
-# dimensions of bounding box
-width = ${json.width}
-height = ${json.height}
-depth = ${json.depth}
-
-# boundaries which define the exact dimensions of FM_L, FM_R, and mol.
-molPosL = ${json.molPosL}
-molPosR = ${json.molPosR}
-topL = ${json.topL}
-bottomL = ${json.bottomL}
-frontR = ${json.frontR}
-backR = ${json.backR}
-
-# turn off front edge of mol.
-# [5 11 10] = 0
-# [5 12 10] = 0
-# [5 13 10] = 0
-# [5 14 10] = 0
-
-# turn off back edge of mol.
-# [5 11 15] = 0
-# [5 12 15] = 0
-# [5 13 15] = 0
-# [5 14 15] = 0
-
-
-# Tempurature
-kT = 0.2
-
-# External Magnetic Field
-B = 0.1 0 0
-
-# Magnetude of spin vectors
-SL = 1
-SR = 1
-Sm = 1
-
-# Maximum Magnetude of spin fluctuation ("flux") vectors
-FL = 0.25
-FR = 0.25
-Fm = 0.25
-
-# Heisenberg exchange coupling between two neighboring spins
-JL = 1
-JR = 1
-Jm = 0.1
-JmL = 0.5
-JmR = -0.5
-JLR = 0.05
-
-# exchange coupling between a spin and its local flux
-Je0L = 0.1
-Je0R = 0.1
-Je0m = 0.2
-
-# exchange coupling between a spin and its neighboring flux (and vice versa)
-Je1L = 0.02
-Je1R = 0.02
-Je1m = 0.02
-Je1mL = 0.02
-Je1mR = 0.02
-Je1LR = 0.001
-
-# exchange coupling between two neighboring fluxes
-JeeL = 0.05
-JeeR = 0.05
-Jeem = -0.25
-JeemL = 0.05
-JeemR = -0.05
-JeeLR = 0.01
-
-# Anisotropy constant(s), as vectors 
-AL = 0.1 0 0
-AR = 0.1 0 0
-Am = 0 0.2 0
-
-# Biquadratic coupling
-bL = 0.01
-bR = 0.01
-bm = 0.01
-bmL = 0.01
-bmR = 0.01
-bLR = 0.001
-
-# Dzyaloshinskii-Moriya (i.e. Skyrmion) interaction, as vectors
-DL = 0.002 0 0
-DR = 0.002 0 0
-Dm = 0.002 0 0
-DmL = 0.002 0 0
-DmR = 0.002 0 0
-DLR = 0.0002 0 0
-	`
-
-	for(let id of DEFAULTS.PARAM_FIELDS.keys())
-	{	
-		const Uinput = document.getElementById(id);
-		content = replaceValues(content, Uinput.id, Uinput.value);
-	}
-
-	vectors = ["AL", "Am", "AR", "DL", "Dm", "DR", "DmL", "DmR", "DLR", "B"]
-
-	for(let id of vectors)
-	{	
-		const id_x = document.getElementById(id + "_x");
-		const id_y = document.getElementById(id + "_y");
-		const id_z = document.getElementById(id + "_z");
-		content = replaceValues(content, id, null, id_x.value, id_y.value, id_z.value);
-	}
-
-	return content;
-}
-
-/**
- * TODO: split into scalar and Vector versions.
- * Take DOM <input> value string and store into JSON field. (parse)
- *  
- * @author Robert J.
- */
-function replaceJSONValues(json, id, name, x, y, z) {
-	if (x,y,z == null) {
-	  json[id] = parseFloat(name);
-	} else {
-	  json[id] = [parseFloat(x), parseFloat(y), parseFloat(z)];
-	}
-	return json;
-  }
-
-/**
  * Takes info from GUI and DOM.
  * Packages as object both to send to server and save as file.
  * 
@@ -362,7 +149,6 @@ function buildJSON(msd) {
 	for(let id of DEFAULTS.PARAM_FIELDS.keys())
 	{	
 		const Uinput = document.getElementById(id);
-		// replaceJSONValues(json, Uinput.id, Uinput.value);  // Chris Note: not all PARAM_FIELDS are numbers
 		const { getter } = DEFAULTS.PARAM_FIELDS.get(Uinput.id);
 		json[id] = getter(Uinput);
 	}
@@ -374,67 +160,24 @@ function buildJSON(msd) {
 		const id_x = document.getElementById(id + "_x");
 		const id_y = document.getElementById(id + "_y");
 		const id_z = document.getElementById(id + "_z");
-		replaceJSONValues(json, id, null, id_x.value, id_y.value, id_z.value);
+		json[id] = [+id_x.value, +id_y.value, +id_z.value];
 	}
 
 	return json;
 }
 
 /**
- * Parse a line from parameters file.
+ * @param {Object} ext_vars
+ * 	see parseParametersTXT in parameterIO.js for specific details on this object.
  * @author Robert J.
+ * @author Christopher D'Angelo - refactoring
  */
-function getValues(line) {
-	[id, value] = line.split('=');
-	return [id, parseFloat(value)];
-}
-
-/**
- * @author Robert J.
- * @params {String} iterate parameters files.
- */
-function importFileContent(content) {
-
-	// send to workload msd-builder	
-	let json = {
-		flippingAlgorithm: "CONTINUOUS_SPIN_MODEL",
-		molType: "LINEAR", // TODO allow change
-		randomize: true, // T/F
-		// seed: 0 // (TODO add later) Can be null (random), or set 
-	}
-
-	let lines = content.split('\n');
-	let ext_vars = {}
-
-	for(let line of lines) {
-		if (line.includes('=') && !line.includes("#")) {
-			line = line.replace(/\s*=\s*/, "=").replace(/\s+/g, ' ').trim();
-			const [id,value] = getValues(line)
-			if((line.split(' ')).length > 1) {
-				let nline = line
-				let [x,y,z] = nline.split('=')[1].split(' ')
-				replaceJSONValues(json, id, null, x, y, z)
-				if(document.getElementById(id) == null) {
-					document.getElementById(id + "_x").value = x
-					document.getElementById(id + "_y").value = y
-					document.getElementById(id + "_z").value = z
-				}
-			} else {
-				replaceJSONValues(json, id, value)
-				if(document.getElementById(id) != null) {
-					document.getElementById(id).value = value
-				} else {
-					ext_vars[id] = value;
-				}
-			}
-		}
-	}
-
-	msd_width = ext_vars["width"];
+function updateForm(ext_vars) {
+	let msd_width = ext_vars["width"];
 	// height of FML can never exceed depth of FMR (making it automatically the maximum)
-	msd_height = ext_vars["height"];
+	let msd_height = ext_vars["height"];
 	// depth of FMR can never exceed depth of FML
-	msd_depth = ext_vars["depth"];
+	let msd_depth = ext_vars["depth"];
 
 	let topL = ext_vars["topL"];
 	let bottomL = ext_vars["bottomL"];
@@ -501,110 +244,9 @@ function importFileContent(content) {
 	// Adding or updating a value in localStorage
 	localStorage.setItem('valueCache', JSON.stringify(vals));
 
+	location.reload();  // TODO: HACK! Find a better way to do this.
 }
 
-// Returns spherical coordinates in radians
-// Robert J.
-function rectToSph(x, y, z) {
-	return new Vector(x, y, z).toSphericalForm();
-}
-
-/**
- * Build first row of iterate-out CSV file: headers, and parameters.
- * @param {Object} json State of {@link MSD} (only parameters??)
- * @return {String} first line of CSV file, with \n
- * @author Robert J.
- */
-function initCSV(json) {
-	row_results = ""
-
-	// Components need _x, _y, _z, _norm, _theta _phi
-	titles_xyz_sph = ['M', 'ML', 'MR', 'Mm', 'MS', 'MSL', 'MSR', 'MSm', 'MF', 'MFL', 'MFR', 'MFm']
-	// Components are as named
-	titles_raw = ['U', 'UL', 'UR', 'Um', 'UmL', 'UmR', 'ULR']
-	// Components need _x, _y and _z.
-	titles_xyz = ['m', 's', 'f']
-	row_results = "t,,"
-		for(let comp of titles_xyz_sph) {
-			row_results += comp + "_x" + "," + comp + "_y" + "," + comp + "_z" + "," + comp + "_norm" + "," + comp + "_theta" + "," + comp + "_phi" + ",,"
-		}
-		
-		for(let comp of titles_raw) {
-			row_results += comp + ","
-		}
-			row_results += ",,x,y,z,"
-
-		for(let comp of titles_xyz) {
-			row_results += comp + "_x" + "," + comp + "_y" + "," + comp + "_z" + ","
-		}
-		row_results += ",,"
-		for(const key in json) {
-			if(!(key.includes("_") || key.includes("flip"))) {
-			if(Array.isArray(json[key])) {
-				row_results += `"${key} = <${json[key].join(", ")}>"`
-			} else {
-				row_results += `${key} = ${json[key]}`
-			}
-			row_results += ","
-		}
-	}
-		row_results += ",msd_version = 6.2a"  // TODO: update server so we can get this from server
-		row_results += "\r\n"
-		
-		row_results = row_results.replace("seed = undefined", "seed = unique");
-	return row_results
-}
-
-/**
- * @param {Object} row_data - .results from {@link MSD} state (record) object
- * @return a single row of iterate-out CSV file
- * @author Robert J.
- */
-function buildCSVRow(row_data) {
-	row_results = ""
-
-	// Components need _x, _y, _z, _norm, _theta _phi
-	titles_xyz_sph = ['M', 'ML', 'MR', 'Mm', 'MS', 'MSL', 'MSR', 'MSm', 'MF', 'MFL', 'MFR', 'MFm']
-	// Components are as named
-	titles_raw = ['U', 'UL', 'UR', 'Um', 'UmL', 'UmR', 'ULR']
-	// Components need _x, _y and _z.
-	titles_xyz = ['m', 's', 'f']
-
-	row_results += row_data['t'] + ",,"
-
-	for(let comp of titles_xyz_sph) {
-		x = row_data[comp][0]
-		y = row_data[comp][1]
-		z = row_data[comp][2]
-		const [r,t,p] = rectToSph(x,y,z)
-		row_results += [x,y,z,r,t,p].join(",") + ",,"
-	}
-
-	for(let comp of titles_raw) {
-		row_results += row_data[comp] + ","
-	}
-
-	row_results += ",,"
-	return row_results
-}
-
-/**
- * @param {Object} msd - .msd field from (@link MSD) state (record) object.
- * @param {Number} index - which msd location we are outputing
- * @return {String} partial CSV row (only "snapshot")
- * @authro Robert J.
- */
-function buildMSDIterations(msd, index) {
-	pos = msd[index].pos
-	localM = msd[index].localM
-	spin = msd[index].spin
-	flux = msd[index].flux
-
-	msd_results = ""
-	msd_results += pos.join(",") + "," + localM.join(",") + "," + spin.join(",") + "," + flux.join(",") + ","
-
-	return msd_results
-}
 
 // ---- TODO: Unused ----------------------------------------------------------
 const splitParam = (param_name) => param_name.split("_", 2);
@@ -694,96 +336,34 @@ const initForm = ({ camera, msdView }) => {
 	const paramsForm = document.getElementById("msd-params-form");
 
 	// Robert J.
-	paramsForm.addEventListener("change", (event) => {
-		event.preventDefault();
-		if (event.target.id == 'getFile') {
-			const file = event.target.files[0];
-			if (file) {
-				const reader = new FileReader();
-
-				reader.onload = function (e) {
-					const content = e.target.result;
-					importFileContent(content)
-
-					location.reload();
-				};
-
-				reader.readAsText(file);
-			}
-
-		}
+	paramsForm.querySelector("#getFile").addEventListener("change", (event) => {
+		const file = event.currentTarget.files[0];
+		if (!file)
+			return;
+	
+		const reader = new FileReader();
+		reader.onload = function (e) {
+			const content = e.target.result;
+			updateForm(parseParametersTXT(content));
+		};
+		reader.readAsText(file);
 	});
 
 	let runId = 0;  // TODO: Used for timing each simulation in the console
 	paramsForm.addEventListener("submit", (event) => {
 		event.preventDefault();
+
+		// run simulation:
 		if (event.submitter.id == 'runButton') {
 			let json = buildJSON(msdView);
-			simCount = +document.getElementById("simCount").value;
-			freq = +document.getElementById("freq").value;
-
-			// Robert J.
-			let final_results = initCSV(json);
-			let final_index = 0;
-			let final_state = null;
-			const iterate = async (createArgs, runArgs) => {
-				const id = `[run, ${++runId}]`;
-				console.time(id);
-				try {
-					let msd = await MSD.create(createArgs);
-					console.log("-- Created MSD:", msd);
-					console.log("-- Start running simulation.");
-					await msd.run(runArgs);
-					await msd.wait((state, index) => {
-						console.log(state);
-						msdView.viewDetailedMagnetization(state, Vector.i());  // TODO: this should be based on current "lens" settings
-						row = buildCSVRow(state.results);
-						row += "ITER";
-						final_results += row + "\r\n";
-						final_index = index;
-						final_state = state;
-					});
-					for(i in final_state.msd) {
-						if(!(final_results.includes("ITER"))) {
-							row = "";
-							row += ",".repeat(95) + buildMSDIterations(final_state.msd, i);
-							final_results += row + "\r\n";
-						} else {
-							final_results = final_results.replace("ITER", buildMSDIterations(final_state.msd, i));
-						}
-						
-					}
-					console.log("-- Destoryed MSD:", msd);
-					msd.destory();
-					console.log("==== Workload Complete. ====");
-					let blob = new Blob([final_results], { type: 'text/csv' });
-					let link = document.createElement('a');
-					link.download = 'iteration-results.csv';
-					link.href = window.URL.createObjectURL(blob);
-					link.click();
-					window.URL.revokeObjectURL(link.href);
-				} catch(ex) {
-					console.error(ex);
-				}
-				console.timeEnd(id);
-			};
-			iterate(json, { simCount, freq });
-
-			// TODO: replace with a better UI
-			alert(`Running...\nOpen JS console (Ctrl-Shift-J or Cmd-Shift-J) to see results.`);
+			let simCount = +document.getElementById("simCount").value;
+			let freq = +document.getElementById("freq").value;
+			runSim(json, { simCount, freq });
 		}
-	});
-
-	paramsForm.addEventListener("submit", (event) => {
-		event.preventDefault();
+		
+		// export iterate-parameters file:
 		if (event.submitter.id == 'exportFile') {
-			let content = loadFileContent(msdView);
-			let blob = new Blob([content], { type: 'text/plain' });
-			let link = document.createElement('a');
-			link.download = 'parameters-iterate.txt';
-			link.href = window.URL.createObjectURL(blob);
-			link.click();
-			window.URL.revokeObjectURL(link.href);
+			exportParameters(buildJSON(msdView));
 		}
 	});
 
@@ -808,6 +388,6 @@ const initForm = ({ camera, msdView }) => {
 
 
 // ---- Exports: --------------------------------------------------------------
-defineExports("MSDBuilder.form", { initForm });
+defineExports("MSDBuilder.form", { initForm, buildJSON });
 
 })();  // end IIFE
