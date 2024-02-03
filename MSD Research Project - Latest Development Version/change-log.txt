@@ -200,6 +200,7 @@ Second bug fix. In MSD::setParameters()
 (1-29-2024) Merged features from Robert! Included a load parameters file button,
 	and saves as CSV after run.
 (2-1-2024) Added basic realtime animations to the 3D MSD model.
+(2-2-2024) Added a basic timeline to GUI.
 
 TODO: Add a timeline.
 TODO: Send C++ MSD version through MSD Server to Javascript.

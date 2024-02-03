@@ -371,6 +371,7 @@ const initForm = ({ camera, msdView, timeline }) => {
 		event.preventDefault();
 		if (confirm("Reset all parameters to a default state?")) {
 			endSim();
+			timeline.clear();
 			valueCache.clear();
 			resetView(msdView, DEFAULTS);
 			updateCamera(camera, msdView);
