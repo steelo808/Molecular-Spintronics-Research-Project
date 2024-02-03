@@ -18,7 +18,7 @@ const { buildParametersTXT } = MSDBuilder.parametersIO;
 
 
 // ---- Functions: ------------------------------------------------------------
-async function runSim(json, runArgs) {
+async function runSim(json, runArgs, timeline) {
 	if (iterate.running && !confirm("Simulation already running. Start new simulation anyway?"))
 		return;
 
@@ -34,6 +34,8 @@ async function runSim(json, runArgs) {
 
 		// TODO: this should be based on current "lens" settings
 		msdView.viewDetailedMagnetization(state, Vector.i());
+
+		timeline.add(index, state);
 
 		// CSV stuff
 		let row = buildCSVRow(state.results);

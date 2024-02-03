@@ -276,7 +276,7 @@ const updateRhoThetaPhi = (prefix) => {
 
 
 // ---- Main: -----------------------------------------------------------------
-const initForm = ({ camera, msdView }) => {
+const initForm = ({ camera, msdView, timeline }) => {
 	loadView(msdView);
 	updateCamera(camera, msdView);
 	syncHTMLDimFields(msdView);
@@ -354,15 +354,15 @@ const initForm = ({ camera, msdView }) => {
 		event.preventDefault();
 
 		// run simulation:
-		if (event.submitter.id == 'runButton') {
+		if (event.submitter.id === 'runButton') {
 			let json = buildJSON(msdView);
 			let simCount = +document.getElementById("simCount").value;
 			let freq = +document.getElementById("freq").value;
-			runSim(json, { simCount, freq });
+			runSim(json, { simCount, freq }, timeline);
 		}
 		
 		// export iterate-parameters file:
-		if (event.submitter.id == 'exportFile') {
+		else if (event.submitter.id === 'exportFile') {
 			exportParameters(buildJSON(msdView));
 		}
 	});
@@ -376,6 +376,22 @@ const initForm = ({ camera, msdView }) => {
 			updateCamera(camera, msdView);
 			syncHTMLDimFields(msdView);
 			loadHTMLParamFields();
+		}
+	});
+
+	document.addEventListener("keydown", (event) => {
+		if (!timeline.timelineEle.contains(document.activeElement))
+			return;
+
+		if (event.key === "ArrowRight") {
+			event.preventDefault();
+			timeline.inc();
+		} else if (event.key === "ArrowLeft") {
+			event.preventDefault();
+			timeline.dec();
+		} else if (/^\d$/.test(event.key)) {
+			event.preventDefault();
+			timeline.show(+event.key);
 		}
 	});
 
