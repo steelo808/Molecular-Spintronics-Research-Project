@@ -22,7 +22,7 @@
 	<script src="src/msd_builder/render.js"></script>
 
 	<!-- TODO: D3 and charting logic -->
-
+s
 	<!-- Form and controls logic -->
 	<script src="src/msd_builder/timeline.js"></script>
 	<script src="src/msd_builder/csv.js"></script>
@@ -34,7 +34,65 @@
 	<script src="src/msd_builder/main.js" defer></script>
 </head>
 <body>
-	<main id="msdBuilder"></main>
+	<!-- start of navigation -->
+    <nav id="main-nav">
+		<div class="container">
+		  <div id="flex-items">
+			<h1>Title of Software</h1>
+			<p>icon</p>
+		  </div>
+		</div>
+	  </nav>
+	<main id="msdBuilder">
+		<div class="data-panel">
+			<form>
+			  <table>
+				<thead>
+				  <tr>
+					<th></th>
+					<th>FML</th>
+					<th>mol</th>
+					<th>FMR</th>
+					<th>ml</th>
+					<th>mR</th>
+					<th>LR</th>
+				  </tr>
+				</thead>
+				<tbody>
+				  <tr>
+					<td>Width</td>
+					<td><input type="text" name="FML_width" class="blue-outline"/></td>
+					<td><input type="text" name="mol_width" class="green-outline"/></td>
+					<td><input type="text" name="FMR_width" class="red-outline"/></td>
+					<!-- <td><input type="text" name="ml_width" /></td>
+					<td><input type="text" name="mR_width" /></td>
+					<td><input type="text" name="LR_width" /></td> -->
+				  </tr>
+				  <tr>
+					<td>Height</td>
+					<td><input type="text" name="FML_height" class="blue-outline"/></td>
+					<td><input type="text" name="mol_height" class="green-outline"/></td>
+					<td><input type="text" name="FMR_height" class="red-outline"/></td>
+					<!-- <td><input type="text" name="ml_height" /></td>
+					<td><input type="text" name="mR_height" /></td>
+					<td><input type="text" name="LR_height" /></td> -->
+				  </tr>
+				  <tr>
+					<td>Depth</td>
+					<td><input type="text" name="FML_depth" class="blue-outline"/></td>
+					<td><input type="text" name="mol_depth" class="green-outline"/></td>
+					<td><input type="text" name="FMR_depth" class="red-outline"/></td>
+					<!-- <td><input type="text" name="ml_depth" /></td>
+					<td><input type="text" name="mR_depth" /></td>
+					<td><input type="text" name="LR_depth" /></td> -->
+				  </tr>
+				</tbody>
+			  </table>
+  
+			</form>
+			<button type="submit" class="btn add-presets-btn">+</button>
+		  </div>
+	</main>
 
 	<section id="timeline"></section>
 
