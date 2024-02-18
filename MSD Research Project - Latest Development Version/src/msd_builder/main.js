@@ -50,3 +50,18 @@ const main = () => {
 document.addEventListener("DOMContentLoaded", main);
 
 })();  // end IIFE
+
+
+let toggleBtn = document.querySelector(".toggle-btn");
+
+toggleBtn.addEventListener("click", () => {
+	let dataPanel = document.querySelector(".data-panel");
+	console.log("working")
+
+	if (!dataPanel.classList.contains("show")){
+		dataPanel.classList.add("show")
+	}else{
+		dataPanel.classList.remove("show")
+	}
+})
+
